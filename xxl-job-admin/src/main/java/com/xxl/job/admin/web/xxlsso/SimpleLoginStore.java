@@ -21,7 +21,7 @@ import java.util.Map;
  *
  * @author xuxueli 2025-08-03
  */
-@Component
+//@Component
 public class SimpleLoginStore implements LoginStore {
 
 

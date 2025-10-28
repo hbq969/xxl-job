@@ -1,5 +1,11 @@
 package com.xxl.job.admin.controller.biz;
 
+import com.github.hbq969.code.common.restful.ReturnMessage;
+import com.github.hbq969.code.common.spring.context.SpringContext;
+import com.github.hbq969.code.dict.model.Pair;
+import com.github.hbq969.code.dict.service.api.impl.MapDictHelperImpl;
+import com.github.hbq969.code.sm.perm.api.SMRequiresPermissions;
+import com.github.pagehelper.PageInfo;
 import com.xxl.job.admin.mapper.XxlJobGroupMapper;
 import com.xxl.job.admin.model.XxlJobGroup;
 import com.xxl.job.admin.model.XxlJobInfo;
@@ -19,15 +25,17 @@ import com.xxl.sso.core.helper.XxlSsoHelper;
 import com.xxl.sso.core.model.LoginInfo;
 import com.xxl.tool.core.CollectionTool;
 import com.xxl.tool.response.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,138 +44,159 @@ import java.util.Map;
 
 /**
  * index controller
+ *
  * @author xuxueli 2015-12-19 16:13:16
  */
-@Controller
-@RequestMapping("/jobinfo")
+@RestController
+@RequestMapping(path = "/xxl-job-ui/jobinfo")
+@Tag(name = "xxl-job-任务管理")
 public class JobInfoController {
-	private static Logger logger = LoggerFactory.getLogger(JobInfoController.class);
+    private static Logger logger = LoggerFactory.getLogger(JobInfoController.class);
 
-	@Resource
-	private XxlJobGroupMapper xxlJobGroupMapper;
-	@Resource
-	private XxlJobService xxlJobService;
-	
-	@RequestMapping
-	public String index(HttpServletRequest request, Model model, @RequestParam(value = "jobGroup", required = false, defaultValue = "-1") int jobGroup) {
+    @Resource
+    private XxlJobGroupMapper xxlJobGroupMapper;
+    @Resource
+    private XxlJobService xxlJobService;
 
-		// 枚举-字典
-		model.addAttribute("ExecutorRouteStrategyEnum", ExecutorRouteStrategyEnum.values());	    // 路由策略-列表
-		model.addAttribute("GlueTypeEnum", GlueTypeEnum.values());								// Glue类型-字典
-		model.addAttribute("ExecutorBlockStrategyEnum", ExecutorBlockStrategyEnum.values());	    // 阻塞处理策略-字典
-		model.addAttribute("ScheduleTypeEnum", ScheduleTypeEnum.values());	    				// 调度类型
-		model.addAttribute("MisfireStrategyEnum", MisfireStrategyEnum.values());	    			// 调度过期策略
+    @Autowired
+    private SpringContext context;
 
-		// 执行器列表
-		List<XxlJobGroup> jobGroupListTotal =  xxlJobGroupMapper.findAll();
+    @RequestMapping
+    public String index(HttpServletRequest request, Model model, @RequestParam(value = "jobGroup", required = false, defaultValue = "-1") int jobGroup) {
 
-		// filter group
-		List<XxlJobGroup> jobGroupList = JobGroupPermissionUtil.filterJobGroupByPermission(request, jobGroupListTotal);
-		if (CollectionTool.isEmpty(jobGroupList)) {
-			throw new XxlJobException(I18nUtil.getString("jobgroup_empty"));
-		}
+        // 枚举-字典
+        model.addAttribute("ExecutorRouteStrategyEnum", ExecutorRouteStrategyEnum.values());        // 路由策略-列表
+        model.addAttribute("GlueTypeEnum", GlueTypeEnum.values());                                // Glue类型-字典
+        model.addAttribute("ExecutorBlockStrategyEnum", ExecutorBlockStrategyEnum.values());        // 阻塞处理策略-字典
+        model.addAttribute("ScheduleTypeEnum", ScheduleTypeEnum.values());                        // 调度类型
+        model.addAttribute("MisfireStrategyEnum", MisfireStrategyEnum.values());                    // 调度过期策略
 
-		model.addAttribute("JobGroupList", jobGroupList);
-		model.addAttribute("jobGroup", jobGroup);
+        // 执行器列表
+        List<XxlJobGroup> jobGroupListTotal = xxlJobGroupMapper.findAll();
 
-		return "jobinfo/jobinfo.index";
-	}
+        // filter group
+        List<XxlJobGroup> jobGroupList = JobGroupPermissionUtil.filterJobGroupByPermission(request, jobGroupListTotal);
+        if (CollectionTool.isEmpty(jobGroupList)) {
+            throw new XxlJobException(I18nUtil.getString("jobgroup_empty"));
+        }
 
-	@RequestMapping("/pageList")
-	@ResponseBody
-	public Map<String, Object> pageList(HttpServletRequest request,
-										@RequestParam(value = "start", required = false, defaultValue = "0") int start,
-										@RequestParam(value = "length", required = false, defaultValue = "10") int length,
-										@RequestParam("jobGroup") int jobGroup,
-										@RequestParam("triggerStatus") int triggerStatus,
-										@RequestParam("jobDesc") String jobDesc,
-										@RequestParam("executorHandler") String executorHandler,
-										@RequestParam("author") String author) {
+        model.addAttribute("JobGroupList", jobGroupList);
+        model.addAttribute("jobGroup", jobGroup);
 
-		// valid jobGroup permission
-		JobGroupPermissionUtil.validJobGroupPermission(request, jobGroup);
+        return "jobinfo/jobinfo.index";
+    }
 
-		// page
-		return xxlJobService.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author);
-	}
-	
-	@RequestMapping("/add")
-	@ResponseBody
-	public ReturnT<String> add(HttpServletRequest request, XxlJobInfo jobInfo) {
-		// valid permission
-		LoginInfo loginInfo = JobGroupPermissionUtil.validJobGroupPermission(request, jobInfo.getJobGroup());
+    @Operation(summary = "分页查询任务列表")
+    @RequestMapping(path = "/pageList", method = RequestMethod.GET)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "pageList", apiDesc = "分页查询任务列表")
+    public ReturnMessage<PageInfo<XxlJobInfo>> pageList(@RequestParam(name = "start", required = false, defaultValue = "1") int start,
+                                                        @RequestParam(name = "length", required = false, defaultValue = "10") int length,
+                                                        @RequestParam(name = "jobGroup", required = false) Integer jobGroup,
+                                                        @RequestParam(name = "triggerStatus", required = false) Integer triggerStatus,
+                                                        @RequestParam(name = "jobDesc", required = false) String jobDesc,
+                                                        @RequestParam(name = "executorHandler", required = false) String executorHandler,
+                                                        @RequestParam(name = "author", required = false) String author) {
 
-		// opt
-		return xxlJobService.add(jobInfo, loginInfo);
-	}
+        return ReturnMessage.success(xxlJobService.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author));
+    }
 
-	@RequestMapping("/update")
-	@ResponseBody
-	public ReturnT<String> update(HttpServletRequest request, XxlJobInfo jobInfo) {
-		// valid permission
-		LoginInfo loginInfo = JobGroupPermissionUtil.validJobGroupPermission(request, jobInfo.getJobGroup());
+    @Operation(summary = "添加任务")
+    @RequestMapping(path = "/add", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "add", apiDesc = "添加任务")
+    public ReturnMessage<String> add(HttpServletRequest request, @RequestBody XxlJobInfo jobInfo) {
+        return xxlJobService.add(jobInfo, null);
+    }
 
-		// opt
-		return xxlJobService.update(jobInfo, loginInfo);
-	}
-	
-	@RequestMapping("/remove")
-	@ResponseBody
-	public ReturnT<String> remove(HttpServletRequest request, @RequestParam("id") int id) {
-		Response<LoginInfo> loginInfoResponse = XxlSsoHelper.loginCheckWithAttr(request);
-		return xxlJobService.remove(id, loginInfoResponse.getData());
-	}
-	
-	@RequestMapping("/stop")
-	@ResponseBody
-	public ReturnT<String> pause(HttpServletRequest request, @RequestParam("id") int id) {
-		Response<LoginInfo> loginInfoResponse = XxlSsoHelper.loginCheckWithAttr(request);
-		return xxlJobService.stop(id, loginInfoResponse.getData());
-	}
-	
-	@RequestMapping("/start")
-	@ResponseBody
-	public ReturnT<String> start(HttpServletRequest request, @RequestParam("id") int id) {
-		Response<LoginInfo> loginInfoResponse = XxlSsoHelper.loginCheckWithAttr(request);
-		return xxlJobService.start(id, loginInfoResponse.getData());
-	}
-	
-	@RequestMapping("/trigger")
-	@ResponseBody
-	public ReturnT<String> triggerJob(HttpServletRequest request,
-									  @RequestParam("id") int id,
-									  @RequestParam("executorParam") String executorParam,
-									  @RequestParam("addressList") String addressList) {
-		Response<LoginInfo> loginInfoResponse = XxlSsoHelper.loginCheckWithAttr(request);
-		return xxlJobService.trigger(loginInfoResponse.getData(), id, executorParam, addressList);
-	}
+    @Operation(summary = "更新任务")
+    @RequestMapping(path = "/update", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "update", apiDesc = "更新任务")
+    public ReturnMessage<String> update(HttpServletRequest request, @RequestBody XxlJobInfo jobInfo) {
+        return xxlJobService.update(jobInfo, null);
+    }
 
-	@RequestMapping("/nextTriggerTime")
-	@ResponseBody
-	public ReturnT<List<String>> nextTriggerTime(@RequestParam("scheduleType") String scheduleType,
-												 @RequestParam("scheduleConf") String scheduleConf) {
+    @Operation(summary = "删除任务")
+    @RequestMapping(path = "/remove", method = RequestMethod.DELETE)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "remove", apiDesc = "删除任务")
+    public ReturnMessage<String> remove(HttpServletRequest request, @RequestParam("id") int id) {
+        return xxlJobService.remove(id, null);
+    }
 
-		XxlJobInfo paramXxlJobInfo = new XxlJobInfo();
-		paramXxlJobInfo.setScheduleType(scheduleType);
-		paramXxlJobInfo.setScheduleConf(scheduleConf);
+    @Operation(summary = "停止任务")
+    @RequestMapping(path = "/stop", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "pause", apiDesc = "停止任务")
+    public ReturnMessage<String> pause(HttpServletRequest request, @RequestParam("id") int id) {
+        return xxlJobService.stop(id, null);
+    }
 
-		List<String> result = new ArrayList<>();
-		try {
-			Date lastTime = new Date();
-			for (int i = 0; i < 5; i++) {
-				lastTime = JobScheduleHelper.generateNextValidTime(paramXxlJobInfo, lastTime);
-				if (lastTime != null) {
-					result.add(DateUtil.formatDateTime(lastTime));
-				} else {
-					break;
-				}
-			}
-		} catch (Exception e) {
-			logger.error("nextTriggerTime error. scheduleType = {}, scheduleConf= {}", scheduleType, scheduleConf, e);
-			return ReturnT.ofFail((I18nUtil.getString("schedule_type")+I18nUtil.getString("system_unvalid")) + e.getMessage());
-		}
-		return ReturnT.ofSuccess(result);
+    @Operation(summary = "启动任务")
+    @RequestMapping(path = "/start", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "start", apiDesc = "启动任务")
+    public ReturnMessage<String> start(HttpServletRequest request, @RequestParam("id") int id) {
+        return xxlJobService.start(id, null);
+    }
 
-	}
+    @Operation(summary = "触发任务")
+    @RequestMapping(path = "/trigger", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "triggerJob", apiDesc = "触发任务")
+    public ReturnMessage<String> triggerJob(HttpServletRequest request,
+                                            @RequestParam("id") int id,
+                                            @RequestParam("executorParam") String executorParam,
+                                            @RequestParam("addressList") String addressList) {
+        return xxlJobService.trigger(null, id, executorParam, addressList);
+    }
+
+    @Operation(summary = "查询任务下次触发时间")
+    @RequestMapping("/nextTriggerTime")
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "nextTriggerTime", apiDesc = "查询任务下次触发时间")
+    public ReturnMessage<List<String>> nextTriggerTime(@RequestParam("scheduleType") String scheduleType,
+                                                       @RequestParam("scheduleConf") String scheduleConf) {
+
+        XxlJobInfo paramXxlJobInfo = new XxlJobInfo();
+        paramXxlJobInfo.setScheduleType(scheduleType);
+        paramXxlJobInfo.setScheduleConf(scheduleConf);
+
+        List<String> result = new ArrayList<>();
+        try {
+            Date lastTime = new Date();
+            for (int i = 0; i < 5; i++) {
+                lastTime = JobScheduleHelper.generateNextValidTime(paramXxlJobInfo, lastTime);
+                if (lastTime != null) {
+                    result.add(DateUtil.formatDateTime(lastTime));
+                } else {
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            logger.error("nextTriggerTime error. scheduleType = {}, scheduleConf= {}", scheduleType, scheduleConf, e);
+            return ReturnMessage.fail((I18nUtil.getString("schedule_type") + I18nUtil.getString("system_unvalid")) + e.getMessage());
+        }
+        return ReturnMessage.success(result);
+
+    }
+
+    @Operation(summary = "查询字典数据")
+    @RequestMapping(path = "/dict", method = RequestMethod.GET)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "queryDict", apiDesc = "查询字典数据")
+    public ReturnMessage<List<Pair>> queryDict(
+            @RequestParam(value = "dn") String dn) {
+        return ReturnMessage.success(context.getBean(MapDictHelperImpl.class).queryPairList(dn));
+    }
+
+    @Operation(summary = "根据id查询任务详情")
+    @RequestMapping(path = "/info", method = RequestMethod.GET)
+    @ResponseBody
+    public ReturnMessage<XxlJobInfo> queryJobInfo(
+            @RequestParam(value = "id") Integer id) {
+        return ReturnMessage.success(xxlJobService.queryJobInfo(id));
+    }
 
 }

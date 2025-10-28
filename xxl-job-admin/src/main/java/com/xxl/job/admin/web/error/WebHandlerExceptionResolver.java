@@ -20,7 +20,7 @@ import java.io.IOException;
  *
  * @author xuxueli 2016-1-6 19:22:18
  */
-@Component
+//@Component
 public class WebHandlerExceptionResolver implements HandlerExceptionResolver {
 	private static transient Logger logger = LoggerFactory.getLogger(WebHandlerExceptionResolver.class);
 

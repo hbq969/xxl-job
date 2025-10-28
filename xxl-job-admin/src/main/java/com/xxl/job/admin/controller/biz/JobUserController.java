@@ -1,10 +1,18 @@
 package com.xxl.job.admin.controller.biz;
 
+import cn.hutool.core.util.StrUtil;
+import com.github.hbq969.code.common.restful.ReturnMessage;
+import com.github.hbq969.code.common.spring.context.SpringContext;
+import com.github.hbq969.code.common.utils.I18nUtils;
+import com.github.hbq969.code.sm.login.model.UserInfo;
+import com.github.hbq969.code.sm.login.session.UserContext;
 import com.xxl.job.admin.constant.Consts;
 import com.xxl.job.admin.mapper.XxlJobGroupMapper;
 import com.xxl.job.admin.mapper.XxlJobUserMapper;
 import com.xxl.job.admin.model.XxlJobGroup;
 import com.xxl.job.admin.model.XxlJobUser;
+import com.xxl.job.admin.model.XxlJobUserGroups;
+import com.xxl.job.admin.service.XxlJobUserService;
 import com.xxl.job.admin.util.I18nUtil;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.sso.core.annotation.XxlSso;
@@ -13,13 +21,14 @@ import com.xxl.sso.core.model.LoginInfo;
 import com.xxl.tool.core.StringTool;
 import com.xxl.tool.encrypt.SHA256Tool;
 import com.xxl.tool.response.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
@@ -28,14 +37,22 @@ import java.util.Map;
 /**
  * @author xuxueli 2019-05-04 16:39:50
  */
-@Controller
-@RequestMapping("/user")
+@Tag(name = "xxl-job-用户管理")
+@RestController
+@RequestMapping(path = "/xxl-job-ui/user")
 public class JobUserController {
 
     @Resource
     private XxlJobUserMapper xxlJobUserMapper;
     @Resource
     private XxlJobGroupMapper xxlJobGroupMapper;
+
+    @Resource
+    private XxlJobUserService xxlJobUserService;
+
+
+    @Autowired
+    private SpringContext context;
 
     @RequestMapping
     @XxlSso(role = Consts.ADMIN_ROLE)
@@ -48,7 +65,7 @@ public class JobUserController {
         return "user/user.index";
     }
 
-    @RequestMapping("/pageList")
+    @RequestMapping(path = "/pageList", method = RequestMethod.GET)
     @ResponseBody
     @XxlSso(role = Consts.ADMIN_ROLE)
     public Map<String, Object> pageList(@RequestParam(value = "start", required = false, defaultValue = "0") int start,
@@ -61,17 +78,17 @@ public class JobUserController {
         int list_count = xxlJobUserMapper.pageListCount(start, length, username, role);
 
         // filter
-        if (list!=null && list.size()>0) {
-            for (XxlJobUser item: list) {
+        if (list != null && list.size() > 0) {
+            for (XxlJobUser item : list) {
                 item.setPassword(null);
             }
         }
 
         // package result
         Map<String, Object> maps = new HashMap<String, Object>();
-        maps.put("recordsTotal", list_count);		// 总记录数
-        maps.put("recordsFiltered", list_count);	// 过滤后的总记录数
-        maps.put("data", list);  					// 分页列表
+        maps.put("recordsTotal", list_count);        // 总记录数
+        maps.put("recordsFiltered", list_count);    // 过滤后的总记录数
+        maps.put("data", list);                    // 分页列表
         return maps;
     }
 
@@ -82,19 +99,19 @@ public class JobUserController {
 
         // valid username
         if (StringTool.isBlank(xxlJobUser.getUsername())) {
-            return ReturnT.ofFail(I18nUtil.getString("system_please_input")+I18nUtil.getString("user_username") );
+            return ReturnT.ofFail(I18nUtil.getString("system_please_input") + I18nUtil.getString("user_username"));
         }
         xxlJobUser.setUsername(xxlJobUser.getUsername().trim());
-        if (!(xxlJobUser.getUsername().length()>=4 && xxlJobUser.getUsername().length()<=20)) {
-            return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit")+"[4-20]" );
+        if (!(xxlJobUser.getUsername().length() >= 4 && xxlJobUser.getUsername().length() <= 20)) {
+            return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit") + "[4-20]");
         }
         // valid password
         if (StringTool.isBlank(xxlJobUser.getPassword())) {
-            return ReturnT.ofFail(I18nUtil.getString("system_please_input")+I18nUtil.getString("user_password") );
+            return ReturnT.ofFail(I18nUtil.getString("system_please_input") + I18nUtil.getString("user_password"));
         }
         xxlJobUser.setPassword(xxlJobUser.getPassword().trim());
-        if (!(xxlJobUser.getPassword().length()>=4 && xxlJobUser.getPassword().length()<=20)) {
-            return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit")+"[4-20]" );
+        if (!(xxlJobUser.getPassword().length() >= 4 && xxlJobUser.getPassword().length() <= 20)) {
+            return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit") + "[4-20]");
         }
         // md5 password
         String passwordHash = SHA256Tool.sha256(xxlJobUser.getPassword());
@@ -103,7 +120,7 @@ public class JobUserController {
         // check repeat
         XxlJobUser existUser = xxlJobUserMapper.loadByUserName(xxlJobUser.getUsername());
         if (existUser != null) {
-            return ReturnT.ofFail( I18nUtil.getString("user_username_repeat") );
+            return ReturnT.ofFail(I18nUtil.getString("user_username_repeat"));
         }
 
         // write
@@ -125,8 +142,8 @@ public class JobUserController {
         // valid password
         if (StringTool.isNotBlank(xxlJobUser.getPassword())) {
             xxlJobUser.setPassword(xxlJobUser.getPassword().trim());
-            if (!(xxlJobUser.getPassword().length()>=4 && xxlJobUser.getPassword().length()<=20)) {
-                return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit")+"[4-20]" );
+            if (!(xxlJobUser.getPassword().length() >= 4 && xxlJobUser.getPassword().length() <= 20)) {
+                return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit") + "[4-20]");
             }
             // md5 password
             String passwordHash = SHA256Tool.sha256(xxlJobUser.getPassword());
@@ -159,18 +176,18 @@ public class JobUserController {
     @ResponseBody
     public ReturnT<String> updatePwd(HttpServletRequest request,
                                      @RequestParam("password") String password,
-                                     @RequestParam("oldPassword") String oldPassword){
+                                     @RequestParam("oldPassword") String oldPassword) {
 
         // valid
-        if (oldPassword==null || oldPassword.trim().isEmpty()){
+        if (oldPassword == null || oldPassword.trim().isEmpty()) {
             return ReturnT.ofFail(I18nUtil.getString("system_please_input") + I18nUtil.getString("change_pwd_field_oldpwd"));
         }
-        if (password==null || password.trim().isEmpty()){
+        if (password == null || password.trim().isEmpty()) {
             return ReturnT.ofFail(I18nUtil.getString("system_please_input") + I18nUtil.getString("change_pwd_field_oldpwd"));
         }
         password = password.trim();
-        if (!(password.length()>=4 && password.length()<=20)) {
-            return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit")+"[4-20]" );
+        if (!(password.length() >= 4 && password.length() <= 20)) {
+            return ReturnT.ofFail(I18nUtil.getString("system_lengh_limit") + "[4-20]");
         }
 
         // md5 password
@@ -191,4 +208,20 @@ public class JobUserController {
         return ReturnT.ofSuccess();
     }
 
+    @Operation(summary = "获取权限范围内的执行器")
+    @RequestMapping(path = "/permission/list", method = RequestMethod.GET)
+    @ResponseBody
+    public ReturnMessage<List<XxlJobGroup>> findPermissionGroups() {
+        UserInfo ui = UserContext.get();
+        List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(ui.getUserName(), ui.getRoleName());
+        return ReturnMessage.success(groupList);
+    }
+
+    @Operation(summary = "保存用户权限")
+    @RequestMapping(path = "/permission", method = RequestMethod.POST)
+    @ResponseBody
+    public ReturnMessage<?> saveUserPermission(XxlJobUserGroups xxlJobUserGroups) {
+        xxlJobUserService.saveUserPermission(xxlJobUserGroups);
+        return ReturnMessage.success(I18nUtils.getMessage(context, "save.result"));
+    }
 }

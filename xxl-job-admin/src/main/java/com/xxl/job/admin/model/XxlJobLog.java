@@ -1,157 +1,189 @@
 package com.xxl.job.admin.model;
 
+import com.github.hbq969.code.common.spring.context.SpringContext;
+import com.github.hbq969.code.common.utils.FormatTime;
+import com.github.hbq969.code.dict.service.api.DictAware;
+import com.github.hbq969.code.dict.service.api.DictModel;
+import com.github.hbq969.code.dict.service.api.Td;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.Date;
 
 /**
  * xxl-job log, used to track trigger process
+ *
  * @author xuxueli  2015-12-19 23:19:09
  */
-public class XxlJobLog {
-	
-	private long id;
-	
-	// job info
-	private int jobGroup;
-	private int jobId;
+public class XxlJobLog implements DictModel, DictAware {
 
-	// execute info
-	private String executorAddress;
-	private String executorHandler;
-	private String executorParam;
-	private String executorShardingParam;
-	private int executorFailRetryCount;
-	
-	// trigger info
-	private Date triggerTime;
-	private int triggerCode;
-	private String triggerMsg;
-	
-	// handle info
-	private Date handleTime;
-	private int handleCode;
-	private String handleMsg;
+    private long id;
 
-	// alarm info
-	private int alarmStatus;
+    // job info
+    private int jobGroup;
+    private int jobId;
 
-	public long getId() {
-		return id;
-	}
+    // execute info
+    private String executorAddress;
+    private String executorHandler;
+    private String executorParam;
+    private String executorShardingParam;
+    private int executorFailRetryCount;
 
-	public void setId(long id) {
-		this.id = id;
-	}
+    // trigger info
+    private Date triggerTime;
+    @Setter
+    @Getter
+    private String fmtTriggerTime;
+    @Td(fmtFieldName = "fmtTriggerCode", dictName = "xxl-job-admin,code")
+    private int triggerCode;
+    @Setter
+    @Getter
+    private String fmtTriggerCode;
+    private String triggerMsg;
 
-	public int getJobGroup() {
-		return jobGroup;
-	}
+    // handle info
+    private Date handleTime;
+    @Setter
+    @Getter
+    private String fmtHandleTime;
+    @Td(fmtFieldName = "fmtHandleCode", dictName = "xxl-job-admin,code")
+    private int handleCode;
+    @Setter
+    @Getter
+    private String fmtHandleCode;
+    private String handleMsg;
 
-	public void setJobGroup(int jobGroup) {
-		this.jobGroup = jobGroup;
-	}
+    // alarm info
+    private int alarmStatus;
 
-	public int getJobId() {
-		return jobId;
-	}
+    @Override
+    public void convertDict(SpringContext context) {
+        DictAware.super.convertDict(context);
+        if (handleTime != null)
+            this.fmtHandleTime = FormatTime.YYYYMMDDHHMISS.withMills(handleTime.getTime());
+        if (triggerTime != null)
+            this.fmtTriggerTime = FormatTime.YYYYMMDDHHMISS.withMills(triggerTime.getTime());
+    }
 
-	public void setJobId(int jobId) {
-		this.jobId = jobId;
-	}
+    public long getId() {
+        return id;
+    }
 
-	public String getExecutorAddress() {
-		return executorAddress;
-	}
+    public void setId(long id) {
+        this.id = id;
+    }
 
-	public void setExecutorAddress(String executorAddress) {
-		this.executorAddress = executorAddress;
-	}
+    public int getJobGroup() {
+        return jobGroup;
+    }
 
-	public String getExecutorHandler() {
-		return executorHandler;
-	}
+    public void setJobGroup(int jobGroup) {
+        this.jobGroup = jobGroup;
+    }
 
-	public void setExecutorHandler(String executorHandler) {
-		this.executorHandler = executorHandler;
-	}
+    public int getJobId() {
+        return jobId;
+    }
 
-	public String getExecutorParam() {
-		return executorParam;
-	}
+    public void setJobId(int jobId) {
+        this.jobId = jobId;
+    }
 
-	public void setExecutorParam(String executorParam) {
-		this.executorParam = executorParam;
-	}
+    public String getExecutorAddress() {
+        return executorAddress;
+    }
 
-	public String getExecutorShardingParam() {
-		return executorShardingParam;
-	}
+    public void setExecutorAddress(String executorAddress) {
+        this.executorAddress = executorAddress;
+    }
 
-	public void setExecutorShardingParam(String executorShardingParam) {
-		this.executorShardingParam = executorShardingParam;
-	}
+    public String getExecutorHandler() {
+        return executorHandler;
+    }
 
-	public int getExecutorFailRetryCount() {
-		return executorFailRetryCount;
-	}
+    public void setExecutorHandler(String executorHandler) {
+        this.executorHandler = executorHandler;
+    }
 
-	public void setExecutorFailRetryCount(int executorFailRetryCount) {
-		this.executorFailRetryCount = executorFailRetryCount;
-	}
+    public String getExecutorParam() {
+        return executorParam;
+    }
 
-	public Date getTriggerTime() {
-		return triggerTime;
-	}
+    public void setExecutorParam(String executorParam) {
+        this.executorParam = executorParam;
+    }
 
-	public void setTriggerTime(Date triggerTime) {
-		this.triggerTime = triggerTime;
-	}
+    public String getExecutorShardingParam() {
+        return executorShardingParam;
+    }
 
-	public int getTriggerCode() {
-		return triggerCode;
-	}
+    public void setExecutorShardingParam(String executorShardingParam) {
+        this.executorShardingParam = executorShardingParam;
+    }
 
-	public void setTriggerCode(int triggerCode) {
-		this.triggerCode = triggerCode;
-	}
+    public int getExecutorFailRetryCount() {
+        return executorFailRetryCount;
+    }
 
-	public String getTriggerMsg() {
-		return triggerMsg;
-	}
+    public void setExecutorFailRetryCount(int executorFailRetryCount) {
+        this.executorFailRetryCount = executorFailRetryCount;
+    }
 
-	public void setTriggerMsg(String triggerMsg) {
-		this.triggerMsg = triggerMsg;
-	}
+    public Date getTriggerTime() {
+        return triggerTime;
+    }
 
-	public Date getHandleTime() {
-		return handleTime;
-	}
+    public void setTriggerTime(Date triggerTime) {
+        this.triggerTime = triggerTime;
+    }
 
-	public void setHandleTime(Date handleTime) {
-		this.handleTime = handleTime;
-	}
+    public int getTriggerCode() {
+        return triggerCode;
+    }
 
-	public int getHandleCode() {
-		return handleCode;
-	}
+    public void setTriggerCode(int triggerCode) {
+        this.triggerCode = triggerCode;
+    }
 
-	public void setHandleCode(int handleCode) {
-		this.handleCode = handleCode;
-	}
+    public String getTriggerMsg() {
+        return triggerMsg;
+    }
 
-	public String getHandleMsg() {
-		return handleMsg;
-	}
+    public void setTriggerMsg(String triggerMsg) {
+        this.triggerMsg = triggerMsg;
+    }
 
-	public void setHandleMsg(String handleMsg) {
-		this.handleMsg = handleMsg;
-	}
+    public Date getHandleTime() {
+        return handleTime;
+    }
 
-	public int getAlarmStatus() {
-		return alarmStatus;
-	}
+    public void setHandleTime(Date handleTime) {
+        this.handleTime = handleTime;
+    }
 
-	public void setAlarmStatus(int alarmStatus) {
-		this.alarmStatus = alarmStatus;
-	}
+    public int getHandleCode() {
+        return handleCode;
+    }
+
+    public void setHandleCode(int handleCode) {
+        this.handleCode = handleCode;
+    }
+
+    public String getHandleMsg() {
+        return handleMsg;
+    }
+
+    public void setHandleMsg(String handleMsg) {
+        this.handleMsg = handleMsg;
+    }
+
+    public int getAlarmStatus() {
+        return alarmStatus;
+    }
+
+    public void setAlarmStatus(int alarmStatus) {
+        this.alarmStatus = alarmStatus;
+    }
 
 }

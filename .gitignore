@@ -5,3 +5,8 @@
 target/
 .DS_Store
 .gitattributes
+logs
+xxl-job-admin/src/main/resources/static/node_modules
+xxl-job-admin/src/main/resources/static/xxl-job-ui
+xxl-job-admin/src/main/resources/static/package-lock.json
+

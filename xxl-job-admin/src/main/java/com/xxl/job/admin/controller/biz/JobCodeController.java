@@ -24,7 +24,7 @@ import java.util.List;
  * @author xuxueli 2015-12-19 16:13:16
  */
 @Controller
-@RequestMapping("/jobcode")
+@RequestMapping("/xxl-job-ui/jobcode")
 public class JobCodeController {
 	
 	@Resource

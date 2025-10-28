@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 /**
  * error page
  */
-@Component
+//@Component
 public class WebErrorPageRegistrar implements ErrorPageRegistrar {
 
     @Override

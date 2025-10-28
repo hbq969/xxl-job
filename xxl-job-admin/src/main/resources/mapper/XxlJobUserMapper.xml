@@ -98,4 +98,46 @@
 		WHERE id = #{id}
 	</update>
 
+	<sql id="Base_Group_Column_List">
+		t.id,
+		t.app_name,
+		t.title,
+		t.address_type,
+		t.address_list,
+		t.update_time
+	</sql>
+
+	<resultMap id="XxlJobGroup" type="com.xxl.job.admin.model.XxlJobGroup" >
+		<result column="id" property="id" />
+		<result column="app_name" property="appname" />
+		<result column="title" property="title" />
+		<result column="address_type" property="addressType" />
+		<result column="address_list" property="addressList" />
+		<result column="update_time" property="updateTime" />
+	</resultMap>
+
+	<select id="queryUserGroupList" resultType="com.xxl.job.admin.model.XxlJobGroup" resultMap="XxlJobGroup">
+        <choose>
+            <when test="roleName=='ADMIN'">
+                SELECT
+                <include refid="Base_Group_Column_List"/>
+                FROM xxl_job_group AS t
+                ORDER BY t.app_name, t.title, t.id ASC
+            </when>
+            <otherwise>
+                SELECT
+                <include refid="Base_Group_Column_List"/>
+                FROM xxl_job_group AS t,h_xxl_job_user_p x
+                where t.id=x.group_id
+                and x.user_name=#{userName}
+                ORDER BY t.app_name, t.title, t.id ASC
+            </otherwise>
+        </choose>
+    </select>
+
+	<insert id="saveUserPermission">
+        insert into h_xxl_job_user_p(user_name, group_id)
+        values (#{userName}, #{groupId})
+    </insert>
+
 </mapper>

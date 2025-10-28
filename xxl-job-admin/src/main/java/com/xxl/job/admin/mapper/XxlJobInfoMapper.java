@@ -16,8 +16,8 @@ public interface XxlJobInfoMapper {
 
 	public List<XxlJobInfo> pageList(@Param("offset") int offset,
 									 @Param("pagesize") int pagesize,
-									 @Param("jobGroup") int jobGroup,
-									 @Param("triggerStatus") int triggerStatus,
+									 @Param("jobGroup") Integer jobGroup,
+									 @Param("triggerStatus") Integer triggerStatus,
 									 @Param("jobDesc") String jobDesc,
 									 @Param("executorHandler") String executorHandler,
 									 @Param("author") String author);
@@ -61,5 +61,6 @@ public interface XxlJobInfoMapper {
 	 */
 	public int scheduleUpdate(XxlJobInfo xxlJobInfo);
 
+	List<XxlJobInfo> findJobInfoByGroupId(@Param("groupId") Integer groupId);
 
 }

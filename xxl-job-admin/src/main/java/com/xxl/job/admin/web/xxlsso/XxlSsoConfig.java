@@ -12,7 +12,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 /**
  * @author xuxueli 2018-11-15
  */
-@Configuration
+//@Configuration
 public class XxlSsoConfig implements WebMvcConfigurer {
 
 

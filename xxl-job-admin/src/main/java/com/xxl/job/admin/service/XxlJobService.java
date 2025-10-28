@@ -1,6 +1,8 @@
 package com.xxl.job.admin.service;
 
 
+import com.github.hbq969.code.common.restful.ReturnMessage;
+import com.github.pagehelper.PageInfo;
 import com.xxl.job.admin.model.XxlJobInfo;
 import com.xxl.job.admin.model.XxlJobUser;
 import com.xxl.job.core.biz.model.ReturnT;
@@ -27,7 +29,9 @@ public interface XxlJobService {
 	 * @param author
 	 * @return
 	 */
-	public Map<String, Object> pageList(int start, int length, int jobGroup, int triggerStatus, String jobDesc, String executorHandler, String author);
+	public PageInfo<XxlJobInfo> pageList(int start, int length, Integer jobGroup, Integer triggerStatus, String jobDesc, String executorHandler, String author);
+
+	XxlJobInfo queryJobInfo(Integer id);
 
 	/**
 	 * add job
@@ -35,7 +39,7 @@ public interface XxlJobService {
 	 * @param jobInfo
 	 * @return
 	 */
-	public ReturnT<String> add(XxlJobInfo jobInfo, LoginInfo loginInfo);
+	public ReturnMessage<String> add(XxlJobInfo jobInfo, LoginInfo loginInfo);
 
 	/**
 	 * update job
@@ -43,7 +47,7 @@ public interface XxlJobService {
 	 * @param jobInfo
 	 * @return
 	 */
-	public ReturnT<String> update(XxlJobInfo jobInfo, LoginInfo loginInfo);
+	public ReturnMessage<String> update(XxlJobInfo jobInfo, LoginInfo loginInfo);
 
 	/**
 	 * remove job
@@ -51,7 +55,7 @@ public interface XxlJobService {
 	 * @param id
 	 * @return
 	 */
-	public ReturnT<String> remove(int id, LoginInfo loginInfo);
+	public ReturnMessage<String> remove(int id, LoginInfo loginInfo);
 
 	/**
 	 * start job
@@ -59,7 +63,7 @@ public interface XxlJobService {
 	 * @param id
 	 * @return
 	 */
-	public ReturnT<String> start(int id, LoginInfo loginInfo);
+	public ReturnMessage<String> start(int id, LoginInfo loginInfo);
 
 	/**
 	 * stop job
@@ -67,7 +71,7 @@ public interface XxlJobService {
 	 * @param id
 	 * @return
 	 */
-	public ReturnT<String> stop(int id, LoginInfo loginInfo);
+	public ReturnMessage<String> stop(int id, LoginInfo loginInfo);
 
 	/**
 	 * trigger
@@ -78,7 +82,7 @@ public interface XxlJobService {
 	 * @param addressList
 	 * @return
 	 */
-	public ReturnT<String> trigger(LoginInfo loginInfo, int jobId, String executorParam, String addressList);
+	public ReturnMessage<String> trigger(LoginInfo loginInfo, int jobId, String executorParam, String addressList);
 
 	/**
 	 * dashboard info

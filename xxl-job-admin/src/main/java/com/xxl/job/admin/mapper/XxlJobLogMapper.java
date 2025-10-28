@@ -1,5 +1,6 @@
 package com.xxl.job.admin.mapper;
 
+import com.xxl.job.admin.model.XxlJobInfo;
 import com.xxl.job.admin.model.XxlJobLog;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
@@ -18,11 +19,11 @@ public interface XxlJobLogMapper {
 	// exist jobId not use jobGroup, not exist use jobGroup
 	public List<XxlJobLog> pageList(@Param("offset") int offset,
 									@Param("pagesize") int pagesize,
-									@Param("jobGroup") int jobGroup,
-									@Param("jobId") int jobId,
+									@Param("jobGroup") Integer jobGroup,
+									@Param("jobId") Integer jobId,
 									@Param("triggerTimeStart") Date triggerTimeStart,
 									@Param("triggerTimeEnd") Date triggerTimeEnd,
-									@Param("logStatus") int logStatus);
+									@Param("logStatus") Integer logStatus);
 	public int pageListCount(@Param("offset") int offset,
 							 @Param("pagesize") int pagesize,
 							 @Param("jobGroup") int jobGroup,
@@ -44,8 +45,8 @@ public interface XxlJobLogMapper {
 	public Map<String, Object> findLogReport(@Param("from") Date from,
 											 @Param("to") Date to);
 
-	public List<Long> findClearLogIds(@Param("jobGroup") int jobGroup,
-									  @Param("jobId") int jobId,
+	public List<Long> findClearLogIds(@Param("jobGroup") Integer jobGroup,
+									  @Param("jobId") Integer jobId,
 									  @Param("clearBeforeTime") Date clearBeforeTime,
 									  @Param("clearBeforeNum") int clearBeforeNum,
 									  @Param("pagesize") int pagesize);
