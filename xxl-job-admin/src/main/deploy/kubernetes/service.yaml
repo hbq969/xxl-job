@@ -1,0 +1,83 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: aqyy-portal-login
+  namespace: ${k8s_ns}
+  labels:
+    app: aqyy-portal-login
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - port: 30630
+      targetPort: 30630
+      protocol: TCP
+      name: restful
+  selector:
+    app: xxl-job-admin
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: xxl-job-admin-deployment
+  namespace: ${k8s_ns}
+spec:
+  replicas: 1
+  revisionHistoryLimit: 1
+  selector:
+    matchLabels:
+      name: xxl-job-admin
+  template:
+    metadata:
+      labels:
+        name: xxl-job-admin
+        app: xxl-job-admin
+    spec:
+      restartPolicy: Always
+      volumes:
+        - name: app-logs
+          hostPath:
+            path: /tmp/apps/xxl-job-admin/logs
+      containers:
+        - name: xxl-job-admin
+          image: ${docker_prefix}/xxl-job-admin:${tag}
+          imagePullPolicy: Always
+          livenessProbe:
+            tcpSocket:
+              port: 30630
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 240
+          readinessProbe:
+            tcpSocket:
+              port: 30630
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 2
+            failureThreshold: 240
+          resources:
+            requests:
+              cpu: '1'
+              memory: 1Gi
+            limits:
+              cpu: '1'
+              memory: 1.5Gi
+          volumeMounts:
+            - mountPath: /opt/app/xxl-job-admin/logs
+              name: app-logs
+          ports:
+            - containerPort: 30630
+          env:
+            - name: spring_cloud_zookeeper_enabled
+              value: "false"
+            - name: spring_cloud_zookeeper_connectString
+              value: ""
+            - name: spring_cloud_zookeeper_auth_info
+              value: ""
+            - name: spring_profiles_active
+              value: "${spring_profiles_active}"
+          command: [ "java" ]
+          args: [ "-Xmx512m","-Xms512m","-DAPP_SN=xxl-job-admin","-Dspring.profiles.active=${spring_profiles_active}", "-Dspring.main.allow-bean-definition-overriding=true","-Dfile.encoding=utf-8", "-jar","/opt/app/xxl-job-admin/lib/xxl-job-admin-3.2.0.jar" ]
+

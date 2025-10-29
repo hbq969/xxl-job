@@ -31,7 +31,7 @@ spring:
   messages:
     basename: i18n/messages
     encoding: UTF-8
-    enabled: false
+    enabled: true
   mvc:
     servlet:
       load-on-startup: 0
@@ -80,6 +80,8 @@ spring:
         sm-initial-script:
           language: zh-CN
           charset: utf-8
+        menu:
+          prefix: ""
         auth:
           base:
             enabled: true
@@ -95,6 +97,10 @@ spring:
       driver-class-name: com.mysql.cj.jdbc.Driver
       username: dbc
       password: 123456
+#      jdbc-url: jdbc:postgresql://localhost:5432/xxl_job
+#      driver-class-name: org.postgresql.Driver
+#      username: admin
+#      password: 123456
       maximum-pool-size: 10
       minimum-idle: 2
       max-lifetime: 1800000
@@ -118,10 +124,10 @@ spring:
 ### mybatis
 mybatis:
   mapper-locations:
-    - classpath*:mapper/*.xml
-    - classpath*:mappers/*.xml
-    - classpath*:**/mapper/common/*Mapper.xml
-    - classpath*:**/mapper/mysql/*Mapper.xml
+    - classpath*:mapper/*Mapper.xml
+    - classpath*:mapper/mysql/*Mapper.xml
+    - classpath*:com/github/hbq969/code/**/mapper/common/*Mapper.xml
+    - classpath*:com/github/hbq969/code/**/mapper/mysql/*Mapper.xml
   config-location: classpath:jpaConfig-mysql.xml
 mybatis-plus:
   mapper-locations: ${mybatis.mapper-locations}
@@ -176,7 +182,7 @@ encrypt:
 ### xxl-job
 xxl:
   job:
-    accessToken: default_token
+    accessToken: 0CF7D9D21B7C4BA7
     timeout: 3
     i18n: zh_CN
     triggerpool:

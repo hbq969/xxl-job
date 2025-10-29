@@ -35,10 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.HtmlUtils;
 
 import java.util.Date;
@@ -52,7 +49,7 @@ import java.util.Map;
  * @author xuxueli 2015-12-19 16:13:16
  */
 @Tag(name = "xxl-job-日志查询")
-@Controller
+@RestController
 @RequestMapping(path = "/xxl-job-ui/joblog")
 public class JobLogController {
     private static Logger logger = LoggerFactory.getLogger(JobLogController.class);
@@ -150,7 +147,7 @@ public class JobLogController {
         return ReturnMessage.success(pg);
     }
 
-    @RequestMapping(path = "/logDetailPage")
+//    @RequestMapping(path = "/logDetailPage")
     public String logDetailPage(HttpServletRequest request, @RequestParam("id") int id, Model model) {
 
         // base check
@@ -237,8 +234,8 @@ public class JobLogController {
         return originData;
     }
 
-    @RequestMapping("/logKill")
-    @ResponseBody
+//    @RequestMapping("/logKill")
+//    @ResponseBody
     public ReturnT<String> logKill(HttpServletRequest request, @RequestParam("id") int id) {
         // base check
         XxlJobLog log = xxlJobLogMapper.load(id);

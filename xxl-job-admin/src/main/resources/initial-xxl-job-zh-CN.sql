@@ -1,5 +1,5 @@
 delete from h_sm_info where app='xxl-job-admin';
-insert into h_sm_info(app,info_content) values('xxl-job-admin','{"title":"XXL-JOB"}');
+insert into h_sm_info(app,info_content) values('xxl-job-admin','{"title":"XXL-任务中心"}');
 
 delete from h_dict_base where dict_name in ('xxl-job-admin,addressType','xxl-job-admin,triggerStatus','xxl-job-admin,scheduleType','xxl-job-admin,glueType','xxl-job-admin,executorRouteStrategy','xxl-job-admin,misfireStrategy','xxl-job-admin,executorBlockStrategy','xxl-job-admin,logStatus','xxl-job-admin,code','xxl-job-admin,logClearType') and app='xxl-job-admin';
 delete from h_dict_pairs where dict_name in ('xxl-job-admin,addressType','xxl-job-admin,triggerStatus','xxl-job-admin,scheduleType','xxl-job-admin,glueType','xxl-job-admin,executorRouteStrategy','xxl-job-admin,misfireStrategy','xxl-job-admin,executorBlockStrategy','xxl-job-admin,logStatus','xxl-job-admin,code','xxl-job-admin,logClearType');
@@ -60,3 +60,42 @@ insert into h_dict_pairs(dict_name,pair_key,pair_value) values('xxl-job-admin,lo
 insert into h_dict_pairs(dict_name,pair_key,pair_value) values('xxl-job-admin,logClearType','8','清理十万条以前日志数据');
 insert into h_dict_pairs(dict_name,pair_key,pair_value) values('xxl-job-admin,logClearType','9','清理所有日志数据');
 
+delete from h_menus where app='xxl-job-admin' and name in ('xxl-job','executor_list','task_list','schedule_log','xxl_user_list');
+insert into h_menus(app,name,menu_desc,url,parent_key,order_index,menu_level,icon_name,created_at) values('xxl-job-admin','xxl-job','任务管理','/xxl-job','-',0,1,'timetask',1735800456);
+insert into h_menus(app,name,menu_desc,url,parent_key,order_index,menu_level,icon_name,created_at) values('xxl-job-admin','executor_list','执行器管理','inner:${menuPrefix}/xxl-job-admin/xxl-job-ui/index.html#/executor/list','xxl-job',0,2,'route_unplug',1735800456);
+insert into h_menus(app,name,menu_desc,url,parent_key,order_index,menu_level,icon_name,created_at) values('xxl-job-admin','task_list','任务配置','inner:${menuPrefix}/xxl-job-admin/xxl-job-ui/index.html#/task/list','xxl-job',1,2,'media2',1735800456);
+insert into h_menus(app,name,menu_desc,url,parent_key,order_index,menu_level,icon_name,created_at) values('xxl-job-admin','schedule_log','日志查询','inner:${menuPrefix}/xxl-job-admin/xxl-job-ui/index.html#/log/list','xxl-job',2,2,'logs',1735800456);
+insert into h_menus(app,name,menu_desc,url,parent_key,order_index,menu_level,icon_name,created_at) values('xxl-job-admin','xxl_user_list','权限配置','inner:${menuPrefix}/xxl-job-admin/xxl-job-ui/index.html#/user/perm','xxl-job',3,2,'PermissionIcon',1735800456);
+
+INSERT INTO `xxl_job_group`(`id`, `app_name`, `title`, `address_type`, `address_list`, `update_time`) VALUES (1, 'xxl-job-executor-sample', '通用执行器Sample', 0, NULL, now()),
+       (2, 'xxl-job-executor-sample-ai', 'AI执行器Sample', 0, NULL, now());
+
+INSERT INTO `xxl_job_info`(`id`, `job_group`, `job_desc`, `add_time`, `update_time`, `author`, `alarm_email`,
+                           `schedule_type`, `schedule_conf`, `misfire_strategy`, `executor_route_strategy`,
+                           `executor_handler`, `executor_param`, `executor_block_strategy`, `executor_timeout`,
+                           `executor_fail_retry_count`, `glue_type`, `glue_source`, `glue_remark`, `glue_updatetime`,
+                           `child_jobid`)
+VALUES (1, 1, '示例任务01', now(), now(), 'XXL', '', 'CRON', '0 0 0 * * ? *',
+        'DO_NOTHING', 'FIRST', 'demoJobHandler', '', 'SERIAL_EXECUTION', 0, 0, 'BEAN', '', 'GLUE代码初始化',
+        now(), ''),
+       (2, 2, 'Ollama示例任务01', now(), now(), 'XXL', '', 'NONE', '',
+        'DO_NOTHING', 'FIRST', 'ollamaJobHandler', '{
+    "input": "慢SQL问题分析思路",
+    "prompt": "你是一个研发工程师，擅长解决技术类问题。",
+    "model": "qwen3:0.6b"
+}', 'SERIAL_EXECUTION', 0, 0, 'BEAN', '', 'GLUE代码初始化',
+        now(), ''),
+       (3, 2, 'Dify示例任务', now(), now(), 'XXL', '', 'NONE', '',
+        'DO_NOTHING', 'FIRST', 'difyWorkflowJobHandler', '{
+    "inputs":{
+        "input":"查询班级各学科前三名"
+    },
+    "user": "xxl-job",
+    "baseUrl": "http://localhost/v1",
+    "apiKey": "app-OUVgNUOQRIMokfmuJvBJoUTN"
+}', 'SERIAL_EXECUTION', 0, 0, 'BEAN', '', 'GLUE代码初始化',
+        now(), '');
+
+INSERT INTO `xxl_job_user`(`id`, `username`, `password`, `role`, `permission`) VALUES (1, 'admin', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 1, NULL);
+
+INSERT INTO `xxl_job_lock` (`lock_name`) VALUES ('schedule_lock');

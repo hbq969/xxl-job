@@ -7,20 +7,60 @@ import type {FormInstance, FormRules} from 'element-plus'
 import axios from '@/network'
 import {msg, notify} from '@/utils/Utils'
 import {getLangData} from "@/i18n/locale";
+import router from '@/router'
 
 const langData = getLangData()
+const fromTaskListFlag = ref(false)
+const dictMap = ref<any>({})
+const logStatusList = ref<any[]>([])
+const triggerStatusList = ref<any[]>([])
+const scheduleTypeList = ref<any[]>([])
+const glueTypeList = ref<any[]>([])
+const executorRouteStrategyList = ref<any[]>([])
+const misfireStrategyList = ref<any[]>([])
+const executorBlockStrategyList = ref<any[]>([])
+const logClearTypeList = ref<any[]>([])
+
+const queryDict = () => {
+  axios({
+    url: '/jobinfo/dict',
+    method: 'get'
+  }).then((res: any) => {
+    if (res.data.state == 'OK') {
+      dictMap.value = res.data.body || {}
+      logStatusList.value = dictMap.value['xxl-job-admin,logStatus'] || [] as any[]
+      triggerStatusList.value = dictMap.value['xxl-job-admin,triggerStatus'] || [] as any[]
+      scheduleTypeList.value = dictMap.value['xxl-job-admin,scheduleType'] || [] as any[]
+      glueTypeList.value = dictMap.value['xxl-job-admin,glueType'] || [] as any[]
+      executorRouteStrategyList.value = dictMap.value['xxl-job-admin,executorRouteStrategy'] || [] as any[]
+      misfireStrategyList.value = dictMap.value['xxl-job-admin,misfireStrategy'] || [] as any[]
+      executorBlockStrategyList.value = dictMap.value['xxl-job-admin,executorBlockStrategy'] || [] as any[]
+      logClearTypeList.value = dictMap.value['xxl-job-admin,logClearType'] || [] as any[]
+    } else {
+      msg(res.data.errorMessage, 'warning')
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(err?.response.data.errorMessage, 'error')
+  })
+}
 
 onMounted(() => {
   fetchJobGroup('')
-  fetchLogStatus('')
+  fromTaskList()
+  queryDict()
   query()
-  fetchTriggerStatus('')
-  fetchScheduleType('')
-  fetchGlueType('')
-  fetchExecutorRouteStrategy('')
-  fetchMisfireStrategy('')
-  fetchExecutorBlockStrategy('')
 });
+
+const fromTaskList = () => {
+  let q = router.currentRoute.value.query
+  if (q && q.jobGroup && q.jobId) {
+    fromTaskListFlag.value = true
+    form.jobGroup = Number.parseInt(q.jobGroup as string)
+    form.jobId = Number.parseInt(q.jobId as string)
+    fetchTaskList('')
+  }
+}
 
 const headerCellStyle = () => {
   // 添加表头颜色
@@ -71,7 +111,7 @@ const fetchJobGroup = (query: string) => {
 const taskList = ref<any[]>([])
 const fetchTaskList = (query: string) => {
   if (!form.jobGroup || form.jobGroup == null || form.jobGroup == '') {
-    msg('请先选择执行器', 'warning')
+    msg(langData.pleaseSelectExecutor, 'warning')
     return
   }
   axios({
@@ -97,7 +137,7 @@ const fetchTaskList = (query: string) => {
 
 const fetchTaskList2 = (query: string) => {
   if (!logClearForm.jobGroup || logClearForm.jobGroup == null || logClearForm.jobGroup == '') {
-    msg('请先选择执行器', 'warning')
+    msg(langData.pleaseSelectExecutor, 'warning')
     return
   }
   axios({
@@ -121,32 +161,9 @@ const fetchTaskList2 = (query: string) => {
   })
 }
 
-const logStatusList = ref<any[]>([])
-const fetchLogStatus = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,logStatus'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        logStatusList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        logStatusList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-
 const form = reactive({
-  jobGroup: null,
-  jobId: null,
+  jobGroup: null as any,
+  jobId: null as any,
   logStatus: null,
   time: [] as any[],
   filterTime: '',
@@ -202,7 +219,7 @@ const updateLogClear = async (formEl: FormInstance | undefined) => {
       }).then((res: any) => {
         if (res.data.state == 'OK') {
           msg(res.data.body, 'success')
-          dialogFormVisible.value=false
+          dialogFormVisible.value = false
           query()
         } else {
           msg(res.data.errorMessage, 'warning')
@@ -219,11 +236,10 @@ const showLogClearDialog = () => {
   formRef.value?.clearValidate()
   logClearForm.jobGroup = form.jobGroup
   logClearForm.jobId = form.jobId
-  fetchLogClearType('')
 }
 
 const drawer = ref(false)
-const drawerTitle = ref('日志详情')
+const drawerTitle = ref(langData.logDetail)
 const logDetail = ref()
 const showLogDrawer = (row: any) => {
   axios({
@@ -247,7 +263,7 @@ const showLogDrawer = (row: any) => {
 }
 
 const drawer1 = ref(false)
-const drawerTitle1 = ref('任务信息')
+const drawerTitle1 = ref(langData.taskDetail)
 const jobInfo = ref<any>({})
 const showJobInfoDrawer = (row: any) => {
   axios({
@@ -267,166 +283,16 @@ const showJobInfoDrawer = (row: any) => {
   })
 }
 
-const triggerStatusList = ref<any[]>([])
-const fetchTriggerStatus = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,triggerStatus'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        triggerStatusList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        triggerStatusList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-const scheduleTypeList = ref<any[]>([])
-const fetchScheduleType = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,scheduleType'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        scheduleTypeList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        scheduleTypeList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-const glueTypeList = ref<any[]>([])
-const fetchGlueType = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,glueType'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        glueTypeList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        glueTypeList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-const executorRouteStrategyList = ref<any[]>([])
-const fetchExecutorRouteStrategy = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,executorRouteStrategy'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        executorRouteStrategyList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        executorRouteStrategyList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-const misfireStrategyList = ref<any[]>([])
-const fetchMisfireStrategy = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,misfireStrategy'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        misfireStrategyList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        misfireStrategyList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-const executorBlockStrategyList = ref<any[]>([])
-const fetchExecutorBlockStrategy = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,executorBlockStrategy'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        executorBlockStrategyList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        executorBlockStrategyList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-
-const logClearTypeList = ref<any[]>([])
-const fetchLogClearType = (query: string) => {
-  axios({
-    url: '/jobinfo/dict',
-    method: 'get',
-    params: {dn: 'xxl-job-admin,logClearType'}
-  }).then((res: any) => {
-    if (res.data.state == 'OK') {
-      if (query && query != '') {
-        let list = res.data.body || []
-        logClearTypeList.value = list.filter((item: any) => item.value.includes(query))
-      } else {
-        logClearTypeList.value = res.data.body
-      }
-    } else {
-      msg(res.data.errorMessage, 'warning')
-    }
-  }).catch((err: any) => {
-    console.log('', err)
-    msg(err?.response.data.errorMessage, 'error')
-  })
-}
-
 </script>
 
 <template>
   <div class="container">
+    <el-page-header :icon="ArrowLeft" @back="router.back()" v-if="fromTaskListFlag">
+      <template #content>
+        <span class="text-large font-600 mr-3"> {{ langData.taskLog }} </span>
+      </template>
+    </el-page-header>
+    <el-divider content-position="left" v-if="fromTaskListFlag"></el-divider>
     <el-form :model="form" size="small" label-position="right" inline-message :inline="true">
       <el-form-item :label="langData.time" prop="time" size="small">
         <el-date-picker
@@ -439,7 +305,7 @@ const fetchLogClearType = (query: string) => {
             size="small"
         />
       </el-form-item>
-      <el-form-item label="执行器" prop="jobGroup">
+      <el-form-item :label="langData.executor" prop="jobGroup">
         <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchJobGroup"
@@ -447,23 +313,23 @@ const fetchLogClearType = (query: string) => {
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="任务" prop="jobId">
+      <el-form-item :label="langData.task" prop="jobId">
         <el-select v-model="form.jobId" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchTaskList">
           <el-option :key="item.id" :label="item.jobDesc" :value="item.id" v-for="item in taskList"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="日志状态" prop="logStatus">
+      <el-form-item :label="langData.logStatus" prop="logStatus">
         <el-select v-model="form.logStatus" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
-                   remote automatic-dropdown :remote-method="fetchLogStatus">
+                   automatic-dropdown>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in logStatusList"/>
         </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" size="small" @click="query()">{{ langData.btnSearch }}</el-button>
-        <el-tooltip content="日志清理" effect="dark" placement="bottom">
+        <el-tooltip :content="langData.logClean" effect="dark" placement="bottom">
           <el-icon @click="showLogClearDialog" color="red" style="cursor: pointer; margin-left: 10px" :size="24">
             <template #default>
               <svg t="1761636296459" class="icon" viewBox="0 0 1024 1024" version="1.1"
@@ -484,7 +350,7 @@ const fetchLogClearType = (query: string) => {
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
           <el-icon @click="showLogDrawer(scope.row)" style="cursor: pointer; margin-left: 10px"
-                   :size="14" title="查看日志">
+                   :size="14" :title="langData.detailLog">
             <template #default>
               <svg t="1761640615592" class="icon" viewBox="0 0 1024 1024" version="1.1"
                    xmlns="http://www.w3.org/2000/svg" p-id="14178" width="32" height="32">
@@ -498,7 +364,7 @@ const fetchLogClearType = (query: string) => {
             </template>
           </el-icon>
           <el-icon @click="showJobInfoDrawer(scope.row)" color="red" style="cursor: pointer; margin-left: 10px"
-                   :size="14" title="查看任务">
+                   :size="14" :title="langData.taskDetail">
             <template #default>
               <svg t="1761640468607" class="icon" viewBox="0 0 1024 1024" version="1.1"
                    xmlns="http://www.w3.org/2000/svg" p-id="11004" width="32" height="32">
@@ -513,16 +379,16 @@ const fetchLogClearType = (query: string) => {
           </el-icon>
         </template>
       </el-table-column>
-      <el-table-column prop="id" label="任务ID" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="id" :label="langData.taskId" :show-overflow-tooltip="true" header-align="center"
                        align="center" width="80"/>
       <!--      <el-table-column prop="jobGroup" label="执行器ID" :show-overflow-tooltip="true" header-align="center"-->
       <!--                       align="center" width="80"/>-->
-      <el-table-column prop="executorAddress" label="执行器地址" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="executorAddress" :label="langData.executorAddress" :show-overflow-tooltip="true" header-align="center"
                        align="left"/>
       <el-table-column prop="executorHandler" label="jobHandler" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="fmtTriggerCode" label="调度结果" :show-overflow-tooltip="true" header-align="center"
-                       align="center" width="80">
+      <el-table-column prop="fmtTriggerCode" :label="langData.scheduleResult" :show-overflow-tooltip="true" header-align="center"
+                       align="center" width="120">
         <template #default="scope">
           <el-tag v-if="scope.row.triggerCode==200 || scope.row.triggerCode==500"
                   :type="scope.row.triggerCode==200?'success':'danger'"
@@ -533,10 +399,10 @@ const fetchLogClearType = (query: string) => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtTriggerTime" label="调度时间" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtTriggerTime" :label="langData.scheduleTime" :show-overflow-tooltip="true" header-align="center"
                        align="left"/>
-      <el-table-column prop="fmtHandleCode" label="执行结果" :show-overflow-tooltip="true" header-align="center"
-                       align="center" width="80">
+      <el-table-column prop="fmtHandleCode" :label="langData.executeResult" :show-overflow-tooltip="true" header-align="center"
+                       align="center" width="120">
         <template #default="scope">
           <el-tag v-if="scope.row.handleCode==200 || scope.row.handleCode==500"
                   :type="scope.row.handleCode==200?'success':'danger'"
@@ -547,7 +413,7 @@ const fetchLogClearType = (query: string) => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtHandleTime" label="执行时间" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtHandleTime" :label="langData.executeTime" :show-overflow-tooltip="true" header-align="center"
                        align="left"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
@@ -571,83 +437,83 @@ const fetchLogClearType = (query: string) => {
         v-model="drawer1"
         :title="drawerTitle1"
         direction="ltr"
-        size="40%"
+        size="50%"
     >
-      <el-form size="small" label-position="right" inline-message :inline="false" label-width="20%">
-        <el-divider content-position="left">基础配置</el-divider>
-        <el-form-item label="执行器" prop="jobGroup">
+      <el-form size="small" label-position="right" inline-message :inline="false" label-width="30%">
+        <el-divider content-position="left">{{langData.baseConfig}}</el-divider>
+        <el-form-item :label="langData.executor" prop="jobGroup">
           <el-select v-model="jobInfo.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                     filterable style="width: 100%" :remote="fetchJobGroup">
+                     filterable style="width: 100%" :remote-method="fetchJobGroup">
             <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="任务描述" prop="jobDesc">
+        <el-form-item :label="langData.taskDesc" prop="jobDesc">
           <el-input v-model="jobInfo.jobDesc" type="text" clearable/>
         </el-form-item>
-        <el-form-item label="报警邮箱" prop="alarmEmail">
+        <el-form-item :label="langData.alarmEmail" prop="alarmEmail">
           <el-input v-model="jobInfo.alarmEmail" type="textarea" clearable
-                    placeholder="多个邮箱地址用逗号分隔 foo@xx.com,bar@xx.com"
+                    :placeholder="langData.alarmEmailPlaceholder"
                     :rows="2"/>
         </el-form-item>
-        <el-divider content-position="left">调度配置</el-divider>
-        <el-form-item label="调度类型" prop="scheduleType">
+        <el-divider content-position="left">{{langData.scheduleConfig}}</el-divider>
+        <el-form-item :label="langData.scheduleType" prop="scheduleType">
           <el-select v-model="jobInfo.scheduleType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                     filterable style="width: 100%" :remote="fetchScheduleType">
+                     filterable style="width: 100%">
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
           </el-select>
         </el-form-item>
         <el-form-item label="CRON" prop="scheduleConf" v-if="jobInfo.scheduleType=='CRON'">
           <el-input v-model="jobInfo.scheduleConf" type="text" clearable placeholder="* * * * * ?"/>
         </el-form-item>
-        <el-form-item label="固定速度(秒)" prop="scheduleConf" v-if="jobInfo.scheduleType=='FIX_RATE'">
+        <el-form-item :label="langData.fixedRate" prop="scheduleConf" v-if="jobInfo.scheduleType=='FIX_RATE'">
           <el-input v-model="jobInfo.scheduleConf" type="number" clearable placeholder="30"/>
         </el-form-item>
-        <el-divider content-position="left">任务配置</el-divider>
-        <el-form-item label="运行模式" prop="glueType">
+        <el-divider content-position="left">{{langData.taskConfig}}</el-divider>
+        <el-form-item :label="langData.glueType" prop="glueType">
           <el-select v-model="jobInfo.glueType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                     filterable style="width: 100%" :remote="fetchGlueType">
+                     filterable style="width: 100%">
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="任务handler" prop="executorHandler" v-if="jobInfo.glueType=='BEAN'">
+        <el-form-item :label="langData.taskHandler" prop="executorHandler" v-if="jobInfo.glueType=='BEAN'">
           <el-input v-model="jobInfo.executorHandler" type="text" clearable
-                    placeholder="执行器中定义的@XxlJob中定义的值"/>
+                    :placeholder="langData.taskHandlerPlaceholder"/>
         </el-form-item>
-        <el-form-item label="任务参数" prop="executorParam">
+        <el-form-item :label="langData.executeParam" prop="executorParam">
           <el-input v-model="jobInfo.executorParam" type="textarea" clearable :rows="5"
-                    placeholder="参数自定义格式，handler中通过XxlJobContext.get()获取"/>
+                    :placeholder="langData.taskParamsPlaceholder"/>
         </el-form-item>
-        <el-divider content-position="left">高级配置</el-divider>
-        <el-form-item label="路由策略" prop="executorRouteStrategy">
+        <el-divider content-position="left">{{ langData.advancedConfig }}</el-divider>
+        <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
           <el-select v-model="jobInfo.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
                      clearable filterable style="width: 100%"
-                     remote automatic-dropdown :remote-method="fetchExecutorRouteStrategy">
+                     automatic-dropdown>
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="子任务ID" prop="childJobId">
+        <el-form-item :label="langData.childTaskId" prop="childJobId">
           <el-input v-model="jobInfo.childJobId" type="text" clearable/>
         </el-form-item>
-        <el-form-item label="调度过期策略" prop="misfireStrategy">
+        <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
           <el-select v-model="jobInfo.misfireStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
                      clearable
                      filterable style="width: 100%"
-                     remote automatic-dropdown :remote-method="fetchMisfireStrategy">
+                     automatic-dropdown>
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="阻塞处理策略" prop="executorBlockStrategy">
+        <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
           <el-select v-model="jobInfo.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
                      clearable
                      filterable style="width: 100%"
-                     remote automatic-dropdown :remote-method="fetchExecutorBlockStrategy">
+                     automatic-dropdown>
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
           </el-select>
         </el-form-item>
-        <el-form-item label="任务超时时间(秒)" prop="executorTimeout">
+        <el-form-item :label="langData.timeout" prop="executorTimeout">
           <el-input v-model="jobInfo.executorTimeout" type="number" clearable/>
         </el-form-item>
-        <el-form-item label="失败重试次数" prop="executorFailRetryCount">
+        <el-form-item :label="langData.failRetryCount" prop="executorFailRetryCount">
           <el-input v-model="jobInfo.executorFailRetryCount" type="number" clearable/>
         </el-form-item>
         <el-form-item label="" prop="glueRemark">
@@ -657,27 +523,27 @@ const fetchLogClearType = (query: string) => {
     </el-drawer>
   </div>
 
-  <el-dialog v-model="dialogFormVisible" title="日志清理" draggable width="40%">
+  <el-dialog v-model="dialogFormVisible" :title="langData.logClean" draggable width="40%">
     <el-form :model="logClearForm" label-position="right" size="small" :inline="false" ref="formRef" :rules="rules"
-             label-width="20%">
-      <el-form-item label="执行器" prop="vendor">
+             label-width="25%">
+      <el-form-item :label="langData.executor" prop="vendor">
         <el-select v-model="logClearForm.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchJobGroup">
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="任务" prop="jobId">
+      <el-form-item :label="langData.task" prop="jobId">
         <el-select v-model="logClearForm.jobId" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchTaskList2">
           <el-option :key="item.id" :label="item.jobDesc" :value="item.id" v-for="item in taskList"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="清理方式" prop="type">
+      <el-form-item :label="langData.cleanWay" prop="type">
         <el-select v-model="logClearForm.type" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
-                   remote automatic-dropdown :remote-method="fetchLogClearType">
+                   automatic-dropdown>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in logClearTypeList"/>
         </el-select>
       </el-form-item>

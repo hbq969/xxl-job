@@ -176,7 +176,7 @@ public class EmbedServer {
             }
             if (accessToken != null
                     && accessToken.trim().length() > 0
-                    && !accessToken.equals(accessTokenReq)) {
+                    && !accessToken.split(",")[1].equals(accessTokenReq)) {
                 return ReturnT.ofFail("The access token is wrong.");
             }
 

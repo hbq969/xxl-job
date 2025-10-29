@@ -38,7 +38,6 @@ public class JobApiController {
      */
     @RequestMapping("/{uri}")
     @ResponseBody
-    @XxlSso(login = false)
     public ReturnT<String> api(HttpServletRequest request, @PathVariable("uri") String uri, @RequestBody(required = false) String data) {
 
         // valid
@@ -48,10 +47,10 @@ public class JobApiController {
         if (StringTool.isBlank(uri)) {
             return ReturnT.ofFail("invalid request, uri-mapping empty.");
         }
-        if (StringTool.isNotBlank(XxlJobAdminConfig.getAdminConfig().getAccessToken())
-                && !XxlJobAdminConfig.getAdminConfig().getAccessToken().equals(request.getHeader(XxlJobRemotingUtil.XXL_JOB_ACCESS_TOKEN))) {
-            return ReturnT.ofFail("The access token is wrong.");
-        }
+//        if (StringTool.isNotBlank(XxlJobAdminConfig.getAdminConfig().getAccessToken())
+//                && !XxlJobAdminConfig.getAdminConfig().getAccessToken().equals(request.getHeader(XxlJobRemotingUtil.XXL_JOB_ACCESS_TOKEN))) {
+//            return ReturnT.ofFail("The access token is wrong.");
+//        }
 
         // services mapping
         if ("callback".equals(uri)) {

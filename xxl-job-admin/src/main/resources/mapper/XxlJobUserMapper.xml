@@ -140,4 +140,9 @@
         values (#{userName}, #{groupId})
     </insert>
 
+	<delete id="deleteUserPermission">
+        delete
+        from h_xxl_job_user_p
+        where user_name = #{userName}
+    </delete>
 </mapper>

@@ -100,6 +100,11 @@
             <version>1.18.42</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <version>42.7.7</version>
+        </dependency>
 
     </dependencies>
 
@@ -171,6 +176,7 @@
                 <directory>src/main/resources</directory>
                 <includes>
                     <include>mapper/*.*</include>
+                    <include>mapper/**/*.*</include>
                     <include>i18n/*.*</include>
                     <include>*.*</include>
                     <include>static/xxl-job-ui/</include>

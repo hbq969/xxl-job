@@ -11,8 +11,28 @@ import router from "@/router";
 import {getLangData} from "@/i18n/locale";
 
 const langData = getLangData()
+const dictMap = ref<any>({})
+const addressTypeList = ref<any[]>([])
+
+const queryDict = () => {
+  axios({
+    url: '/jobinfo/dict',
+    method: 'get'
+  }).then((res: any) => {
+    if (res.data.state == 'OK') {
+      dictMap.value = res.data.body || {}
+      addressTypeList.value = dictMap.value['xxl-job-admin,addressType'] || [] as any[]
+    } else {
+      msg(res.data.errorMessage, 'warning')
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(err?.response.data.errorMessage, 'error')
+  })
+}
 
 onMounted(() => {
+  queryDict()
   query()
 });
 
@@ -50,10 +70,6 @@ const form = reactive({
 })
 const total = ref(0)
 const list = ref<any[]>()
-const addressTypeList = [
-  {key: 0, label: '自动注册'},
-  {key: 1, label: '手工注册'}
-] as any[]
 
 const query = () => {
   axios({
@@ -74,31 +90,31 @@ const query = () => {
 }
 
 const drawer = ref(false)
-const drawerTitle = ref('新增执行器')
+const drawerTitle = ref(langData.addExecutor)
 const executorForm = reactive({
   id: '',
   appname: '',
   title: '',
-  addressType: 1,
+  addressType: null as any,
   addressList: 'http://localhost:8080'
 })
 const showAddExecutor = (row: any) => {
   drawer.value = true
-  drawerTitle.value = '新增执行器'
+  drawerTitle.value = langData.addExecutor
   executorForm.id = ''
   executorForm.appname = ''
   executorForm.title = ''
-  executorForm.addressType = 1
+  executorForm.addressType = '1'
   executorForm.addressList = 'http://localhost:8080'
 }
 
 const showEditExecutor = (row: any) => {
   drawer.value = true
-  drawerTitle.value = '编辑执行器'
+  drawerTitle.value = langData.editExecutor
   executorForm.id = row.id
   executorForm.appname = row.appname
   executorForm.title = row.title
-  executorForm.addressType = row.addressType
+  executorForm.addressType = row.addressType+''
   executorForm.addressList = row.addressList
 }
 
@@ -114,7 +130,7 @@ const updateExecutor = async (formEl: FormInstance | undefined) => {
   await formEl.validate((valid, fields) => {
     if (valid) {
       axios({
-        url: drawerTitle.value == '新增执行器' ? '/jobgroup/save' : '/jobgroup/update',
+        url: drawerTitle.value == langData.addExecutor ? '/jobgroup/save' : '/jobgroup/update',
         method: 'post',
         data: executorForm,
       }).then((res: any) => {
@@ -159,10 +175,10 @@ const deleteExecutor = (row: any) => {
 <template>
   <div class="container">
     <el-form :model="form" size="small" label-position="right" inline-message inline>
-      <el-form-item label="应用名字" prop="appname">
+      <el-form-item :label="langData.appname" prop="appname">
         <el-input v-model="form.appname" type="text" clearable/>
       </el-form-item>
-      <el-form-item label="应用描述" prop="title">
+      <el-form-item :label="langData.appDesc" prop="title">
         <el-input v-model="form.title" type="text" clearable/>
       </el-form-item>
       <el-form-item>
@@ -172,7 +188,7 @@ const deleteExecutor = (row: any) => {
     </el-form>
     <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
               size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle">
-<!--      <el-table-column type="selection" header-align="center" align="center"/>-->
+      <!--      <el-table-column type="selection" header-align="center" align="center"/>-->
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
           <el-icon @click="showEditExecutor(scope.row)" color="#3F9EFF" style="cursor: pointer; margin-left: 10px"
@@ -192,15 +208,15 @@ const deleteExecutor = (row: any) => {
       </el-table-column>
       <el-table-column prop="id" label="ID" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="appname" label="执行器名称" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="appname" :label="langData.executorName" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="title" label="执行器描述" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="title" :label="langData.executorDesc" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="fmtAddressType" label="注册方式" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtAddressType" :label="langData.registerType" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="addressList" label="注册地址" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="addressList" :label="langData.registerAddress" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="fmtUpdateTime" label="时间" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtUpdateTime" :label="langData.updateTime" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
@@ -217,25 +233,25 @@ const deleteExecutor = (row: any) => {
       direction="ltr"
       size="40%"
   >
-    <el-form :model="executorForm" size="small" label-position="right" inline-message :inline="false" label-width="15%"
+    <el-form :model="executorForm" size="small" label-position="right" inline-message :inline="false" label-width="20%"
              ref="formRef" :rules="rules">
-      <el-form-item label="ID" prop="id" v-if="drawerTitle=='编辑执行器'">
+      <el-form-item label="ID" prop="id" v-if="drawerTitle==langData.editExecutor">
         <el-input v-model="executorForm.id" type="text" clearable disabled/>
       </el-form-item>
-      <el-form-item label="名称" prop="appname">
+      <el-form-item :label="langData.executorName" prop="appname">
         <el-input v-model="executorForm.appname" type="text" clearable/>
       </el-form-item>
-      <el-form-item label="描述" prop="title">
+      <el-form-item :label="langData.executorDesc" prop="title">
         <el-input v-model="executorForm.title" type="text" clearable/>
       </el-form-item>
-      <el-form-item label="注册方式" prop="addressType">
+      <el-form-item :label="langData.registerType" prop="addressType">
         <el-select v-model="executorForm.addressType" :placeholder="langData.formSelectPlaceholder" size="small"
                    clearable filterable style="width: 100%"
                    @change="executorForm.addressType==0?executorForm.addressList='':executorForm.addressList='http://localhost:8080'">
-          <el-option :key="item.key" :label="item.label" :value="item.key" v-for="item in addressTypeList"/>
+          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in addressTypeList"/>
         </el-select>
       </el-form-item>
-      <el-form-item label="注册地址" prop="addressList">
+      <el-form-item :label="langData.registerAddress" prop="addressList" v-if="executorForm.addressType==1">
         <el-input v-model="executorForm.addressList" type="textarea"
                   :rows="3" style="width: 100%"/>
       </el-form-item>

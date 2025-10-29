@@ -1,7 +1,9 @@
 package com.xxl.job.admin.controller.biz;
 
+import cn.hutool.core.util.StrUtil;
 import com.github.hbq969.code.common.restful.ReturnMessage;
 import com.github.hbq969.code.common.spring.context.SpringContext;
+import com.github.hbq969.code.dict.model.Dict;
 import com.github.hbq969.code.dict.model.Pair;
 import com.github.hbq969.code.dict.service.api.impl.MapDictHelperImpl;
 import com.github.hbq969.code.sm.perm.api.SMRequiresPermissions;
@@ -37,10 +39,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * index controller
@@ -61,7 +60,7 @@ public class JobInfoController {
     @Autowired
     private SpringContext context;
 
-    @RequestMapping
+    //    @RequestMapping
     public String index(HttpServletRequest request, Model model, @RequestParam(value = "jobGroup", required = false, defaultValue = "-1") int jobGroup) {
 
         // 枚举-字典
@@ -186,14 +185,22 @@ public class JobInfoController {
     @RequestMapping(path = "/dict", method = RequestMethod.GET)
     @ResponseBody
     @SMRequiresPermissions(menu = "task_list", apiKey = "queryDict", apiDesc = "查询字典数据")
-    public ReturnMessage<List<Pair>> queryDict(
-            @RequestParam(value = "dn") String dn) {
-        return ReturnMessage.success(context.getBean(MapDictHelperImpl.class).queryPairList(dn));
+    public ReturnMessage<Map<String, List<Pair>>> queryDict() {
+        Map<String, List<Pair>> dictMap = new HashMap<>();
+        MapDictHelperImpl dict = context.getBean(MapDictHelperImpl.class);
+        Collection<Dict> c = dict.allDicts();
+        for (Dict d : c) {
+            if (StrUtil.startWith(d.getDictName(), "xxl-job-admin")) {
+                dictMap.put(d.getDictName(), dict.queryPairList(d.getDictName()));
+            }
+        }
+        return ReturnMessage.success(dictMap);
     }
 
     @Operation(summary = "根据id查询任务详情")
     @RequestMapping(path = "/info", method = RequestMethod.GET)
     @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "queryJobInfo", apiDesc = "根据id查询任务详情")
     public ReturnMessage<XxlJobInfo> queryJobInfo(
             @RequestParam(value = "id") Integer id) {
         return ReturnMessage.success(xxlJobService.queryJobInfo(id));

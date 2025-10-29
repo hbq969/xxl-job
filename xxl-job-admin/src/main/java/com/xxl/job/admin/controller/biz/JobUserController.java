@@ -4,8 +4,12 @@ import cn.hutool.core.util.StrUtil;
 import com.github.hbq969.code.common.restful.ReturnMessage;
 import com.github.hbq969.code.common.spring.context.SpringContext;
 import com.github.hbq969.code.common.utils.I18nUtils;
+import com.github.hbq969.code.sm.login.dao.entity.UserEntity;
 import com.github.hbq969.code.sm.login.model.UserInfo;
+import com.github.hbq969.code.sm.login.service.LoginService;
 import com.github.hbq969.code.sm.login.session.UserContext;
+import com.github.hbq969.code.sm.perm.api.SMRequiresPermissions;
+import com.github.pagehelper.PageInfo;
 import com.xxl.job.admin.constant.Consts;
 import com.xxl.job.admin.mapper.XxlJobGroupMapper;
 import com.xxl.job.admin.mapper.XxlJobUserMapper;
@@ -33,6 +37,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * @author xuxueli 2019-05-04 16:39:50
@@ -51,10 +56,13 @@ public class JobUserController {
     private XxlJobUserService xxlJobUserService;
 
 
-    @Autowired
+    @Resource
     private SpringContext context;
 
-    @RequestMapping
+    @Resource
+    private LoginService loginService;
+
+//    @RequestMapping
     @XxlSso(role = Consts.ADMIN_ROLE)
     public String index(Model model) {
 
@@ -65,8 +73,8 @@ public class JobUserController {
         return "user/user.index";
     }
 
-    @RequestMapping(path = "/pageList", method = RequestMethod.GET)
-    @ResponseBody
+//    @RequestMapping(path = "/pageList", method = RequestMethod.GET)
+//    @ResponseBody
     @XxlSso(role = Consts.ADMIN_ROLE)
     public Map<String, Object> pageList(@RequestParam(value = "start", required = false, defaultValue = "0") int start,
                                         @RequestParam(value = "length", required = false, defaultValue = "10") int length,
@@ -92,8 +100,8 @@ public class JobUserController {
         return maps;
     }
 
-    @RequestMapping("/add")
-    @ResponseBody
+//    @RequestMapping("/add")
+//    @ResponseBody
     @XxlSso(role = Consts.ADMIN_ROLE)
     public ReturnT<String> add(XxlJobUser xxlJobUser) {
 
@@ -128,8 +136,8 @@ public class JobUserController {
         return ReturnT.ofSuccess();
     }
 
-    @RequestMapping("/update")
-    @ResponseBody
+//    @RequestMapping("/update")
+//    @ResponseBody
     @XxlSso(role = Consts.ADMIN_ROLE)
     public ReturnT<String> update(HttpServletRequest request, XxlJobUser xxlJobUser) {
 
@@ -157,8 +165,8 @@ public class JobUserController {
         return ReturnT.ofSuccess();
     }
 
-    @RequestMapping("/remove")
-    @ResponseBody
+//    @RequestMapping("/remove")
+//    @ResponseBody
     @XxlSso(role = Consts.ADMIN_ROLE)
     public ReturnT<String> remove(HttpServletRequest request, @RequestParam("id") int id) {
 
@@ -172,8 +180,8 @@ public class JobUserController {
         return ReturnT.ofSuccess();
     }
 
-    @RequestMapping("/updatePwd")
-    @ResponseBody
+//    @RequestMapping("/updatePwd")
+//    @ResponseBody
     public ReturnT<String> updatePwd(HttpServletRequest request,
                                      @RequestParam("password") String password,
                                      @RequestParam("oldPassword") String oldPassword) {
@@ -211,17 +219,44 @@ public class JobUserController {
     @Operation(summary = "获取权限范围内的执行器")
     @RequestMapping(path = "/permission/list", method = RequestMethod.GET)
     @ResponseBody
+    @SMRequiresPermissions(menu = "xxl_user_list", apiDesc = "获取权限范围内的执行器", apiKey = "findPermissionGroups")
     public ReturnMessage<List<XxlJobGroup>> findPermissionGroups() {
         UserInfo ui = UserContext.get();
         List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(ui.getUserName(), ui.getRoleName());
         return ReturnMessage.success(groupList);
     }
 
+    @Operation(summary = "获取指定用户的权限范围内的执行器")
+    @RequestMapping(path = "/permission/list/{userName}", method = RequestMethod.GET)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "xxl_user_list", apiDesc = "获取指定用户的权限范围内的执行器", apiKey = "findUserPermissionGroups")
+    public ReturnMessage<List<Integer>> findUserPermissionGroups(@PathVariable(name = "userName") String userName) {
+        List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(userName, "USER");
+        List<Integer> groupIds = groupList.stream().map(g -> g.getId()).collect(Collectors.toList());
+        return ReturnMessage.success(groupIds);
+    }
+
     @Operation(summary = "保存用户权限")
     @RequestMapping(path = "/permission", method = RequestMethod.POST)
     @ResponseBody
-    public ReturnMessage<?> saveUserPermission(XxlJobUserGroups xxlJobUserGroups) {
+    @SMRequiresPermissions(menu = "xxl_user_list", apiDesc = "保存用户权限", apiKey = "saveUserPermission")
+    public ReturnMessage<?> saveUserPermission(@RequestBody XxlJobUserGroups xxlJobUserGroups) {
         xxlJobUserService.saveUserPermission(xxlJobUserGroups);
         return ReturnMessage.success(I18nUtils.getMessage(context, "save.result"));
+    }
+
+    @Operation(summary = "查询用户列表")
+    @RequestMapping(path = "/list", method = RequestMethod.GET)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "xxl_user_list", apiDesc = "查询用户列表", apiKey = "queryUserList")
+    public ReturnMessage<PageInfo<UserEntity>> queryUserList(
+            @RequestParam(value = "pageNum", defaultValue = "1") int pageNum,
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
+        PageInfo<UserEntity> pg = loginService.queryUserList(pageNum, pageSize, new UserEntity());
+        pg.setList(pg.getList().stream().filter(u -> {
+            u.setPassword("**");
+            return !StrUtil.equals("ADMIN", u.getRoleName());
+        }).collect(Collectors.toList()));
+        return ReturnMessage.success(pg);
     }
 }

@@ -19,7 +19,8 @@ import java.util.Map;
  */
 public class XxlJobRemotingUtil {
     private static Logger logger = LoggerFactory.getLogger(XxlJobRemotingUtil.class);
-    public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";
+    //    public static final String XXL_JOB_ACCESS_TOKEN = "XXL-JOB-ACCESS-TOKEN";
+    public static final String XXL_JOB_ACCESS_TOKEN = "Authorization";
 
 
     // trust-https start
@@ -40,14 +41,17 @@ public class XxlJobRemotingUtil {
             }
         });
     }
+
     private static final TrustManager[] trustAllCerts = new TrustManager[]{new X509TrustManager() {
         @Override
         public java.security.cert.X509Certificate[] getAcceptedIssuers() {
             return new java.security.cert.X509Certificate[]{};
         }
+
         @Override
         public void checkClientTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
+
         @Override
         public void checkServerTrusted(X509Certificate[] chain, String authType) throws CertificateException {
         }
@@ -60,7 +64,7 @@ public class XxlJobRemotingUtil {
      *
      * @param url
      * @param accessToken
-     * @param timeout           by second
+     * @param timeout            by second
      * @param requestObj
      * @param returnTargClassOfT
      * @return
@@ -92,7 +96,9 @@ public class XxlJobRemotingUtil {
             connection.setRequestProperty("Content-Type", "application/json;charset=UTF-8");
             connection.setRequestProperty("Accept-Charset", "application/json;charset=UTF-8");
 
-            if(accessToken!=null && !accessToken.trim().isEmpty()){
+            if (accessToken != null && !accessToken.trim().isEmpty()) {
+                if (accessToken.contains(","))
+                    accessToken = accessToken.split(",")[0];
                 connection.setRequestProperty(XXL_JOB_ACCESS_TOKEN, accessToken);
             }
 
@@ -119,7 +125,7 @@ public class XxlJobRemotingUtil {
             // valid StatusCode
             int statusCode = connection.getResponseCode();
             if (statusCode != 200) {
-                return ReturnT.ofFail("xxl-job remoting fail, StatusCode("+ statusCode +") invalid. for url : " + url);
+                return ReturnT.ofFail("xxl-job remoting fail, StatusCode(" + statusCode + ") invalid. for url : " + url);
             }
 
             // result
@@ -136,13 +142,13 @@ public class XxlJobRemotingUtil {
                 ReturnT returnT = GsonTool.fromJson(resultJson, ReturnT.class, returnTargClassOfT);
                 return returnT;
             } catch (Exception e) {
-                logger.error("xxl-job remoting (url="+url+") response content invalid("+ resultJson +").", e);
-                return ReturnT.ofFail("xxl-job remoting (url="+url+") response content invalid("+ resultJson +").");
+                logger.error("xxl-job remoting (url=" + url + ") response content invalid(" + resultJson + ").", e);
+                return ReturnT.ofFail("xxl-job remoting (url=" + url + ") response content invalid(" + resultJson + ").");
             }
 
         } catch (Exception e) {
             logger.error(e.getMessage(), e);
-            return ReturnT.ofFail("xxl-job remoting error("+ e.getMessage() +"), for url : " + url);
+            return ReturnT.ofFail("xxl-job remoting error(" + e.getMessage() + "), for url : " + url);
         } finally {
             try {
                 if (dataOutputStream != null) {

@@ -30,6 +30,11 @@ const router = createRouter({
       path: '/log/list',
       name: 'log_list',
       component: () => import('../views/log/list.vue'),
+    },
+    {
+      path: '/user/perm',
+      name: 'user_perm',
+      component: () => import('../views/user/perm.vue'),
     }
   ],
 })
