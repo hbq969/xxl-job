@@ -8,6 +8,11 @@
 - [x] Mapper.xml规整下
 - [x] 国际化支持
 - [x] 合并字典数据查询
+- [x] 使用deploy/bootstrap/start.sh启动不行，直接使用java -jar可以
+- [ ] postgresql环境下，启动错误，操作接口时错误问题
+- [ ] 表结构字段长度问题
+- [ ] 不指定全路径mybatis扫描有问题
+- [ ] 研究下xxl-job的脚本调度方式
 - [ ] 报表页面开发
 - [ ] CRON组件
 - [ ] 自动注册和手工注册的表为什么不一样

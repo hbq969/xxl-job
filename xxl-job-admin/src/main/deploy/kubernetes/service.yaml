@@ -6,11 +6,12 @@ metadata:
   labels:
     app: aqyy-portal-login
 spec:
-  type: ClusterIP
+  type: NodePort
   sessionAffinity: None
   ports:
-    - port: 30630
-      targetPort: 30630
+    - port: 30635
+      targetPort: 30635
+      nodePort: 30635
       protocol: TCP
       name: restful
   selector:
@@ -45,30 +46,30 @@ spec:
           imagePullPolicy: Always
           livenessProbe:
             tcpSocket:
-              port: 30630
+              port: 30635
             initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 240
           readinessProbe:
             tcpSocket:
-              port: 30630
+              port: 30635
             initialDelaySeconds: 30
             periodSeconds: 5
             timeoutSeconds: 2
             failureThreshold: 240
           resources:
             requests:
-              cpu: '1'
+              cpu: '0.5'
               memory: 1Gi
             limits:
-              cpu: '1'
+              cpu: '0.5'
               memory: 1.5Gi
           volumeMounts:
             - mountPath: /opt/app/xxl-job-admin/logs
               name: app-logs
           ports:
-            - containerPort: 30630
+            - containerPort: 30635
           env:
             - name: spring_cloud_zookeeper_enabled
               value: "false"

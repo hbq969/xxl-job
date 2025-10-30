@@ -2,7 +2,7 @@
 import {
   Edit, ArrowLeft, Document, Operation
 } from '@element-plus/icons-vue'
-import {ref, reactive, onMounted} from 'vue'
+import {ref, reactive, onMounted, computed} from 'vue'
 import type {FormInstance, FormRules} from 'element-plus'
 import axios from '@/network'
 import {msg, notify} from '@/utils/Utils'
@@ -261,6 +261,9 @@ const showLogDrawer = (row: any) => {
     msg(err?.response.data.errorMessage, 'error')
   })
 }
+const formatLogDetail = computed(() => {
+  return logDetail.value.replace(/\n/g, '<br/>')
+})
 
 const drawer1 = ref(false)
 const drawerTitle1 = ref(langData.taskDetail)
@@ -383,11 +386,13 @@ const showJobInfoDrawer = (row: any) => {
                        align="center" width="80"/>
       <!--      <el-table-column prop="jobGroup" label="执行器ID" :show-overflow-tooltip="true" header-align="center"-->
       <!--                       align="center" width="80"/>-->
-      <el-table-column prop="executorAddress" :label="langData.executorAddress" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="executorAddress" :label="langData.executorAddress" :show-overflow-tooltip="true"
+                       header-align="center"
                        align="left"/>
       <el-table-column prop="executorHandler" label="jobHandler" :show-overflow-tooltip="true" header-align="center"
                        align="center"/>
-      <el-table-column prop="fmtTriggerCode" :label="langData.scheduleResult" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtTriggerCode" :label="langData.scheduleResult" :show-overflow-tooltip="true"
+                       header-align="center"
                        align="center" width="120">
         <template #default="scope">
           <el-tag v-if="scope.row.triggerCode==200 || scope.row.triggerCode==500"
@@ -399,9 +404,11 @@ const showJobInfoDrawer = (row: any) => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtTriggerTime" :label="langData.scheduleTime" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtTriggerTime" :label="langData.scheduleTime" :show-overflow-tooltip="true"
+                       header-align="center"
                        align="left"/>
-      <el-table-column prop="fmtHandleCode" :label="langData.executeResult" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtHandleCode" :label="langData.executeResult" :show-overflow-tooltip="true"
+                       header-align="center"
                        align="center" width="120">
         <template #default="scope">
           <el-tag v-if="scope.row.handleCode==200 || scope.row.handleCode==500"
@@ -413,7 +420,8 @@ const showJobInfoDrawer = (row: any) => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtHandleTime" :label="langData.executeTime" :show-overflow-tooltip="true" header-align="center"
+      <el-table-column prop="fmtHandleTime" :label="langData.executeTime" :show-overflow-tooltip="true"
+                       header-align="center"
                        align="left"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
@@ -429,7 +437,7 @@ const showJobInfoDrawer = (row: any) => {
         direction="ltr"
         size="60%"
     >
-      <p v-html="logDetail" style="font-size: 12px">
+      <p v-html="formatLogDetail" style="font-size: 12px">
       </p>
     </el-drawer>
 
@@ -440,7 +448,7 @@ const showJobInfoDrawer = (row: any) => {
         size="50%"
     >
       <el-form size="small" label-position="right" inline-message :inline="false" label-width="30%">
-        <el-divider content-position="left">{{langData.baseConfig}}</el-divider>
+        <el-divider content-position="left">{{ langData.baseConfig }}</el-divider>
         <el-form-item :label="langData.executor" prop="jobGroup">
           <el-select v-model="jobInfo.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                      filterable style="width: 100%" :remote-method="fetchJobGroup">
@@ -455,7 +463,7 @@ const showJobInfoDrawer = (row: any) => {
                     :placeholder="langData.alarmEmailPlaceholder"
                     :rows="2"/>
         </el-form-item>
-        <el-divider content-position="left">{{langData.scheduleConfig}}</el-divider>
+        <el-divider content-position="left">{{ langData.scheduleConfig }}</el-divider>
         <el-form-item :label="langData.scheduleType" prop="scheduleType">
           <el-select v-model="jobInfo.scheduleType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                      filterable style="width: 100%">
@@ -468,7 +476,7 @@ const showJobInfoDrawer = (row: any) => {
         <el-form-item :label="langData.fixedRate" prop="scheduleConf" v-if="jobInfo.scheduleType=='FIX_RATE'">
           <el-input v-model="jobInfo.scheduleConf" type="number" clearable placeholder="30"/>
         </el-form-item>
-        <el-divider content-position="left">{{langData.taskConfig}}</el-divider>
+        <el-divider content-position="left">{{ langData.taskConfig }}</el-divider>
         <el-form-item :label="langData.glueType" prop="glueType">
           <el-select v-model="jobInfo.glueType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                      filterable style="width: 100%">
@@ -551,7 +559,7 @@ const showJobInfoDrawer = (row: any) => {
     <template #footer>
               <span class="dialog-footer">
                 <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
-                <el-button type="primary" @click="updateLogClear(formRef)">{{ langData.btnSave }}</el-button>
+                <el-button type="warning" @click="updateLogClear(formRef)">{{ langData.btnConfirm }}</el-button>
               </span>
     </template>
   </el-dialog>
