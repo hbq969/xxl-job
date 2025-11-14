@@ -3,6 +3,7 @@ package com.xxl.job.admin.scheduler.conf;
 import com.xxl.job.admin.scheduler.alarm.JobAlarmer;
 import com.xxl.job.admin.scheduler.scheduler.XxlJobScheduler;
 import com.xxl.job.admin.mapper.*;
+import com.xxl.job.admin.service.impl.InitialServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.DisposableBean;
 import org.springframework.beans.factory.InitializingBean;
@@ -32,12 +33,20 @@ public class XxlJobAdminConfig implements InitializingBean, DisposableBean {
 
     private XxlJobScheduler xxlJobScheduler;
 
+    @Resource
+    private InitialServiceImpl initialService;
+
     @Override
     public void afterPropertiesSet() throws Exception {
         adminConfig = this;
-
-        xxlJobScheduler = new XxlJobScheduler();
-        xxlJobScheduler.init();
+        initialService.asyncScriptInitialDone(-1,null,()->{
+            xxlJobScheduler = new XxlJobScheduler();
+            try {
+                xxlJobScheduler.init();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
