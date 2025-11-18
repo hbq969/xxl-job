@@ -34,7 +34,7 @@ public class I18nUtil {
             String i18nFile = MessageFormat.format("i18n/message_{0}.properties", i18n);
 
             // load prop
-            Resource resource = new ClassPathResource(i18nFile);
+            Resource resource = new ClassPathResource(i18nFile, I18nUtil.class.getClassLoader());
             EncodedResource encodedResource = new EncodedResource(resource,"UTF-8");
             prop = PropertiesLoaderUtils.loadProperties(encodedResource);
         } catch (IOException e) {
