@@ -1,0 +1,16 @@
+spring:
+  cloud:
+    config:
+      h-dbc:
+        enabled: false
+        dbc-key: h-dbc
+        service-name: aqyy-gather-manage
+        profile-name: default
+        api:
+          basic-auth:
+            username: cloud-flare
+            password: 1
+          charset: utf-8
+          https: true
+          truststore-password: Yjc@201301
+          url: https://hdbc.for.host.internal:30170/h-dbc
