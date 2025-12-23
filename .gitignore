@@ -14,3 +14,4 @@ xxl-job-admin/src/main/resources/application-prod.yml
 xxl-job-admin/src/main/resources/application-me.yml
 xxl-job-admin/src/main/resources/bootstrap-test.yml
 xxl-job-admin/src/main/resources/bootstrap-prod.yml
+xxl-job-admin/src/main/resources/logback-prod.xml
