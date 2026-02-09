@@ -11,6 +11,7 @@ xxl-job-admin/src/main/resources/static/xxl-job-ui
 xxl-job-admin/src/main/resources/static/package-lock.json
 xxl-job-admin/src/main/resources/application-test.yml
 xxl-job-admin/src/main/resources/application-prod.yml
+xxl-job-admin/src/main/resources/application-gray.yml
 xxl-job-admin/src/main/resources/application-me.yml
 xxl-job-admin/src/main/resources/bootstrap-test.yml
 xxl-job-admin/src/main/resources/bootstrap-prod.yml
