@@ -175,10 +175,10 @@ const deleteExecutor = (row: any) => {
 <template>
   <div class="container">
     <el-form :model="form" size="small" label-position="right" inline-message inline>
-      <el-form-item :label="langData.appname" prop="appname">
+      <el-form-item :label="langData.appname" prop="appname" style="width: 180px">
         <el-input v-model="form.appname" type="text" clearable/>
       </el-form-item>
-      <el-form-item :label="langData.appDesc" prop="title">
+      <el-form-item :label="langData.appDesc" prop="title" style="width: 180px">
         <el-input v-model="form.title" type="text" clearable/>
       </el-form-item>
       <el-form-item>

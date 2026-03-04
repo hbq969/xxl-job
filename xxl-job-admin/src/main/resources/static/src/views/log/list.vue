@@ -297,7 +297,7 @@ const showJobInfoDrawer = (row: any) => {
     </el-page-header>
     <el-divider content-position="left" v-if="fromTaskListFlag"></el-divider>
     <el-form :model="form" size="small" label-position="right" inline-message :inline="true">
-      <el-form-item :label="langData.time" prop="time" size="small">
+      <el-form-item :label="langData.time" prop="time" size="small" style="width: 360px">
         <el-date-picker
             v-model="form.time"
             type="datetimerange"
@@ -308,7 +308,7 @@ const showJobInfoDrawer = (row: any) => {
             size="small"
         />
       </el-form-item>
-      <el-form-item :label="langData.executor" prop="jobGroup">
+      <el-form-item :label="langData.executor" prop="jobGroup" style="width: 180px">
         <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchJobGroup"
@@ -316,14 +316,14 @@ const showJobInfoDrawer = (row: any) => {
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
-      <el-form-item :label="langData.task" prop="jobId">
+      <el-form-item :label="langData.task" prop="jobId" style="width: 180px">
         <el-select v-model="form.jobId" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchTaskList">
           <el-option :key="item.id" :label="item.jobDesc" :value="item.id" v-for="item in taskList"/>
         </el-select>
       </el-form-item>
-      <el-form-item :label="langData.logStatus" prop="logStatus">
+      <el-form-item :label="langData.logStatus" prop="logStatus" style="width: 180px">
         <el-select v-model="form.logStatus" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    automatic-dropdown>

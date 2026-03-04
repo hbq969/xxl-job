@@ -384,27 +384,27 @@ const fetchJobGroup = (query: string) => {
 <template>
   <div class="container">
     <el-form :model="form" size="small" label-position="right" inline-message :inline="true">
-      <el-form-item :label="langData.executor" prop="jobGroup">
+      <el-form-item :label="langData.executor" prop="jobGroup" style="width: 180px">
         <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchJobGroup">
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
-      <el-form-item :label="langData.taskStatus" prop="triggerStatus">
+      <el-form-item :label="langData.taskStatus" prop="triggerStatus" style="width: 180px">
         <el-select v-model="form.triggerStatus" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    automatic-dropdown>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in triggerStatusList"/>
         </el-select>
       </el-form-item>
-      <el-form-item :label="langData.taskDesc" prop="jobDesc">
+      <el-form-item :label="langData.taskDesc" prop="jobDesc" style="width: 180px">
         <el-input v-model="form.jobDesc" type="text" clearable/>
       </el-form-item>
-      <el-form-item :label="langData.taskHandler" prop="executorHandler">
+      <el-form-item :label="langData.taskHandler" prop="executorHandler" style="width: 180px">
         <el-input v-model="form.executorHandler" type="text" clearable/>
       </el-form-item>
-      <el-form-item :label="langData.tableHeaderCreator" prop="author">
+      <el-form-item :label="langData.tableHeaderCreator" prop="author" style="width: 180px">
         <el-input v-model="form.author" type="text" clearable/>
       </el-form-item>
       <el-form-item>
