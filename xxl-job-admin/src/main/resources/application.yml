@@ -29,7 +29,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
   messages:
-    basename: i18n/message
+    basename: i18n/messages
     encoding: UTF-8
     enabled: true
   mvc:
