@@ -58,6 +58,7 @@ public class XxlJobServiceImpl implements XxlJobService {
     @Override
     public PageInfo<XxlJobInfo> pageList(int start, int length, Integer jobGroup, Integer triggerStatus, String jobDesc, String executorHandler, String author) {
 
+        logger.info("+++++++>>>> ");
         PageInfo<XxlJobInfo> pg = PageHelper.startPage(start, length)
                 .doSelectPageInfo(() -> xxlJobInfoMapper.pageList(start, length, jobGroup, triggerStatus, jobDesc, executorHandler, author));
         pg.getList().forEach(xi -> xi.convertDict(context));

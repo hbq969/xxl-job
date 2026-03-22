@@ -65,6 +65,12 @@ public class XxlJobInfo implements DictModel, DictAware {
     @Setter
     @Getter
     private String fmtTriggerNextTime;
+    @Setter
+    @Getter
+    private String groupTitle;
+    @Setter
+    @Getter
+    private String groupAddressList;
 
     @Override
     public void convertDict(SpringContext context) {

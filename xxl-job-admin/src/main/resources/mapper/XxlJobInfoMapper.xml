@@ -36,6 +36,8 @@
 		<result column="trigger_status" property="triggerStatus" />
 		<result column="trigger_last_time" property="triggerLastTime" />
 		<result column="trigger_next_time" property="triggerNextTime" />
+		<result column="title" property="groupTitle"/>
+		<result column="address_list" property="groupAddressList"/>
 	</resultMap>
 
 	<sql id="Base_Column_List">
@@ -66,9 +68,11 @@
 	</sql>
 
 	<select id="pageList" parameterType="java.util.HashMap" resultMap="XxlJobInfo">
-		SELECT <include refid="Base_Column_List" />
-		FROM xxl_job_info AS t
+		SELECT <include refid="Base_Column_List" />,
+		b.title,b.address_list
+		FROM xxl_job_info AS t, xxl_job_group b
 		<trim prefix="WHERE" prefixOverrides="AND | OR" >
+			AND t.job_group=b.id
 			<if test="jobGroup!=null and jobGroup gt 0">
 				AND t.job_group = #{jobGroup}
 			</if>

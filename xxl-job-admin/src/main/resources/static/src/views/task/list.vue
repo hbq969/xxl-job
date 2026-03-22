@@ -388,7 +388,7 @@ const fetchJobGroup = (query: string) => {
         <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%"
                    remote automatic-dropdown :remote-method="fetchJobGroup">
-          <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
+          <el-option :key="item.id" :label="item.title+' ('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
       <el-form-item :label="langData.taskStatus" prop="triggerStatus" style="width: 180px">
@@ -416,59 +416,37 @@ const fetchJobGroup = (query: string) => {
     <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
               size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle">
       <!--      <el-table-column type="selection" header-align="center" align="center"/>-->
-      <el-table-column fixed="left" :label="langData.tableHeaderOp" width="200" header-align="center" align="center">
+      <el-table-column fixed="left" :label="langData.tableHeaderOp" width="100" header-align="center" align="center">
         <template #default="scope">
-          <el-icon @click="showEditTaskDialog(scope.row)" color="#3F9EFF" style="cursor: pointer; margin-left: 10px"
-                   :size="14">
-            <Edit/>
-          </el-icon>
-          <el-popconfirm :title="langData.confirmDelete" @confirm="deleteTask(scope.row)"
-                         icon-color="red"
-                         confirm-button-type="danger">
+          <el-icon @click="showEditTaskDialog(scope.row)" color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14"><Edit/></el-icon>
+          <el-popconfirm :title="langData.confirmDelete" @confirm="deleteTask(scope.row)" icon-color="red" confirm-button-type="danger">
             <template #reference>
-              <el-icon color="red" style="cursor: pointer; margin-left: 10px" :size="14">
-                <Delete/>
-              </el-icon>
+              <el-icon color="red" style="cursor: pointer; margin-left: 10px" :size="14"><Delete/></el-icon>
             </template>
           </el-popconfirm>
-          <el-popconfirm :title="langData.confirmOpera" @confirm="startTask(scope.row)"
-                         icon-color="red"
-                         confirm-button-type="danger" v-if="scope.row.triggerStatus==0">
+          <el-popconfirm :title="langData.confirmOpera" @confirm="startTask(scope.row)" icon-color="red" confirm-button-type="danger" v-if="scope.row.triggerStatus==0">
             <template #reference>
-              <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.startTask">
-                <VideoPlay/>
-              </el-icon>
+              <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.startTask"><VideoPlay/></el-icon>
             </template>
           </el-popconfirm>
-          <el-popconfirm :title="langData.confirmOpera" @confirm="stopTask(scope.row)"
-                         icon-color="red"
-                         confirm-button-type="danger" v-if="scope.row.triggerStatus==1">
+          <el-popconfirm :title="langData.confirmOpera" @confirm="stopTask(scope.row)" icon-color="red" confirm-button-type="danger" v-if="scope.row.triggerStatus==1">
             <template #reference>
-              <el-icon color="orange" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.stopTask">
-                <VideoPause/>
-              </el-icon>
+              <el-icon color="orange" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.stopTask"><VideoPause/></el-icon>
             </template>
           </el-popconfirm>
-          <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.copyTask"
-                   @click="copyTask(scope.row)">
-            <DocumentCopy/>
-          </el-icon>
-          <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.runImmediate"
-                   @click="showImmediateTaskDialog(scope.row)">
+          <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.copyTask" @click="copyTask(scope.row)"><DocumentCopy/></el-icon>
+          <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.runImmediate" @click="showImmediateTaskDialog(scope.row)">
             <template #default>
-              <svg t="1761619792188" class="icon" viewBox="0 0 1024 1024" version="1.1"
-                   xmlns="http://www.w3.org/2000/svg" p-id="4669" width="32" height="32">
+              <svg t="1761619792188" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4669" width="32" height="32">
                 <path
                     d="M317.9 80.6l531.7 354.5c25.7 17.2 41.2 46 41.2 76.9 0 30.9-15.4 59.8-41.2 76.9L317.9 943.4c-28.4 18.9-64.9 20.7-95 4.6-30.1-16.1-48.9-47.5-48.8-81.7V157.6c0-34.1 18.7-65.5 48.8-81.6 30.1-16.2 66.6-14.4 95 4.6z m-38.5 57.7c-7.1-4.7-16.2-5.2-23.7-1.1s-12.2 11.9-12.2 20.4v708.8c0 8.5 4.7 16.4 12.2 20.4 7.5 4 16.7 3.6 23.7-1.2l531.7-354.4c6.4-4.3 10.3-11.5 10.3-19.3 0-7.7-3.9-15-10.3-19.2L279.4 138.3zM440 454.2h-87.7c-4.7 0-8.9-2.8-10.7-7.1-1.8-4.3-0.8-9.3 2.5-12.6l95.9-95.9h57.8v346.9H440V454.2z m0 0"
                     fill="#1296db" p-id="4670"></path>
               </svg>
             </template>
           </el-icon>
-          <el-icon @click="toTaskLogList(scope.row)" style="cursor: pointer; margin-left: 10px" :size="14"
-                   :title="langData.detailTaskLog">
+          <el-icon @click="toTaskLogList(scope.row)" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.detailTaskLog">
             <template #default>
-              <svg t="1761632063541" class="icon" viewBox="0 0 1024 1024" version="1.1"
-                   xmlns="http://www.w3.org/2000/svg" p-id="5500" width="32" height="32">
+              <svg t="1761632063541" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5500" width="32" height="32">
                 <path
                     d="M768 960H256A106.666667 106.666667 0 0 1 149.333333 853.333333V170.666667A106.666667 106.666667 0 0 1 256 64h512A106.666667 106.666667 0 0 1 874.666667 170.666667v682.666666a106.666667 106.666667 0 0 1-106.666667 106.666667zM256 106.666667c-35.413333 0-64 28.586667-64 64v682.666666c0 35.413333 28.586667 64 64 64h512c35.413333 0 64-28.586667 64-64V170.666667c0-35.413333-28.586667-64-64-64H256z"
                     fill="#666666" p-id="5501"></path>
@@ -480,37 +458,25 @@ const fetchJobGroup = (query: string) => {
           </el-icon>
         </template>
       </el-table-column>
-      <el-table-column prop="id" :label="langData.taskId" :show-overflow-tooltip="true" header-align="center"
-                       align="center" width="80"/>
-      <el-table-column prop="jobDesc" :label="langData.taskDesc" :show-overflow-tooltip="true" header-align="center"
-                       align="left"/>
-      <el-table-column prop="scheduleType" :label="langData.scheduleType" :show-overflow-tooltip="true" header-align="center"
-                       align="left"
-                       :formatter="(row: any, column: any, cellValue: any, index: number)=>row.scheduleType+': '+row.scheduleConf"/>
-      <el-table-column prop="glueType" :label="langData.glueType" :show-overflow-tooltip="true" header-align="center"
-                       align="left"
-                       :formatter="(row: any, column: any, cellValue: any, index: number)=>row.glueType+': '+row.executorHandler"
-                       width="300"/>
-      <el-table-column prop="author" :label="langData.tableHeaderCreator" :show-overflow-tooltip="true" header-align="center"
-                       align="center" width="100"/>
-      <el-table-column prop="fmtTriggerStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center"
-                       align="center" w="80">
+      <el-table-column prop="id" :label="langData.taskId" :show-overflow-tooltip="true" header-align="center" align="center" width="80"/>
+      <el-table-column prop="jobDesc" :label="langData.taskDesc" :show-overflow-tooltip="true" header-align="center" align="left" width="150"/>
+      <el-table-column prop="scheduleType" :label="langData.scheduleType" :show-overflow-tooltip="true" header-align="center" align="left"
+                       :formatter="(row: any, column: any, cellValue: any, index: number)=>row.scheduleType+': '+row.scheduleConf" width="150"/>
+      <el-table-column prop="glueType" :label="langData.glueType" :show-overflow-tooltip="true" header-align="center" align="left"
+                       :formatter="(row: any, column: any, cellValue: any, index: number)=>row.glueType+': '+row.executorHandler"/>
+      <el-table-column prop="title" :label="langData.executor" :show-overflow-tooltip="true" header-align="center" align="left"
+                       :formatter="(row: any, column: any, cellValue: any, index: number)=>row.groupTitle+' ('+row.groupAddressList+')'"/>
+      <el-table-column prop="fmtTriggerStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center" align="center" w="80">
         <template #default="scope">
-          <el-tag
-              :type="scope.row.triggerStatus==0?'info':'success'"
-              effect="plain"
-          >
+          <el-tag :type="scope.row.triggerStatus==0?'info':'success'" effect="plain">
             {{ scope.row.fmtTriggerStatus }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtTriggerLastTime" :label="langData.triggerLastTime" :show-overflow-tooltip="true"
-                       header-align="center"
-                       align="center"/>
-      <el-table-column prop="fmtTriggerNextTime" :label="langData.triggerNextTime" :show-overflow-tooltip="true"
-                       header-align="center"
-                       align="center"/>
-
+      <el-table-column prop="fmtUpdateTime" :label="langData.tableHeaderUpdateTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
+      <el-table-column prop="author" :label="langData.tableHeaderCreator" :show-overflow-tooltip="true" header-align="center" align="center" width="100"/>
+      <el-table-column prop="fmtTriggerLastTime" :label="langData.triggerLastTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
+      <el-table-column prop="fmtTriggerNextTime" :label="langData.triggerNextTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
@@ -557,7 +523,7 @@ const fetchJobGroup = (query: string) => {
       <el-form-item :label="langData.executor" prop="jobGroup">
         <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
                    filterable style="width: 100%" :remote-method="fetchJobGroup">
-          <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
+          <el-option :key="item.id" :label="item.title+'('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
       <el-form-item :label="langData.taskDesc" prop="jobDesc">
