@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import {
-  Edit, ArrowLeft, Plus, Delete, VideoPause, VideoPlay, DocumentCopy
+  Edit, ArrowLeft, Plus, Delete, VideoPause, VideoPlay, DocumentCopy, Setting
 } from '@element-plus/icons-vue'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
@@ -50,6 +50,12 @@ onMounted(() => {
 const headerCellStyle = () => {
   // 添加表头颜色
   return {backgroundColor: '#f5f5f5', color: '#333', fontWeight: 'bold'};
+}
+
+const multipleTableRef = ref<TableInstance>()
+const selectedCount = ref(0)
+const handleSelectionChange = (rows: any[]) => {
+  selectedCount.value = rows.length
 }
 
 const debounce = (callback: (...args: any[]) => void, delay: number) => {
@@ -379,6 +385,64 @@ const fetchJobGroup = (query: string) => {
   })
 }
 
+const getSelectedIds = (): number[] => {
+  return multipleTableRef.value?.getSelectionRows().map((row: any) => row.id) || []
+}
+
+const executeBatchAction = (url: string, ids: number[], onSuccess?: () => void) => {
+  axios({
+    url,
+    method: 'post',
+    data: ids
+  }).then((res: any) => {
+    if (res.data.state == 'OK') {
+      msg(res.data.body, 'success')
+      query()
+      if (onSuccess) onSuccess()
+    } else {
+      msg(res.data.errorMessage, 'warning')
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(err?.response.data.errorMessage, 'error')
+  })
+}
+
+const batchStartTasks = () => executeBatchAction('/jobinfo/batchStart', getSelectedIds())
+const batchStopTasks = () => executeBatchAction('/jobinfo/batchStop', getSelectedIds())
+
+const batchExecutorDialogVisible = ref(false)
+const batchExecutorForm = reactive({ jobGroup: null as number | null })
+
+const showBatchModifyExecutorDialog = () => {
+  batchExecutorForm.jobGroup = null
+  batchExecutorDialogVisible.value = true
+}
+
+const batchUpdateJobGroup = () => {
+  if (!batchExecutorForm.jobGroup) {
+    msg(langData.pleaseSelectExecutor, 'warning')
+    return
+  }
+  const ids = getSelectedIds()
+  axios({
+    url: '/jobinfo/batchUpdateJobGroup',
+    method: 'post',
+    data: { ids, jobGroup: batchExecutorForm.jobGroup }
+  }).then((res: any) => {
+    if (res.data.state == 'OK') {
+      msg(res.data.body, 'success')
+      batchExecutorDialogVisible.value = false
+      query()
+    } else {
+      msg(res.data.errorMessage, 'warning')
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(err?.response.data.errorMessage, 'error')
+  })
+}
+
 </script>
 
 <template>
@@ -413,9 +477,33 @@ const fetchJobGroup = (query: string) => {
       </el-form-item>
     </el-form>
 
+    <div style="display: flex;justify-content: flex-start; margin-bottom: 5px">
+      <template v-if="selectedCount">
+        <el-popconfirm :title="langData.confirmOpera" @confirm="batchStartTasks" confirm-button-type="warning">
+          <template #reference>
+            <el-icon color="#67C23A" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
+          </template>
+        </el-popconfirm>
+        <el-popconfirm :title="langData.confirmOpera" @confirm="batchStopTasks" confirm-button-type="warning">
+          <template #reference>
+            <el-icon color="#E6A23C" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
+          </template>
+        </el-popconfirm>
+      </template>
+      <template v-else>
+        <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
+        <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
+      </template>
+      <el-icon v-if="selectedCount" color="#3F9EFF" style="cursor: pointer; margin-left: 5px" :size="18"
+               :title="langData.batchModifyExecutor" @click="showBatchModifyExecutorDialog"><Setting/></el-icon>
+      <el-icon v-else color="#C0C4CC" style="margin-left: 5px" :size="18"
+               :title="langData.batchModifyExecutor"><Setting/></el-icon>
+    </div>
+
     <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
-              size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle">
-      <!--      <el-table-column type="selection" header-align="center" align="center"/>-->
+              size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle" ref="multipleTableRef"
+              @selection-change="handleSelectionChange">
+      <el-table-column type="selection" header-align="center" align="center"/>
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="100" header-align="center" align="center">
         <template #default="scope">
           <el-icon @click="showEditTaskDialog(scope.row)" color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14"><Edit/></el-icon>
@@ -603,6 +691,21 @@ const fetchJobGroup = (query: string) => {
       </el-form-item>
     </el-form>
   </el-drawer>
+
+  <el-dialog v-model="batchExecutorDialogVisible" :title="langData.batchModifyExecutor" draggable width="30%">
+    <el-form :model="batchExecutorForm" label-position="right" size="small" label-width="20%">
+      <el-form-item :label="langData.executor" prop="jobGroup">
+        <el-select v-model="batchExecutorForm.jobGroup" :placeholder="langData.formSelectPlaceholder"
+                   size="small" clearable filterable style="width: 100%"
+                   remote automatic-dropdown :remote-method="fetchJobGroup">
+          <el-option :key="item.id" :label="item.title+' ('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <el-button type="primary" size="small" @click="batchUpdateJobGroup">{{ langData.btnSave }}</el-button>
+    </template>
+  </el-dialog>
 </template>
 
 <style scoped>

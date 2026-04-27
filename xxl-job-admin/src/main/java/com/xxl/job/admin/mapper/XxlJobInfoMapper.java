@@ -4,6 +4,7 @@ import com.xxl.job.admin.model.XxlJobInfo;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.Date;
 import java.util.List;
 
 
@@ -62,5 +63,7 @@ public interface XxlJobInfoMapper {
 	public int scheduleUpdate(XxlJobInfo xxlJobInfo);
 
 	List<XxlJobInfo> findJobInfoByGroupId(@Param("groupId") Integer groupId);
+
+	int batchUpdateJobGroup(@Param("ids") List<Integer> ids, @Param("jobGroup") Integer jobGroup, @Param("updateTime") Date updateTime);
 
 }

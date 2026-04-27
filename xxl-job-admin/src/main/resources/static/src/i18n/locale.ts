@@ -105,7 +105,10 @@ const locale: any = {
         "cleanWay":"清理方式",
         "permConfig":"权限配置",
         "username":"用户名",
-        "roleName":"角色名"
+        "roleName":"角色名",
+        "batchStartTask":"批量启动",
+        "batchStopTask":"批量停止",
+        "batchModifyExecutor":"批量修改执行器"
     },
     'en-US': {
         "axiosRequestCallKey": "Call",
@@ -212,7 +215,10 @@ const locale: any = {
         "cleanWay":"Cleanup method",
         "permConfig":"Permission Configuration",
         "username":"Username",
-        "roleName":"Role Name"
+        "roleName":"Role Name",
+        "batchStartTask":"Batch Start",
+        "batchStopTask":"Batch Stop",
+        "batchModifyExecutor":"Batch Modify Executor"
     },
     'ja-JP': {
         "axiosRequestCallKey": "電話",
@@ -320,7 +326,10 @@ const locale: any = {
         "cleanWay":"クリーンアップ方法",
         "permConfig":"権限設定",
         "username":"ユーザー名",
-        "roleName":"ロール名"
+        "roleName":"ロール名",
+        "batchStartTask":"バッチ開始",
+        "batchStopTask":"バッチ停止",
+        "batchModifyExecutor":"バッチ実行器変更"
     }
 }
 

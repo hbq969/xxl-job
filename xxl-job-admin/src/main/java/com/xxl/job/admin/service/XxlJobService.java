@@ -9,6 +9,7 @@ import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.sso.core.model.LoginInfo;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -99,5 +100,11 @@ public interface XxlJobService {
 	 * @return
 	 */
 	public ReturnT<Map<String,Object>> chartInfo(Date startDate, Date endDate);
+
+	ReturnMessage<String> batchStart(List<Integer> ids, LoginInfo loginInfo);
+
+	ReturnMessage<String> batchStop(List<Integer> ids, LoginInfo loginInfo);
+
+	ReturnMessage<String> batchUpdateJobGroup(List<Integer> ids, Integer jobGroup);
 
 }

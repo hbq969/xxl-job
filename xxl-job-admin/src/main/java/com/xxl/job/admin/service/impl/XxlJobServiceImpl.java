@@ -490,4 +490,40 @@ public class XxlJobServiceImpl implements XxlJobService {
         return ReturnT.ofSuccess(result);
     }
 
+    @Override
+    public ReturnMessage<String> batchStart(List<Integer> ids, LoginInfo loginInfo) {
+        int failCount = 0;
+        for (Integer id : ids) {
+            ReturnMessage<String> result = start(id, loginInfo);
+            if (!"OK".equals(result.getState())) {
+                logger.warn("批量启动任务失败, id: {}", id);
+                failCount++;
+            }
+        }
+        return ReturnMessage.success("批量启动完成，成功" + (ids.size() - failCount) + "个");
+    }
+
+    @Override
+    public ReturnMessage<String> batchStop(List<Integer> ids, LoginInfo loginInfo) {
+        int failCount = 0;
+        for (Integer id : ids) {
+            ReturnMessage<String> result = stop(id, loginInfo);
+            if (!"OK".equals(result.getState())) {
+                logger.warn("批量停止任务失败, id: {}", id);
+                failCount++;
+            }
+        }
+        return ReturnMessage.success("批量停止完成，成功" + (ids.size() - failCount) + "个");
+    }
+
+    @Override
+    public ReturnMessage<String> batchUpdateJobGroup(List<Integer> ids, Integer jobGroup) {
+        XxlJobGroup group = xxlJobGroupMapper.load(jobGroup);
+        if (group == null) {
+            return ReturnMessage.fail("执行器不存在");
+        }
+        xxlJobInfoMapper.batchUpdateJobGroup(ids, jobGroup, new Date());
+        return ReturnMessage.success("批量修改执行器成功");
+    }
+
 }

@@ -206,4 +206,36 @@ public class JobInfoController {
         return ReturnMessage.success(xxlJobService.queryJobInfo(id));
     }
 
+    @Operation(summary = "批量启动任务")
+    @RequestMapping(path = "/batchStart", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "batchStart", apiDesc = "批量启动任务")
+    public ReturnMessage<String> batchStart(@RequestBody List<Integer> ids) {
+        return xxlJobService.batchStart(ids, null);
+    }
+
+    @Operation(summary = "批量停止任务")
+    @RequestMapping(path = "/batchStop", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "batchStop", apiDesc = "批量停止任务")
+    public ReturnMessage<String> batchStop(@RequestBody List<Integer> ids) {
+        return xxlJobService.batchStop(ids, null);
+    }
+
+    @Operation(summary = "批量修改任务执行器")
+    @RequestMapping(path = "/batchUpdateJobGroup", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "batchUpdateJobGroup", apiDesc = "批量修改任务执行器")
+    public ReturnMessage<String> batchUpdateJobGroup(@RequestBody Map<String, Object> params) {
+        List<Integer> ids = (List<Integer>) params.get("ids");
+        Integer jobGroup = (Integer) params.get("jobGroup");
+        if (CollectionTool.isEmpty(ids)) {
+            return ReturnMessage.fail("请选择至少一条记录");
+        }
+        if (jobGroup == null) {
+            return ReturnMessage.fail(I18nUtil.getString("system_please_choose") + I18nUtil.getString("jobinfo_field_jobgroup"));
+        }
+        return xxlJobService.batchUpdateJobGroup(ids, jobGroup);
+    }
+
 }

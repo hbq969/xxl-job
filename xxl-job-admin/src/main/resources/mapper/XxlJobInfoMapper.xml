@@ -249,4 +249,14 @@
         FROM xxl_job_info AS t
         WHERE t.job_group = #{groupId}
     </select>
+
+		<update id="batchUpdateJobGroup">
+			UPDATE xxl_job_info
+			SET job_group = #{jobGroup}, update_time = #{updateTime}
+			WHERE id IN
+			<foreach collection="ids" item="id" open="(" separator="," close=")">
+				#{id}
+			</foreach>
+		</update>
+
 </mapper>
