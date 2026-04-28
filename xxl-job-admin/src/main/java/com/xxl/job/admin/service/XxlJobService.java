@@ -7,6 +7,8 @@ import com.xxl.job.admin.model.XxlJobInfo;
 import com.xxl.job.admin.model.XxlJobUser;
 import com.xxl.job.core.biz.model.ReturnT;
 import com.xxl.sso.core.model.LoginInfo;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Date;
 import java.util.List;
@@ -105,6 +107,14 @@ public interface XxlJobService {
 
 	ReturnMessage<String> batchStop(List<Integer> ids, LoginInfo loginInfo);
 
+	ReturnMessage<String> batchDelete(List<Integer> ids, LoginInfo loginInfo);
+
 	ReturnMessage<String> batchUpdateJobGroup(List<Integer> ids, Integer jobGroup);
+
+	ReturnMessage<String> importJobs(MultipartFile file, LoginInfo loginInfo);
+
+	void exportJobs(XxlJobInfo query, HttpServletResponse response);
+
+	void downloadTemplate(HttpServletResponse response);
 
 }

@@ -31,6 +31,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.*;
 
@@ -222,6 +224,14 @@ public class JobInfoController {
         return xxlJobService.batchStop(ids, null);
     }
 
+    @Operation(summary = "批量删除任务")
+    @RequestMapping(path = "/batchDelete", method = RequestMethod.POST)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "batchDelete", apiDesc = "批量删除任务")
+    public ReturnMessage<String> batchDelete(@RequestBody List<Integer> ids) {
+        return xxlJobService.batchDelete(ids, null);
+    }
+
     @Operation(summary = "批量修改任务执行器")
     @RequestMapping(path = "/batchUpdateJobGroup", method = RequestMethod.POST)
     @ResponseBody
@@ -236,6 +246,28 @@ public class JobInfoController {
             return ReturnMessage.fail(I18nUtil.getString("system_please_choose") + I18nUtil.getString("jobinfo_field_jobgroup"));
         }
         return xxlJobService.batchUpdateJobGroup(ids, jobGroup);
+    }
+
+    @Operation(summary = "导入任务数据")
+    @RequestMapping(path = "/import", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseBody
+    @SMRequiresPermissions(menu = "task_list", apiKey = "importJobs", apiDesc = "导入任务数据")
+    public ReturnMessage<String> importJobs(@RequestParam("file") MultipartFile file) {
+        return xxlJobService.importJobs(file, null);
+    }
+
+    @Operation(summary = "导出任务数据")
+    @RequestMapping(path = "/export", method = RequestMethod.POST)
+    @SMRequiresPermissions(menu = "task_list", apiKey = "exportJobs", apiDesc = "导出任务数据")
+    public void exportJobs(@RequestBody XxlJobInfo query, HttpServletResponse response) {
+        xxlJobService.exportJobs(query, response);
+    }
+
+    @Operation(summary = "下载导入模版")
+    @RequestMapping(path = "/template", method = RequestMethod.GET)
+    @SMRequiresPermissions(menu = "task_list", apiKey = "downloadTemplate", apiDesc = "下载导入模版")
+    public void downloadTemplate(HttpServletResponse response) {
+        xxlJobService.downloadTemplate(response);
     }
 
 }

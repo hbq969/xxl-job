@@ -27,11 +27,16 @@ import com.xxl.job.core.glue.GlueTypeEnum;
 import com.xxl.job.core.util.DateUtil;
 import com.xxl.sso.core.model.LoginInfo;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.*;
 
@@ -76,8 +81,11 @@ public class XxlJobServiceImpl implements XxlJobService {
 
     @Override
     public ReturnMessage<String> add(XxlJobInfo jobInfo, LoginInfo loginInfo) {
-
         jobInfo.setAuthor(UserContext.get().getUserName());
+        return doAdd(jobInfo);
+    }
+
+    private ReturnMessage<String> doAdd(XxlJobInfo jobInfo) {
         // valid base
         XxlJobGroup group = xxlJobGroupMapper.load(jobInfo.getJobGroup());
         if (group == null) {
@@ -173,7 +181,12 @@ public class XxlJobServiceImpl implements XxlJobService {
             return ReturnMessage.fail((I18nUtil.getString("jobinfo_field_add") + I18nUtil.getString("system_fail")));
         }
 
-        return ReturnMessage.success(I18nUtils.getMessage(context, "save.result"));
+        String successMsg = I18nUtils.getMessage(context, "save.result");
+        if (successMsg == null) {
+            successMsg = "保存成功";
+            logger.warn("save.result 未获取到国际化消息, 使用默认消息, context={}", context);
+        }
+        return ReturnMessage.success(successMsg);
     }
 
     private boolean isNumeric(String str) {
@@ -517,6 +530,19 @@ public class XxlJobServiceImpl implements XxlJobService {
     }
 
     @Override
+    public ReturnMessage<String> batchDelete(List<Integer> ids, LoginInfo loginInfo) {
+        int failCount = 0;
+        for (Integer id : ids) {
+            ReturnMessage<String> result = remove(id, loginInfo);
+            if (!"OK".equals(result.getState())) {
+                logger.warn("批量删除任务失败, id: {}", id);
+                failCount++;
+            }
+        }
+        return ReturnMessage.success("批量删除完成，成功" + (ids.size() - failCount) + "个");
+    }
+
+    @Override
     public ReturnMessage<String> batchUpdateJobGroup(List<Integer> ids, Integer jobGroup) {
         XxlJobGroup group = xxlJobGroupMapper.load(jobGroup);
         if (group == null) {
@@ -524,6 +550,222 @@ public class XxlJobServiceImpl implements XxlJobService {
         }
         xxlJobInfoMapper.batchUpdateJobGroup(ids, jobGroup, new Date());
         return ReturnMessage.success("批量修改执行器成功");
+    }
+
+    private static final String[] CSV_HEADERS = {
+            "jobGroup", "jobDesc", "author", "alarmEmail", "scheduleType", "scheduleConf",
+            "misfireStrategy", "executorRouteStrategy", "executorHandler", "executorParam",
+            "executorBlockStrategy", "executorTimeout", "executorFailRetryCount",
+            "glueType", "glueSource", "glueRemark", "childJobId"
+    };
+
+    private static final String CSV_CONTENT_TYPE = "text/csv;charset=UTF-8";
+
+    private XxlJobInfo parseCsvRow(String[] headers, String[] fields) {
+        XxlJobInfo jobInfo = new XxlJobInfo();
+        for (int i = 0; i < headers.length && i < fields.length; i++) {
+            String value = fields[i].trim();
+            if (value.isEmpty()) continue;
+            switch (headers[i]) {
+                case "jobGroup": jobInfo.setJobGroup(Integer.parseInt(value)); break;
+                case "jobDesc": jobInfo.setJobDesc(value); break;
+                case "author": jobInfo.setAuthor(value); break;
+                case "alarmEmail": jobInfo.setAlarmEmail(value); break;
+                case "scheduleType": jobInfo.setScheduleType(value); break;
+                case "scheduleConf": jobInfo.setScheduleConf(value); break;
+                case "misfireStrategy": jobInfo.setMisfireStrategy(value); break;
+                case "executorRouteStrategy": jobInfo.setExecutorRouteStrategy(value); break;
+                case "executorHandler": jobInfo.setExecutorHandler(value); break;
+                case "executorParam": jobInfo.setExecutorParam(value); break;
+                case "executorBlockStrategy": jobInfo.setExecutorBlockStrategy(value); break;
+                case "executorTimeout": jobInfo.setExecutorTimeout(Integer.parseInt(value)); break;
+                case "executorFailRetryCount": jobInfo.setExecutorFailRetryCount(Integer.parseInt(value)); break;
+                case "glueType": jobInfo.setGlueType(value); break;
+                case "glueSource": jobInfo.setGlueSource(value); break;
+                case "glueRemark": jobInfo.setGlueRemark(value); break;
+                case "childJobId": jobInfo.setChildJobId(value); break;
+            }
+        }
+        return jobInfo;
+    }
+
+    private String[] splitCsvLine(String line) {
+        List<String> fields = new ArrayList<>();
+        boolean inQuotes = false;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < line.length(); i++) {
+            char c = line.charAt(i);
+            if (inQuotes) {
+                if (c == '"') {
+                    if (i + 1 < line.length() && line.charAt(i + 1) == '"') {
+                        sb.append('"');
+                        i++;
+                    } else {
+                        inQuotes = false;
+                    }
+                } else {
+                    sb.append(c);
+                }
+            } else {
+                if (c == '"') {
+                    inQuotes = true;
+                } else if (c == ',') {
+                    fields.add(sb.toString());
+                    sb = new StringBuilder();
+                } else {
+                    sb.append(c);
+                }
+            }
+        }
+        fields.add(sb.toString());
+        return fields.toArray(new String[0]);
+    }
+
+    private String escapeCsvField(String field) {
+        if (field == null) return "";
+        if (field.contains(",") || field.contains("\"") || field.contains("\n") || field.contains("\r")) {
+            return "\"" + field.replace("\"", "\"\"") + "\"";
+        }
+        return field;
+    }
+
+    private String buildCsvLine(String[] fields) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < fields.length; i++) {
+            if (i > 0) sb.append(",");
+            sb.append(escapeCsvField(fields[i]));
+        }
+        return sb.toString();
+    }
+
+    private String getFieldValue(XxlJobInfo ji, String fieldName) {
+        switch (fieldName) {
+            case "jobGroup": return String.valueOf(ji.getJobGroup());
+            case "jobDesc": return ji.getJobDesc();
+            case "author": return ji.getAuthor();
+            case "alarmEmail": return ji.getAlarmEmail();
+            case "scheduleType": return ji.getScheduleType();
+            case "scheduleConf": return ji.getScheduleConf();
+            case "misfireStrategy": return ji.getMisfireStrategy();
+            case "executorRouteStrategy": return ji.getExecutorRouteStrategy();
+            case "executorHandler": return ji.getExecutorHandler();
+            case "executorParam": return ji.getExecutorParam();
+            case "executorBlockStrategy": return ji.getExecutorBlockStrategy();
+            case "executorTimeout": return String.valueOf(ji.getExecutorTimeout());
+            case "executorFailRetryCount": return String.valueOf(ji.getExecutorFailRetryCount());
+            case "glueType": return ji.getGlueType();
+            case "glueSource": return ji.getGlueSource();
+            case "glueRemark": return ji.getGlueRemark();
+            case "childJobId": return ji.getChildJobId();
+            default: return "";
+        }
+    }
+
+    @Override
+    public ReturnMessage<String> importJobs(MultipartFile file, LoginInfo loginInfo) {
+        if (file.isEmpty()) {
+            return ReturnMessage.fail("导入文件为空");
+        }
+        int successCount = 0;
+        int failCount = 0;
+        StringBuilder errors = new StringBuilder();
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream(), StandardCharsets.UTF_8))) {
+            String headerLine = br.readLine();
+            if (headerLine == null) {
+                return ReturnMessage.fail("导入文件无内容");
+            }
+            String[] headers = splitCsvLine(headerLine);
+            String line;
+            int rowNum = 1;
+            while ((line = br.readLine()) != null) {
+                rowNum++;
+                if (line.trim().isEmpty()) continue;
+                try {
+                    String[] fields = splitCsvLine(line);
+                    XxlJobInfo jobInfo = parseCsvRow(headers, fields);
+                    if (jobInfo.getJobGroup() < 1) {
+                        failCount++;
+                        errors.append(String.format("第%d行: 执行器ID不能为空; ", rowNum));
+                        continue;
+                    }
+                    if (jobInfo.getJobDesc() == null || jobInfo.getJobDesc().trim().isEmpty()) {
+                        failCount++;
+                        errors.append(String.format("第%d行: 任务描述不能为空; ", rowNum));
+                        continue;
+                    }
+                    if (jobInfo.getScheduleType() == null || jobInfo.getScheduleType().trim().isEmpty()) {
+                        failCount++;
+                        errors.append(String.format("第%d行: 调度类型不能为空; ", rowNum));
+                        continue;
+                    }
+                    ReturnMessage<String> result = doAdd(jobInfo);
+                    String errMsg = result.getErrorMessage();
+                    if (errMsg == null || errMsg.isEmpty()) {
+                        successCount++;
+                    } else {
+                        failCount++;
+                        errors.append(String.format("第%d行: %s; ", rowNum, errMsg));
+                    }
+                } catch (Exception e) {
+                    failCount++;
+                    String errMsg = e.getMessage();
+                    if (errMsg == null || errMsg.isEmpty()) {
+                        errMsg = e.getClass().getSimpleName();
+                    }
+                    errors.append(String.format("第%d行: %s; ", rowNum, errMsg));
+                }
+            }
+        } catch (Exception e) {
+            logger.error("导入任务数据失败", e);
+            return ReturnMessage.fail("导入失败: " + e.getMessage());
+        }
+        String msg = String.format("导入完成，成功%d条，失败%d条", successCount, failCount);
+        if (failCount > 0) {
+            msg += "。失败详情: " + errors.toString();
+        }
+        return ReturnMessage.success(msg);
+    }
+
+    @Override
+    public void exportJobs(XxlJobInfo query, HttpServletResponse response) {
+        List<XxlJobInfo> list = xxlJobInfoMapper.pageList(0, Integer.MAX_VALUE,
+                query.getJobGroup(),
+                query.getTriggerStatus(),
+                query.getJobDesc(),
+                query.getExecutorHandler(),
+                query.getAuthor());
+        try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
+            response.setContentType(CSV_CONTENT_TYPE);
+            response.setHeader("Content-Disposition", "attachment;filename=" +
+                    URLEncoder.encode("xxl-job任务数据.csv", StandardCharsets.UTF_8));
+            // BOM for Excel UTF-8 recognition
+            osw.write('\ufeff');
+            osw.write(buildCsvLine(CSV_HEADERS) + "\n");
+            for (XxlJobInfo ji : list) {
+                String[] fields = new String[CSV_HEADERS.length];
+                for (int i = 0; i < CSV_HEADERS.length; i++) {
+                    fields[i] = getFieldValue(ji, CSV_HEADERS[i]);
+                }
+                osw.write(buildCsvLine(fields) + "\n");
+            }
+            osw.flush();
+        } catch (IOException e) {
+            logger.error("导出任务数据失败", e);
+        }
+    }
+
+    @Override
+    public void downloadTemplate(HttpServletResponse response) {
+        try (OutputStreamWriter osw = new OutputStreamWriter(response.getOutputStream(), StandardCharsets.UTF_8)) {
+            response.setContentType(CSV_CONTENT_TYPE);
+            response.setHeader("Content-Disposition", "attachment;filename=" +
+                    URLEncoder.encode("xxl-job导入模版.csv", StandardCharsets.UTF_8));
+            osw.write('\ufeff');
+            osw.write(buildCsvLine(CSV_HEADERS) + "\n");
+            osw.flush();
+        } catch (IOException e) {
+            logger.error("下载导入模版失败", e);
+        }
     }
 
 }

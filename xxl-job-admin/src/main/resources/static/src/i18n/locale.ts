@@ -108,7 +108,13 @@ const locale: any = {
         "roleName":"角色名",
         "batchStartTask":"批量启动",
         "batchStopTask":"批量停止",
-        "batchModifyExecutor":"批量修改执行器"
+        "batchModifyExecutor":"批量修改执行器",
+        "batchDeleteTask":"批量删除",
+        "importTask":"导入任务",
+        "exportTask":"导出任务",
+        "downloadTemplate":"下载导入模版",
+        "importTaskTitle":"导入任务",
+        "importFileTip":"上传 csv 文件，大小不超过 100MB"
     },
     'en-US': {
         "axiosRequestCallKey": "Call",
@@ -218,7 +224,13 @@ const locale: any = {
         "roleName":"Role Name",
         "batchStartTask":"Batch Start",
         "batchStopTask":"Batch Stop",
-        "batchModifyExecutor":"Batch Modify Executor"
+        "batchModifyExecutor":"Batch Modify Executor",
+        "batchDeleteTask":"Batch Delete",
+        "importTask":"Import Task",
+        "exportTask":"Export Task",
+        "downloadTemplate":"Download Template",
+        "importTaskTitle":"Import Task",
+        "importFileTip":"Upload csv file, size less than 100MB"
     },
     'ja-JP': {
         "axiosRequestCallKey": "電話",
@@ -329,7 +341,13 @@ const locale: any = {
         "roleName":"ロール名",
         "batchStartTask":"バッチ開始",
         "batchStopTask":"バッチ停止",
-        "batchModifyExecutor":"バッチ実行器変更"
+        "batchModifyExecutor":"バッチ実行器変更",
+        "batchDeleteTask":"バッチ削除",
+        "importTask":"タスクインポート",
+        "exportTask":"タスクエクスポート",
+        "downloadTemplate":"テンプレートダウンロード",
+        "importTaskTitle":"タスクインポート",
+        "importFileTip":"csvファイルをアップロード、100MB以下"
     }
 }
 

@@ -1,12 +1,12 @@
 <script lang="ts" setup>
 import {
-  Edit, ArrowLeft, Plus, Delete, VideoPause, VideoPlay, DocumentCopy, Setting
+  Edit, ArrowLeft, Plus, Delete, VideoPause, VideoPlay, DocumentCopy, Setting, UploadFilled, Printer, Document
 } from '@element-plus/icons-vue'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, notify, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import type {FormInstance, FormRules, TableInstance, UploadFile} from 'element-plus'
+import type {FormInstance, FormRules, TableInstance, UploadFile, UploadInstance} from 'element-plus'
 import router from "@/router";
 import {getLangData} from "@/i18n/locale";
 
@@ -410,6 +410,10 @@ const executeBatchAction = (url: string, ids: number[], onSuccess?: () => void) 
 
 const batchStartTasks = () => executeBatchAction('/jobinfo/batchStart', getSelectedIds())
 const batchStopTasks = () => executeBatchAction('/jobinfo/batchStop', getSelectedIds())
+const batchDeleteTasks = () => {
+  const ids = getSelectedIds()
+  executeBatchAction('/jobinfo/batchDelete', ids)
+}
 
 const batchExecutorDialogVisible = ref(false)
 const batchExecutorForm = reactive({ jobGroup: null as number | null })
@@ -440,6 +444,107 @@ const batchUpdateJobGroup = () => {
   }).catch((err: any) => {
     console.log('', err)
     msg(err?.response.data.errorMessage, 'error')
+  })
+}
+
+const importDialogVisible = ref(false)
+const importForm = reactive({ file: null as any | null })
+const uploadRef = ref<UploadInstance>()
+
+const showImportDialog = () => {
+  importDialogVisible.value = true
+  uploadRef.value?.clearFiles()
+}
+
+const fileChange = (uploadFile: UploadFile) => {
+  importForm.file = uploadFile.raw
+}
+
+const fileRemove = () => {
+  importForm.file = null
+}
+
+const fileImport = () => {
+  if (importForm.file == null) {
+    msg('导入文件为空', 'warning')
+    return
+  }
+  const formData = new FormData()
+  formData.append('file', importForm.file)
+  axios({
+    url: '/jobinfo/import',
+    method: 'post',
+    data: formData,
+    headers: { 'Content-Type': 'multipart/form-data' }
+  }).then((res: any) => {
+    if (res.data.state == 'OK') {
+      msg(res.data.body, 'success')
+      importDialogVisible.value = false
+      uploadRef.value!.clearFiles()
+      query()
+    } else {
+      msg(res.data.errorMessage, 'warning')
+      uploadRef.value!.clearFiles()
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(err?.response.data.errorMessage, 'error')
+    uploadRef.value!.clearFiles()
+  })
+}
+
+const exportData = () => {
+  const exportParams: any = {}
+  if (form.jobGroup) exportParams.jobGroup = form.jobGroup
+  if (form.triggerStatus != null) exportParams.triggerStatus = form.triggerStatus
+  if (form.jobDesc) exportParams.jobDesc = form.jobDesc
+  if (form.executorHandler) exportParams.executorHandler = form.executorHandler
+  if (form.author) exportParams.author = form.author
+  axios({
+    url: '/jobinfo/export',
+    method: 'post',
+    data: exportParams,
+    responseType: 'blob'
+  }).then((res: any) => {
+    const blob = new Blob([res.data], { type: 'text/csv' })
+    const fileName = 'xxl-job任务数据.csv'
+    if ('download' in document.createElement('a')) {
+      const elink = document.createElement('a')
+      elink.download = fileName
+      elink.style.display = 'none'
+      elink.href = URL.createObjectURL(blob)
+      document.body.appendChild(elink)
+      elink.click()
+      URL.revokeObjectURL(elink.href)
+      document.body.removeChild(elink)
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(langData.axiosRequestErr, 'error')
+  })
+}
+
+const downloadTemplate = () => {
+  axios({
+    url: '/jobinfo/template',
+    method: 'get',
+    responseType: 'blob'
+  }).then((res: any) => {
+    const blob = new Blob([res.data], { type: 'text/csv' })
+    const fileName = 'xxl-job导入模版.csv'
+    if ('download' in document.createElement('a')) {
+      const elink = document.createElement('a')
+      elink.download = fileName
+      elink.style.display = 'none'
+      elink.href = URL.createObjectURL(blob)
+      document.body.appendChild(elink)
+      elink.click()
+      URL.revokeObjectURL(elink.href)
+      document.body.removeChild(elink)
+    }
+  }).catch((err: any) => {
+    console.log('', err)
+    msg(langData.axiosRequestErr, 'error')
   })
 }
 
@@ -477,27 +582,46 @@ const batchUpdateJobGroup = () => {
       </el-form-item>
     </el-form>
 
-    <div style="display: flex;justify-content: flex-start; margin-bottom: 5px">
-      <template v-if="selectedCount">
-        <el-popconfirm :title="langData.confirmOpera" @confirm="batchStartTasks" confirm-button-type="warning">
-          <template #reference>
-            <el-icon color="#67C23A" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
-          </template>
-        </el-popconfirm>
-        <el-popconfirm :title="langData.confirmOpera" @confirm="batchStopTasks" confirm-button-type="warning">
-          <template #reference>
-            <el-icon color="#E6A23C" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
-          </template>
-        </el-popconfirm>
-      </template>
-      <template v-else>
-        <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
-        <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
-      </template>
-      <el-icon v-if="selectedCount" color="#3F9EFF" style="cursor: pointer; margin-left: 5px" :size="18"
-               :title="langData.batchModifyExecutor" @click="showBatchModifyExecutorDialog"><Setting/></el-icon>
-      <el-icon v-else color="#C0C4CC" style="margin-left: 5px" :size="18"
-               :title="langData.batchModifyExecutor"><Setting/></el-icon>
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px">
+      <div style="display: flex; align-items: center;">
+        <template v-if="selectedCount">
+          <el-popconfirm :title="langData.confirmOpera" @confirm="batchStartTasks" confirm-button-type="warning">
+            <template #reference>
+              <el-icon color="#67C23A" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
+            </template>
+          </el-popconfirm>
+          <el-popconfirm :title="langData.confirmOpera" @confirm="batchStopTasks" confirm-button-type="warning">
+            <template #reference>
+              <el-icon color="#E6A23C" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
+            </template>
+          </el-popconfirm>
+          <el-popconfirm :title="langData.confirmDelete" @confirm="batchDeleteTasks" confirm-button-type="danger">
+            <template #reference>
+              <el-icon color="red" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchDeleteTask"><Delete/></el-icon>
+            </template>
+          </el-popconfirm>
+        </template>
+        <template v-else>
+          <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
+          <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
+          <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchDeleteTask"><Delete/></el-icon>
+        </template>
+        <el-icon v-if="selectedCount" color="#3F9EFF" style="cursor: pointer; margin-left: 5px" :size="18"
+                 :title="langData.batchModifyExecutor" @click="showBatchModifyExecutorDialog"><Setting/></el-icon>
+        <el-icon v-else color="#C0C4CC" style="margin-left: 5px" :size="18"
+                 :title="langData.batchModifyExecutor"><Setting/></el-icon>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <el-tooltip :content="langData.importTask" effect="dark" placement="top">
+          <el-icon color="#67C23A" style="cursor: pointer; margin-left: 5px" :size="18" @click="showImportDialog"><UploadFilled/></el-icon>
+        </el-tooltip>
+        <el-tooltip :content="langData.exportTask" effect="dark" placement="top">
+          <el-icon color="#409EFF" style="cursor: pointer; margin-left: 5px" :size="18" @click="exportData"><Printer/></el-icon>
+        </el-tooltip>
+        <el-tooltip :content="langData.downloadTemplate" effect="dark" placement="top">
+          <el-icon color="#E6A23C" style="cursor: pointer; margin-left: 5px" :size="18" @click="downloadTemplate"><Document/></el-icon>
+        </el-tooltip>
+      </div>
     </div>
 
     <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
@@ -706,6 +830,26 @@ const batchUpdateJobGroup = () => {
       <el-button type="primary" size="small" @click="batchUpdateJobGroup">{{ langData.btnSave }}</el-button>
     </template>
   </el-dialog>
+
+  <el-drawer v-model="importDialogVisible" :title="langData.importTaskTitle" direction="ltr" size="50%">
+    <el-form :model="importForm" label-position="left" :inline="false" label-width="25%">
+      <div>
+        <el-upload action="#" name="file" ref="uploadRef" class="upload-demo" drag
+            :multiple="false" :auto-upload="false" :limit="1"
+            @change="fileChange" @remove="fileRemove" accept=".csv" style="height:230px">
+          <el-icon class="el-icon--upload"><UploadFilled/></el-icon>
+          <div class="el-upload__text">Drop file here or <em> click to upload </em></div>
+          <template #tip>
+            <div class="el-upload__tip">{{ langData.importFileTip }}</div>
+          </template>
+        </el-upload>
+      </div>
+      <br/>
+      <el-form-item label-width="0%">
+        <el-button type="primary" @click="fileImport()">{{ langData.btnSubmit }}</el-button>
+      </el-form-item>
+    </el-form>
+  </el-drawer>
 </template>
 
 <style scoped>
