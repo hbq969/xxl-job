@@ -148,6 +148,7 @@ const taskForm = reactive({
 })
 const drawer = ref(false)
 const drawerTitle = ref(langData.addTask)
+const submitting = ref(false)
 
 const showAddTaskDialog = () => {
   drawer.value = true
@@ -157,20 +158,20 @@ const showAddTaskDialog = () => {
   taskForm.jobGroup = null
   taskForm.jobDesc = ''
   taskForm.author = ''
-  taskForm.alarmEmail = ''
-  taskForm.scheduleType = ''
-  taskForm.scheduleConf = ''
+  taskForm.alarmEmail = 'foo@bar.com'
+  taskForm.scheduleType = 'CRON'
+  taskForm.scheduleConf = '0 */30 * * * ?'
   taskForm.cronGen_display = ''
   taskForm.schedule_conf_CRON = ''
   taskForm.schedule_conf_FIX_RATE = ''
   taskForm.schedule_conf_FIX_DELAY = ''
-  taskForm.glueType = ''
+  taskForm.glueType = 'BEAN'
   taskForm.executorHandler = ''
   taskForm.executorParam = ''
-  taskForm.executorRouteStrategy = ''
+  taskForm.executorRouteStrategy = 'FIRST'
   taskForm.childJobId = ''
-  taskForm.misfireStrategy = ''
-  taskForm.executorBlockStrategy = ''
+  taskForm.misfireStrategy = 'FIRE_ONCE_NOW'
+  taskForm.executorBlockStrategy = 'SERIAL_EXECUTION'
   taskForm.executorTimeout = 5
   taskForm.executorFailRetryCount = 0
   taskForm.glueRemark = 'GLUE代码初始化'
@@ -209,6 +210,7 @@ const updateTask = async (formEl: FormInstance | undefined) => {
   if (!formEl) return
   await formEl.validate((valid, fields) => {
     if (valid) {
+      submitting.value = true
       axios({
         url: drawerTitle.value == langData.addTask ? '/jobinfo/add' : '/jobinfo/update',
         method: 'post',
@@ -224,6 +226,8 @@ const updateTask = async (formEl: FormInstance | undefined) => {
       }).catch((err: any) => {
         console.log('', err)
         msg(err?.response.data.errorMessage, 'error')
+      }).finally(() => {
+        submitting.value = false
       })
     }
   })
@@ -723,98 +727,151 @@ const downloadTemplate = () => {
     </template>
   </el-dialog>
 
-  <el-drawer
+  <el-dialog
       v-model="drawer"
       :title="drawerTitle"
-      direction="ltr"
-      size="50%"
+      fullscreen
+      :close-on-click-modal="false"
+      class="task-dialog"
   >
-    <el-form :model="taskForm" size="small" label-position="right" inline-message :inline="false" ref="formRef"
-             :rules="rules" label-width="30%">
-      <el-divider content-position="left">{{langData.baseConfig}}</el-divider>
-      <el-form-item :label="langData.executor" prop="jobGroup">
-        <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                   filterable style="width: 100%" :remote-method="fetchJobGroup">
-          <el-option :key="item.id" :label="item.title+'('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="langData.taskDesc" prop="jobDesc">
-        <el-input v-model="taskForm.jobDesc" type="text" clearable/>
-      </el-form-item>
-      <el-form-item :label="langData.alarmEmail" prop="alarmEmail">
-        <el-input v-model="taskForm.alarmEmail" type="textarea" clearable
-                  :placeholder="langData.alarmEmailPlaceholder"
-                  :rows="2"/>
-      </el-form-item>
-      <el-divider content-position="left">{{langData.scheduleConfig}}</el-divider>
-      <el-form-item :label="langData.scheduleType" prop="scheduleType">
-        <el-select v-model="taskForm.scheduleType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                   filterable style="width: 100%">
-          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item label="CRON" prop="scheduleConf" v-if="taskForm.scheduleType=='CRON'">
-        <el-input v-model="taskForm.scheduleConf" type="text" clearable placeholder="* * * * * ?"/>
-      </el-form-item>
-      <el-form-item :label="langData.fixedRate" prop="scheduleConf" v-if="taskForm.scheduleType=='FIX_RATE'">
-        <el-input v-model="taskForm.scheduleConf" type="number" clearable placeholder="30"/>
-      </el-form-item>
-      <el-divider content-position="left">{{langData.taskConfig}}</el-divider>
-      <el-form-item :label="langData.glueType" prop="glueType">
-        <el-select v-model="taskForm.glueType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                   filterable style="width: 100%">
-          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="langData.taskHandler" prop="executorHandler" v-if="taskForm.glueType=='BEAN'">
-        <el-input v-model="taskForm.executorHandler" type="text" clearable
-                  :placeholder="langData.taskHandlerPlaceholder"/>
-      </el-form-item>
-      <el-form-item :label="langData.executeParam" prop="executorParam">
-        <el-input v-model="taskForm.executorParam" type="textarea" clearable :rows="5"
-                  :placeholder="langData.taskParamsPlaceholder"/>
-      </el-form-item>
-      <el-divider content-position="left">{{ langData.advancedConfig }}</el-divider>
-      <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
-        <el-select v-model="taskForm.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
-                   clearable filterable style="width: 100%"
-                   automatic-dropdown>
-          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="langData.childTaskId" prop="childJobId">
-        <el-input v-model="taskForm.childJobId" type="text" clearable/>
-      </el-form-item>
-      <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
-        <el-select v-model="taskForm.misfireStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
-                   clearable
-                   filterable style="width: 100%"
-                   automatic-dropdown>
-          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
-        <el-select v-model="taskForm.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
-                   clearable
-                   filterable style="width: 100%"
-                   automatic-dropdown>
-          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="langData.timeout" prop="executorTimeout">
-        <el-input v-model="taskForm.executorTimeout" type="number" clearable/>
-      </el-form-item>
-      <el-form-item :label="langData.failRetryCount" prop="executorFailRetryCount">
-        <el-input v-model="taskForm.executorFailRetryCount" type="number" clearable/>
-      </el-form-item>
-      <el-form-item label="" prop="glueRemark">
-        <el-input v-model="taskForm.glueRemark" type="hidden" clearable/>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" size="small" @click="updateTask(formRef)">{{ langData.btnSave }}</el-button>
-      </el-form-item>
-    </el-form>
-  </el-drawer>
+    <div class="form-container">
+      <el-form :model="taskForm" size="small" label-position="right" inline-message :inline="false" ref="formRef"
+               :rules="rules" label-width="100px">
+        <el-row :gutter="20" class="form-top-row">
+          <el-col :span="8">
+            <div class="form-section fill-height">
+              <div class="section-title">
+                <span class="section-dot base"></span>
+                <span>{{langData.baseConfig}}</span>
+              </div>
+              <div class="section-body">
+                <el-form-item :label="langData.executor" prop="jobGroup">
+                  <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+                             filterable style="width: 100%" :remote-method="fetchJobGroup">
+                    <el-option :key="item.id" :label="item.title+'('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
+                  </el-select>
+                </el-form-item>
+                <el-form-item :label="langData.taskDesc" prop="jobDesc">
+                  <el-input v-model="taskForm.jobDesc" type="text" clearable/>
+                </el-form-item>
+                <el-form-item :label="langData.alarmEmail" prop="alarmEmail">
+                  <el-input v-model="taskForm.alarmEmail" type="textarea" clearable
+                            :placeholder="langData.alarmEmailPlaceholder" :rows="4"/>
+                </el-form-item>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="form-section fill-height">
+              <div class="section-title">
+                <span class="section-dot schedule"></span>
+                <span>{{langData.scheduleConfig}}</span>
+              </div>
+              <div class="section-body">
+                <el-form-item :label="langData.scheduleType" prop="scheduleType">
+                  <el-select v-model="taskForm.scheduleType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+                             filterable style="width: 100%">
+                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
+                  </el-select>
+                </el-form-item>
+                <el-form-item label="CRON" prop="scheduleConf" v-if="taskForm.scheduleType=='CRON'">
+                  <el-input v-model="taskForm.scheduleConf" type="text" clearable placeholder="* * * * * ?"/>
+                </el-form-item>
+                <el-form-item :label="langData.fixedRate" prop="scheduleConf" v-if="taskForm.scheduleType=='FIX_RATE'">
+                  <el-input v-model="taskForm.scheduleConf" type="number" clearable placeholder="30"/>
+                </el-form-item>
+              </div>
+            </div>
+          </el-col>
+          <el-col :span="8">
+            <div class="form-section fill-height">
+              <div class="section-title">
+                <span class="section-dot task"></span>
+                <span>{{langData.taskConfig}}</span>
+              </div>
+              <div class="section-body">
+                <el-form-item :label="langData.glueType" prop="glueType">
+                  <el-select v-model="taskForm.glueType" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+                             filterable style="width: 100%">
+                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
+                  </el-select>
+                </el-form-item>
+                <el-form-item :label="langData.taskHandler" prop="executorHandler" v-if="taskForm.glueType=='BEAN'">
+                  <el-input v-model="taskForm.executorHandler" type="text" clearable
+                            :placeholder="langData.taskHandlerPlaceholder"/>
+                </el-form-item>
+                <el-form-item :label="langData.executeParam" prop="executorParam">
+                  <el-input v-model="taskForm.executorParam" type="textarea" clearable :rows="4"
+                            :placeholder="langData.taskParamsPlaceholder"/>
+                </el-form-item>
+              </div>
+            </div>
+          </el-col>
+        </el-row>
+        <!-- 高级配置 -->
+        <div class="form-section" style="margin-top:16px">
+          <div class="section-title">
+            <span class="section-dot advanced"></span>
+            <span>{{langData.advancedConfig}}</span>
+          </div>
+          <div class="section-body">
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
+                  <el-select v-model="taskForm.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
+                             clearable filterable style="width: 100%" automatic-dropdown>
+                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
+                  <el-select v-model="taskForm.misfireStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
+                             clearable filterable style="width: 100%" automatic-dropdown>
+                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
+                  <el-select v-model="taskForm.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" size="small"
+                             clearable filterable style="width: 100%" automatic-dropdown>
+                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item :label="langData.childTaskId" prop="childJobId">
+                  <el-input v-model="taskForm.childJobId" type="text" clearable/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="langData.timeout" prop="executorTimeout">
+                  <el-input v-model="taskForm.executorTimeout" type="number" clearable/>
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item :label="langData.failRetryCount" prop="executorFailRetryCount">
+                  <el-input v-model="taskForm.executorFailRetryCount" type="number" clearable/>
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item label="" prop="glueRemark" style="display:none">
+              <el-input v-model="taskForm.glueRemark" type="hidden" clearable/>
+            </el-form-item>
+          </div>
+        </div>
+      </el-form>
+    </div>
+    <template #footer>
+      <div class="dialog-footer">
+        <el-button size="small" @click="drawer = false">{{langData.btnCancel}}</el-button>
+        <el-button type="primary" size="small" @click="updateTask(formRef)" :loading="submitting">{{langData.btnSave}}</el-button>
+      </div>
+    </template>
+  </el-dialog>
 
   <el-dialog v-model="batchExecutorDialogVisible" :title="langData.batchModifyExecutor" draggable width="30%">
     <el-form :model="batchExecutorForm" label-position="right" size="small" label-width="20%">
@@ -874,5 +931,121 @@ const downloadTemplate = () => {
   .success-row {
     --el-table-tr-bg-color: var(--el-color-success-light-9) !important;
   }
+}
+
+/* 全屏 Dialog */
+:deep(.task-dialog) {
+  .el-dialog__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    overflow: hidden;
+    padding: 16px 24px 8px 24px;
+  }
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.form-container .el-form {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  overflow: hidden;
+}
+
+.form-top-row {
+  flex: 1;
+  min-height: 0;
+}
+
+.form-top-row .el-col {
+  display: flex;
+}
+
+/* 任务表单 - 卡片分区 */
+.form-section {
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
+  overflow: hidden;
+  transition: border-color 0.2s;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.form-section:hover {
+  border-color: #c6d0e1;
+}
+
+.fill-height {
+  flex: 1;
+}
+
+.fill-height .section-body {
+  flex: 1;
+  overflow: auto;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 14px;
+  background: #fafbfc;
+  border-bottom: 1px solid #ebeef5;
+  font-size: 13px;
+  font-weight: 600;
+  color: #303133;
+  flex-shrink: 0;
+}
+
+.section-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.section-dot.base {
+  background: #409EFF;
+  box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.12);
+}
+
+.section-dot.schedule {
+  background: #67C23A;
+  box-shadow: 0 0 0 3px rgba(103, 194, 58, 0.12);
+}
+
+.section-dot.task {
+  background: #E6A23C;
+  box-shadow: 0 0 0 3px rgba(230, 162, 60, 0.12);
+}
+
+.section-dot.advanced {
+  background: #909399;
+  box-shadow: 0 0 0 3px rgba(144, 147, 153, 0.12);
+}
+
+.section-body {
+  padding: 8px 14px 2px 14px;
+}
+
+.section-body :deep(.el-form-item) {
+  margin-bottom: 10px;
+}
+
+.section-body :deep(.el-form-item__label) {
+  width: 120px !important;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style>
