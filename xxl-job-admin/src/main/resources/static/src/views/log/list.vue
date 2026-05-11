@@ -563,9 +563,9 @@ const showJobInfoDrawer = (row: any) => {
 <style scoped>
 .container {
   flex-grow: 1;
-  padding: 20px 2%;
+  padding: 0;
   overflow: auto;
-  width: 96%;
+  width: 100%;
 }
 
 :deep(.el-table) {
