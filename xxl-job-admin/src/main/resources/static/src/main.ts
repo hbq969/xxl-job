@@ -1,4 +1,5 @@
 import './assets/css/base.css'
+import { useDark } from '@/utils/theme'
 
 import router from './router'
 import ElementPlus from 'element-plus'

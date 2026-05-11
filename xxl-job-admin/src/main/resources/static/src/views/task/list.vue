@@ -47,11 +47,6 @@ onMounted(() => {
   query()
 });
 
-const headerCellStyle = () => {
-  // 添加表头颜色
-  return {backgroundColor: '#f5f5f5', color: '#333', fontWeight: 'bold'};
-}
-
 const multipleTableRef = ref<TableInstance>()
 const selectedCount = ref(0)
 const handleSelectionChange = (rows: any[]) => {
@@ -591,12 +586,12 @@ const downloadTemplate = () => {
         <template v-if="selectedCount">
           <el-popconfirm :title="langData.confirmOpera" @confirm="batchStartTasks" confirm-button-type="warning">
             <template #reference>
-              <el-icon color="#67C23A" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
+              <el-icon :color="'var(--el-color-success)'" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
             </template>
           </el-popconfirm>
           <el-popconfirm :title="langData.confirmOpera" @confirm="batchStopTasks" confirm-button-type="warning">
             <template #reference>
-              <el-icon color="#E6A23C" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
+              <el-icon :color="'var(--el-color-warning)'" style="cursor: pointer; margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
             </template>
           </el-popconfirm>
           <el-popconfirm :title="langData.confirmDelete" @confirm="batchDeleteTasks" confirm-button-type="danger">
@@ -606,35 +601,35 @@ const downloadTemplate = () => {
           </el-popconfirm>
         </template>
         <template v-else>
-          <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
-          <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
-          <el-icon color="#C0C4CC" style="margin-left: 5px" :size="18" :title="langData.batchDeleteTask"><Delete/></el-icon>
+          <el-icon :color="'var(--el-text-color-placeholder)'" style="margin-left: 5px" :size="18" :title="langData.batchStartTask"><VideoPlay/></el-icon>
+          <el-icon :color="'var(--el-text-color-placeholder)'" style="margin-left: 5px" :size="18" :title="langData.batchStopTask"><VideoPause/></el-icon>
+          <el-icon :color="'var(--el-text-color-placeholder)'" style="margin-left: 5px" :size="18" :title="langData.batchDeleteTask"><Delete/></el-icon>
         </template>
-        <el-icon v-if="selectedCount" color="#3F9EFF" style="cursor: pointer; margin-left: 5px" :size="18"
+        <el-icon v-if="selectedCount" :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 5px" :size="18"
                  :title="langData.batchModifyExecutor" @click="showBatchModifyExecutorDialog"><Setting/></el-icon>
-        <el-icon v-else color="#C0C4CC" style="margin-left: 5px" :size="18"
+        <el-icon v-else :color="'var(--el-text-color-placeholder)'" style="margin-left: 5px" :size="18"
                  :title="langData.batchModifyExecutor"><Setting/></el-icon>
       </div>
       <div style="display: flex; align-items: center;">
         <el-tooltip :content="langData.importTask" effect="dark" placement="top">
-          <el-icon color="#67C23A" style="cursor: pointer; margin-left: 5px" :size="18" @click="showImportDialog"><UploadFilled/></el-icon>
+          <el-icon :color="'var(--el-color-success)'" style="cursor: pointer; margin-left: 5px" :size="18" @click="showImportDialog"><UploadFilled/></el-icon>
         </el-tooltip>
         <el-tooltip :content="langData.exportTask" effect="dark" placement="top">
-          <el-icon color="#409EFF" style="cursor: pointer; margin-left: 5px" :size="18" @click="exportData"><Printer/></el-icon>
+          <el-icon :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 5px" :size="18" @click="exportData"><Printer/></el-icon>
         </el-tooltip>
         <el-tooltip :content="langData.downloadTemplate" effect="dark" placement="top">
-          <el-icon color="#E6A23C" style="cursor: pointer; margin-left: 5px" :size="18" @click="downloadTemplate"><Document/></el-icon>
+          <el-icon :color="'var(--el-color-warning)'" style="cursor: pointer; margin-left: 5px" :size="18" @click="downloadTemplate"><Document/></el-icon>
         </el-tooltip>
       </div>
     </div>
 
     <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
-              size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle" ref="multipleTableRef"
+              size="small" :highlight-current-row="true" ref="multipleTableRef"
               @selection-change="handleSelectionChange">
       <el-table-column type="selection" header-align="center" align="center"/>
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="100" header-align="center" align="center">
         <template #default="scope">
-          <el-icon @click="showEditTaskDialog(scope.row)" color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14"><Edit/></el-icon>
+          <el-icon @click="showEditTaskDialog(scope.row)" :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 10px" :size="14"><Edit/></el-icon>
           <el-popconfirm :title="langData.confirmDelete" @confirm="deleteTask(scope.row)" icon-color="red" confirm-button-type="danger">
             <template #reference>
               <el-icon color="red" style="cursor: pointer; margin-left: 10px" :size="14"><Delete/></el-icon>
@@ -642,7 +637,7 @@ const downloadTemplate = () => {
           </el-popconfirm>
           <el-popconfirm :title="langData.confirmOpera" @confirm="startTask(scope.row)" icon-color="red" confirm-button-type="danger" v-if="scope.row.triggerStatus==0">
             <template #reference>
-              <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.startTask"><VideoPlay/></el-icon>
+              <el-icon :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.startTask"><VideoPlay/></el-icon>
             </template>
           </el-popconfirm>
           <el-popconfirm :title="langData.confirmOpera" @confirm="stopTask(scope.row)" icon-color="red" confirm-button-type="danger" v-if="scope.row.triggerStatus==1">
@@ -650,13 +645,13 @@ const downloadTemplate = () => {
               <el-icon color="orange" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.stopTask"><VideoPause/></el-icon>
             </template>
           </el-popconfirm>
-          <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.copyTask" @click="copyTask(scope.row)"><DocumentCopy/></el-icon>
-          <el-icon color="#3F9EFF" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.runImmediate" @click="showImmediateTaskDialog(scope.row)">
+          <el-icon :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.copyTask" @click="copyTask(scope.row)"><DocumentCopy/></el-icon>
+          <el-icon :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 10px" :size="14" :title="langData.runImmediate" @click="showImmediateTaskDialog(scope.row)">
             <template #default>
               <svg t="1761619792188" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4669" width="32" height="32">
                 <path
                     d="M317.9 80.6l531.7 354.5c25.7 17.2 41.2 46 41.2 76.9 0 30.9-15.4 59.8-41.2 76.9L317.9 943.4c-28.4 18.9-64.9 20.7-95 4.6-30.1-16.1-48.9-47.5-48.8-81.7V157.6c0-34.1 18.7-65.5 48.8-81.6 30.1-16.2 66.6-14.4 95 4.6z m-38.5 57.7c-7.1-4.7-16.2-5.2-23.7-1.1s-12.2 11.9-12.2 20.4v708.8c0 8.5 4.7 16.4 12.2 20.4 7.5 4 16.7 3.6 23.7-1.2l531.7-354.4c6.4-4.3 10.3-11.5 10.3-19.3 0-7.7-3.9-15-10.3-19.2L279.4 138.3zM440 454.2h-87.7c-4.7 0-8.9-2.8-10.7-7.1-1.8-4.3-0.8-9.3 2.5-12.6l95.9-95.9h57.8v346.9H440V454.2z m0 0"
-                    fill="#1296db" p-id="4670"></path>
+                    fill="currentColor" p-id="4670"></path>
               </svg>
             </template>
           </el-icon>
@@ -665,10 +660,10 @@ const downloadTemplate = () => {
               <svg t="1761632063541" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="5500" width="32" height="32">
                 <path
                     d="M768 960H256A106.666667 106.666667 0 0 1 149.333333 853.333333V170.666667A106.666667 106.666667 0 0 1 256 64h512A106.666667 106.666667 0 0 1 874.666667 170.666667v682.666666a106.666667 106.666667 0 0 1-106.666667 106.666667zM256 106.666667c-35.413333 0-64 28.586667-64 64v682.666666c0 35.413333 28.586667 64 64 64h512c35.413333 0 64-28.586667 64-64V170.666667c0-35.413333-28.586667-64-64-64H256z"
-                    fill="#666666" p-id="5501"></path>
+                    fill="currentColor" p-id="5501"></path>
                 <path
                     d="M725.333333 362.666667H298.666667c-11.946667 0-21.333333-9.386667-21.333334-21.333334s9.386667-21.333333 21.333334-21.333333h426.666666c11.946667 0 21.333333 9.386667 21.333334 21.333333s-9.386667 21.333333-21.333334 21.333334zM725.333333 533.333333H298.666667c-11.946667 0-21.333333-9.386667-21.333334-21.333333s9.386667-21.333333 21.333334-21.333333h426.666666c11.946667 0 21.333333 9.386667 21.333334 21.333333s-9.386667 21.333333-21.333334 21.333333zM725.333333 704H298.666667c-11.946667 0-21.333333-9.386667-21.333334-21.333333s9.386667-21.333333 21.333334-21.333334h426.666666c11.946667 0 21.333333 9.386667 21.333334 21.333334s-9.386667 21.333333-21.333334 21.333333z"
-                    fill="#666666" p-id="5502"></path>
+                    fill="currentColor" p-id="5502"></path>
               </svg>
             </template>
           </el-icon>
@@ -970,7 +965,7 @@ const downloadTemplate = () => {
 /* 任务表单 - 卡片分区 */
 .form-section {
   border-radius: 6px;
-  border: 1px solid #ebeef5;
+  border: 1px solid var(--el-border-color);
   overflow: hidden;
   transition: border-color 0.2s;
   display: flex;
@@ -979,7 +974,7 @@ const downloadTemplate = () => {
 }
 
 .form-section:hover {
-  border-color: #c6d0e1;
+  border-color: var(--el-border-color-light);
 }
 
 .fill-height {
@@ -996,11 +991,11 @@ const downloadTemplate = () => {
   align-items: center;
   gap: 8px;
   padding: 8px 14px;
-  background: #fafbfc;
-  border-bottom: 1px solid #ebeef5;
+  background: var(--el-fill-color-light);
+  border-bottom: 1px solid var(--el-border-color);
   font-size: 13px;
   font-weight: 600;
-  color: #303133;
+  color: var(--el-text-color-primary);
   flex-shrink: 0;
 }
 
@@ -1012,22 +1007,22 @@ const downloadTemplate = () => {
 }
 
 .section-dot.base {
-  background: #409EFF;
+  background: var(--el-color-primary);
   box-shadow: 0 0 0 3px rgba(64, 158, 255, 0.12);
 }
 
 .section-dot.schedule {
-  background: #67C23A;
+  background: var(--el-color-success);
   box-shadow: 0 0 0 3px rgba(103, 194, 58, 0.12);
 }
 
 .section-dot.task {
-  background: #E6A23C;
+  background: var(--el-color-warning);
   box-shadow: 0 0 0 3px rgba(230, 162, 60, 0.12);
 }
 
 .section-dot.advanced {
-  background: #909399;
+  background: var(--el-color-info);
   box-shadow: 0 0 0 3px rgba(144, 147, 153, 0.12);
 }
 

@@ -16,11 +16,6 @@ onMounted(() => {
   query()
 });
 
-const headerCellStyle = () => {
-  // 添加表头颜色
-  return {backgroundColor: '#f5f5f5', color: '#333', fontWeight: 'bold'};
-}
-
 const debounce = (callback: (...args: any[]) => void, delay: number) => {
   let tid: any;
   return function (...args: any[]) {
@@ -142,12 +137,12 @@ const fetchJobGroup = () => {
 <template>
   <div class="container">
     <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
-              size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle">
+              size="small" :highlight-current-row="true">
 <!--      <el-table-column type="selection" header-align="center" align="center"/>-->
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
           <el-tooltip :content="langData.permConfig" effect="dark" placement="top">
-            <el-icon @click="showUserPermDialog(scope.row)" color="#3F9EFF" style="cursor: pointer; margin-left: 10px"
+            <el-icon @click="showUserPermDialog(scope.row)" :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 10px"
                      :size="14">
               <UserFilled/>
             </el-icon>

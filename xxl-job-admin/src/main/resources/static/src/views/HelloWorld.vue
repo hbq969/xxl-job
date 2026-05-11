@@ -60,11 +60,6 @@ const deleteUser=(row:any)=>{
 
 }
 
-const headerCellStyle = () => {
-  // 添加表头颜色
-  return {backgroundColor: '#f5f5f5', color: '#333', fontWeight: 'bold'}
-}
-
 const debounce = (callback: (...args: any[]) => void, delay: number) => {
   let tid: any
   return function (...args: any[]) {
@@ -107,7 +102,7 @@ const _ = (window as any).ResizeObserver;
       </el-form-item>
     </el-form>
     <el-table :data="data" style="width: 100%" :border="true" table-layout="fixed" :stripe="true"
-              size="small" :highlight-current-row="true" :header-cell-style="headerCellStyle">
+              size="small" :highlight-current-row="true">
       <el-table-column fixed="left" label="Operation" width="180" header-align="center" align="center">
         <template #default="scope">
           <el-button link type="primary" size="small" @click="showEditDialog(scope.row)">edit
