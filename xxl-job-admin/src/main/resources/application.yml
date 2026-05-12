@@ -90,6 +90,7 @@ spring:
         copyright: ""
         ui-output-dir: ui
         home-url: inner:/xxl-job-admin/xxl-job-ui/index.html#/task/list
+        favicon-path: /xxl-job-admin/ui/favicon.ico
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     dynamic:
