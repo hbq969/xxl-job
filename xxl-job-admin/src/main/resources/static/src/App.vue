@@ -8,26 +8,35 @@ import { RouterView } from 'vue-router'
 
 <style>
 /* ========================================
+   Font Import
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap');
+
+/* ========================================
    全局基础
    ======================================== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-weight: 400;
+  font-size: 13.5px;
+  line-height: 1.6;
   background: #F1F5F9;
   color: #0F172A;
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
 
 /* ========================================
-   全局细滚动条 — 1px
+   全局细滚动条 — minimal
    ======================================== */
-* {
-  scrollbar-width: none;
-}
-*::-webkit-scrollbar { width: 1px; height: 1px; }
+* { scrollbar-width: thin; scrollbar-color: rgba(0,0,0,0.12) transparent; }
+*::-webkit-scrollbar { width: 4px; height: 4px; }
 *::-webkit-scrollbar-track { background: transparent; }
-*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.80); }
+*::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.12); border-radius: 20px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.22); }
 *::-webkit-scrollbar-corner { background: transparent; }
 
 /* ========================================
@@ -49,6 +58,20 @@ body {
   --el-color-success: #059669;
   --el-color-danger: #DC2626;
   --el-color-warning: #D97706;
+
+  /* 自定义 design tokens */
+  --surface-elevated: #FFFFFF;
+  --surface-inset: #F8FAFC;
+  --surface-hover: #F1F5F9;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --font-mono: 'JetBrains Mono', 'SF Mono', 'Fira Code', monospace;
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-smooth: 250ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ========================================
@@ -59,9 +82,8 @@ html.dark body {
   color: #e5e7eb;
 }
 
-html.dark *::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.30);
-}
+html.dark *::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+html.dark *::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.25); }
 
 html.dark {
   --el-color-primary: #A5B4FC;
@@ -89,6 +111,13 @@ html.dark {
   --el-color-success: #34D399;
   --el-color-danger: #F87171;
   --el-color-warning: #FBBF24;
+
+  --surface-elevated: #1d1e1f;
+  --surface-inset: #141414;
+  --surface-hover: #222324;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.5);
 }
 
 /* ========================================
@@ -100,26 +129,175 @@ html.dark {
   mix-blend-mode: normal;
 }
 
-/* 浅→暗: old 向内收缩 */
-html.tx-shrink::view-transition-old(root) {
-  z-index: 9999;
-  animation: theme-clip 0.8s cubic-bezier(0.4, 0, 0.2, 1) reverse;
-}
-html.tx-shrink::view-transition-new(root) {
-  z-index: 1;
-}
-
-/* 暗→浅: new 向外扩散 */
-html.tx-expand::view-transition-old(root) {
-  z-index: 1;
-}
-html.tx-expand::view-transition-new(root) {
-  z-index: 9999;
-  animation: theme-clip 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-}
+html.tx-shrink::view-transition-old(root) { z-index: 9999; animation: theme-clip 0.8s cubic-bezier(0.4, 0, 0.2, 1) reverse; }
+html.tx-shrink::view-transition-new(root) { z-index: 1; }
+html.tx-expand::view-transition-old(root) { z-index: 1; }
+html.tx-expand::view-transition-new(root) { z-index: 9999; animation: theme-clip 0.8s cubic-bezier(0.4, 0, 0.2, 1); }
 
 @keyframes theme-clip {
   from { clip-path: circle(0px  at var(--tx-x, 50vw) var(--tx-y, 50vh)); }
   to   { clip-path: circle(150vw at var(--tx-x, 50vw) var(--tx-y, 50vh)); }
+}
+
+/* ========================================
+   Element Plus 全局覆盖 - 精细打磨
+   ======================================== */
+
+/* 表格 */
+.el-table {
+  --el-table-border-color: var(--el-border-color);
+  border-radius: var(--radius-md) !important;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  font-size: 13px;
+}
+
+.el-table::before { display: none; }
+
+.el-table th.el-table__cell {
+  background: var(--surface-inset) !important;
+  font-weight: 600;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--el-text-color-secondary);
+  border-bottom: 2px solid var(--el-border-color) !important;
+  padding: 10px 0 8px 0;
+}
+
+.el-table td.el-table__cell {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.el-table .el-table__row:hover > td {
+  background: var(--surface-hover) !important;
+}
+
+.el-table__inner-wrapper::before { display: none !important; }
+
+/* 表单 */
+.el-form--inline .el-form-item {
+  margin-right: 16px;
+}
+
+.el-input__wrapper, .el-select__wrapper, .el-textarea__inner {
+  border-radius: var(--radius-sm) !important;
+  transition: all var(--transition-fast);
+}
+
+.el-input__wrapper:hover, .el-select__wrapper:hover {
+  border-color: var(--el-color-primary-light-3);
+}
+
+/* select 下拉面板暗黑模式 */
+.el-select-dropdown__item {
+  font-size: 13px;
+  padding: 6px 16px;
+}
+
+html.dark .el-popper.is-light,
+html.dark .el-select-dropdown {
+  background: var(--el-bg-color) !important;
+  border-color: var(--el-border-color) !important;
+  color: var(--el-text-color-primary) !important;
+}
+
+html.dark .el-select-dropdown__item {
+  color: var(--el-text-color-regular) !important;
+}
+
+html.dark .el-select-dropdown__item.hover,
+html.dark .el-select-dropdown__item:hover {
+  background: var(--el-fill-color-light) !important;
+  color: var(--el-color-primary) !important;
+}
+
+html.dark .el-select-dropdown__item.selected {
+  color: var(--el-color-primary) !important;
+  font-weight: 600;
+}
+
+/* date-picker 暗黑 */
+html.dark .el-picker-panel {
+  background: var(--el-bg-color) !important;
+  border-color: var(--el-border-color) !important;
+  color: var(--el-text-color-primary) !important;
+}
+
+html.dark .el-date-table td {
+  color: var(--el-text-color-regular);
+}
+
+html.dark .el-date-table td.current:not(.disabled) .el-date-table-cell__text {
+  background: var(--el-color-primary) !important;
+}
+
+html.dark .el-month-table td .cell,
+html.dark .el-year-table td .cell {
+  color: var(--el-text-color-regular);
+}
+
+html.dark .el-month-table td.current:not(.disabled) .cell,
+html.dark .el-year-table td.current:not(.disabled) .cell {
+  color: var(--el-color-primary);
+}
+
+/* 按钮 */
+.el-button {
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+}
+
+.el-button--primary {
+  box-shadow: 0 2px 6px rgba(79,70,229,0.25);
+}
+
+.el-button--primary:hover {
+  box-shadow: 0 4px 12px rgba(79,70,229,0.35);
+  transform: translateY(-1px);
+}
+
+.el-button--primary:active {
+  transform: translateY(0);
+}
+
+/* 分页 */
+.el-pagination {
+  padding: 12px 0 4px 0;
+}
+
+.el-pagination .el-pager li {
+  border-radius: var(--radius-sm);
+  font-weight: 500;
+}
+
+/* Dialog */
+.el-dialog {
+  border-radius: var(--radius-lg) !important;
+  box-shadow: var(--shadow-lg) !important;
+}
+
+.el-drawer {
+  border-radius: var(--radius-lg) 0 0 var(--radius-lg) !important;
+}
+
+/* Tag */
+.el-tag {
+  border-radius: 20px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+}
+
+/* 加载动画 */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.view-enter {
+  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 </style>

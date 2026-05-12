@@ -89,6 +89,7 @@ spring:
         group-menu-size: 5
         copyright: ""
         ui-output-dir: ui
+        home-url: inner:/xxl-job-admin/xxl-job-ui/index.html#/task/list
   datasource:
     type: com.zaxxer.hikari.HikariDataSource
     dynamic:

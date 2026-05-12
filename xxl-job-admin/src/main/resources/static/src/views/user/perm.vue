@@ -135,77 +135,98 @@ const fetchJobGroup = () => {
 </script>
 
 <template>
-  <div class="container">
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="true"
-              size="small" :highlight-current-row="true">
-<!--      <el-table-column type="selection" header-align="center" align="center"/>-->
+  <div class="perm-page view-enter">
+    <!-- 用户表格 -->
+    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false"
+              size="small" :highlight-current-row="true" class="data-table">
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
-          <el-tooltip :content="langData.permConfig" effect="dark" placement="top">
-            <el-icon @click="showUserPermDialog(scope.row)" :color="'var(--el-color-primary)'" style="cursor: pointer; margin-left: 10px"
-                     :size="14">
-              <UserFilled/>
-            </el-icon>
-          </el-tooltip>
+          <div class="row-actions">
+            <el-tooltip :content="langData.permConfig" effect="dark" placement="top">
+              <el-icon @click="showUserPermDialog(scope.row)" :color="'var(--el-color-primary)'" :size="15"><UserFilled/></el-icon>
+            </el-tooltip>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column prop="username" :label="langData.username" :show-overflow-tooltip="true" header-align="center"
-                       align="center"/>
-      <el-table-column prop="roleName" :label="langData.roleName" :show-overflow-tooltip="true" header-align="center"
-                       align="center"/>
-      <el-table-column prop="fmtAccStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center"
-                       align="center"/>
-      <el-table-column prop="fmtCreatedAt" :label="langData.tableHeaderCreateTime" :show-overflow-tooltip="true" header-align="center"
-                       align="center"/>
+      <el-table-column prop="username" :label="langData.username" :show-overflow-tooltip="true" header-align="center" align="center" min-width="140"/>
+      <el-table-column prop="roleName" :label="langData.roleName" :show-overflow-tooltip="true" header-align="center" align="center" min-width="130"/>
+      <el-table-column prop="fmtAccStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center" align="center" width="130">
+        <template #default="{row}">
+          <el-tag size="small" effect="plain" :type="row.accStatus==1?'success':'info'">{{ row.fmtAccStatus }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column prop="fmtCreatedAt" :label="langData.tableHeaderCreateTime" :show-overflow-tooltip="true" header-align="center" align="center" width="150"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="pg.pageSize" v-model:current-page="pg.pageNum"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()"
-                   @current-change="query()" @prev-click="query()" @next-click="query()"
+                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
                    size="small" :background="true"
                    :page-sizes="[5, 10, 20, 50, 100]"/>
   </div>
 
-  <el-dialog v-model="dialogFormVisible" :title="langData.permConfig" draggable width="30%">
-    <el-form :model="permForm" label-position="right" size="small" :inline="false" ref="formRef" :rules="rules"
-             label-width="20%">
+  <!-- 权限配置弹窗 -->
+  <el-dialog v-model="dialogFormVisible" :title="langData.permConfig" draggable width="420px">
+    <el-form :model="permForm" label-position="right" size="small" :inline="false" ref="formRef" :rules="rules" label-width="80px">
       <el-form-item :label="langData.executor" prop="jobGroup">
         <el-select v-model="permForm.groupIds" :placeholder="langData.formSelectPlaceholder" size="small" clearable
-                   filterable style="width: 100%" multiple>
+                   filterable multiple>
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in jobGroupList"/>
         </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
-              <span class="dialog-footer">
-                <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
-                <el-button type="primary" @click="updateUserPerm(formRef)">{{ langData.btnSave }}</el-button>
-              </span>
+      <div class="dialog-footer">
+        <el-button size="small" @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
+        <el-button type="primary" size="small" @click="updateUserPerm(formRef)">{{ langData.btnSave }}</el-button>
+      </div>
     </template>
   </el-dialog>
 </template>
 
 <style scoped>
-.container {
+/* ========================================
+   Permission Page - Layout
+   ======================================== */
+.perm-page {
   flex-grow: 1;
-  padding: 20px;
+  padding: 24px;
   overflow: auto;
   width: 100%;
+  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
 
-:deep(.el-table) {
-  .cell {
-    white-space: pre-line !important;
-  }
+/* ========================================
+   Data Table
+   ======================================== */
+.data-table {
+  border-radius: var(--radius-md) !important;
 }
 
-:deep(.el-table) {
-  .warning-row {
-    --el-table-tr-bg-color: var(--el-color-danger-light-9) !important;
-  }
+.data-table :deep(.cell) {
+  white-space: pre-line !important;
+}
 
-  .success-row {
-    --el-table-tr-bg-color: var(--el-color-success-light-9) !important;
-  }
+.row-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.row-actions .el-icon {
+  transition: all var(--transition-fast);
+}
+
+.row-actions .el-icon:hover {
+  transform: scale(1.15);
+}
+
+/* ========================================
+   Dialog
+   ======================================== */
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
 }
 </style>
