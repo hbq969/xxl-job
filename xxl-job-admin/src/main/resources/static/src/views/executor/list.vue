@@ -204,20 +204,20 @@ const deleteExecutor = (row: any) => {
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="id" label="ID" :show-overflow-tooltip="true" header-align="center" align="center" width="80"/>
-      <el-table-column prop="appname" :label="langData.executorName" :show-overflow-tooltip="true" header-align="center" align="center" min-width="160">
+      <el-table-column prop="id" label="ID" header-align="center" align="center" width="80"/>
+      <el-table-column prop="appname" :label="langData.executorName" header-align="center" align="center" min-width="160">
         <template #default="{row}">
           <code class="cell-mono">{{ row.appname }}</code>
         </template>
       </el-table-column>
-      <el-table-column prop="title" :label="langData.executorDesc" :show-overflow-tooltip="true" header-align="center" align="center" min-width="140"/>
-      <el-table-column prop="fmtAddressType" :label="langData.registerType" :show-overflow-tooltip="true" header-align="center" align="center" width="110">
+      <el-table-column prop="title" :label="langData.executorDesc" header-align="center" align="center" min-width="160"/>
+      <el-table-column prop="fmtAddressType" :label="langData.registerType" header-align="center" align="center" width="110">
         <template #default="{row}">
           <el-tag size="small" effect="plain" type="info">{{ row.fmtAddressType }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="addressList" :label="langData.registerAddress" :show-overflow-tooltip="true" header-align="center" align="center" min-width="160"/>
-      <el-table-column prop="fmtUpdateTime" :label="langData.updateTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
+      <el-table-column prop="addressList" :label="langData.registerAddress" header-align="center" align="center" min-width="160"/>
+      <el-table-column prop="fmtUpdateTime" :label="langData.updateTime" header-align="center" align="center"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"

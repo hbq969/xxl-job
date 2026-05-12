@@ -631,7 +631,7 @@ const downloadTemplate = () => {
               size="small" :highlight-current-row="true" ref="multipleTableRef"
               @selection-change="handleSelectionChange" class="data-table">
       <el-table-column type="selection" header-align="center" align="center" width="40"/>
-      <el-table-column fixed="left" :label="langData.tableHeaderOp" width="110" header-align="center" align="center">
+      <el-table-column fixed="left" :label="langData.tableHeaderOp" width="90" header-align="center" align="center">
         <template #default="scope">
           <div class="row-actions">
             <el-icon @click="showEditTaskDialog(scope.row)" :color="'var(--el-color-primary)'" :size="14" :title="langData.btnEdit"><Edit/></el-icon>
@@ -665,35 +665,35 @@ const downloadTemplate = () => {
           </div>
         </template>
       </el-table-column>
-      <el-table-column prop="id" :label="langData.taskId" :show-overflow-tooltip="true" header-align="center" align="center" width="75"/>
-      <el-table-column prop="jobDesc" :label="langData.taskDesc" :show-overflow-tooltip="true" header-align="center" align="left" min-width="140"/>
-      <el-table-column :label="langData.scheduleType" :show-overflow-tooltip="true" header-align="center" align="left" min-width="160">
+      <el-table-column prop="id" :label="langData.taskId" header-align="center" align="center" width="60"/>
+      <el-table-column prop="jobDesc" :label="langData.taskDesc" header-align="center" align="left" width="120"/>
+      <el-table-column :label="langData.scheduleType" header-align="center" align="left" width="120">
         <template #default="{row}">
-          <code class="cell-mono">{{ row.scheduleType }}: {{ row.scheduleConf }}</code>
+          {{ row.scheduleType }}: <code class="cell-sub">{{ row.scheduleConf }}</code>
         </template>
       </el-table-column>
-      <el-table-column :label="langData.glueType" :show-overflow-tooltip="true" header-align="center" align="left" min-width="140">
+      <el-table-column :label="langData.glueType" header-align="center" align="left" width="200">
         <template #default="{row}">
-          <code class="cell-mono">{{ row.glueType }}: {{ row.executorHandler }}</code>
+          {{ row.glueType }}: <code class="cell-sub">{{ row.executorHandler }}</code>
         </template>
       </el-table-column>
-      <el-table-column :label="langData.executor" :show-overflow-tooltip="true" header-align="center" align="left" min-width="150">
+      <el-table-column :label="langData.executor" header-align="center" align="left" width="130">
         <template #default="{row}">
           <span>{{ row.groupTitle }}</span>
           <span class="cell-sub">{{ row.groupAddressList }}</span>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtTriggerStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center" align="center" width="90">
+      <el-table-column prop="fmtTriggerStatus" :label="langData.triggerStatus" header-align="center" align="center" width="90">
         <template #default="scope">
           <el-tag :type="scope.row.triggerStatus==0?'info':'success'" effect="plain" size="small">
             {{ scope.row.fmtTriggerStatus }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="fmtUpdateTime" :label="langData.tableHeaderUpdateTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
-      <el-table-column prop="author" :label="langData.tableHeaderCreator" :show-overflow-tooltip="true" header-align="center" align="center" width="90"/>
-      <el-table-column prop="fmtTriggerLastTime" :label="langData.triggerLastTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
-      <el-table-column prop="fmtTriggerNextTime" :label="langData.triggerNextTime" :show-overflow-tooltip="true" header-align="center" align="center" width="120"/>
+      <el-table-column prop="fmtUpdateTime" :label="langData.tableHeaderUpdateTime" header-align="center" align="center" width="120"/>
+      <el-table-column prop="author" :label="langData.tableHeaderCreator" header-align="center" align="center" width="90"/>
+      <el-table-column prop="fmtTriggerLastTime" :label="langData.triggerLastTime" header-align="center" align="center"/>
+      <el-table-column prop="fmtTriggerNextTime" :label="langData.triggerNextTime" header-align="center" align="center"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
@@ -1069,12 +1069,11 @@ const downloadTemplate = () => {
 .cell-mono {
   font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 50;
   background: var(--surface-inset);
-  padding: 2px 8px;
+  padding: 2px 2px;
   border-radius: 4px;
   color: var(--el-text-color-regular);
-  white-space: nowrap;
 }
 
 .cell-sub {
