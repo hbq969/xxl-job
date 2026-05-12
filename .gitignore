@@ -22,3 +22,6 @@
 **/*-me.xml
 **/components.d.ts
 **/.mcp-class-index.json
+**/.claude
+.github
+graphify-out

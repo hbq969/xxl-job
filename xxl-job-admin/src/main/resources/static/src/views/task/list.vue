@@ -907,7 +907,7 @@ const downloadTemplate = () => {
 <style scoped>
 .container {
   flex-grow: 1;
-  padding: 0;
+  padding: 20px;
   overflow: auto;
   width: 100%;
 }
