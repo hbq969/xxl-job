@@ -76,6 +76,8 @@ spring:
           - "/${spring.mvc.interceptors.login.ui-output-dir}/i18n/lang"
           - "/${spring.mvc.interceptors.login.ui-output-dir}/i18n/lang/data"
           - "/${spring.mvc.interceptors.login.ui-output-dir}/**/getPublicKey"
+          - "/${spring.mvc.interceptors.login.ui-output-dir}/system/captcha"
+          - "/${spring.mvc.interceptors.login.ui-output-dir}/system/captcha/verify"
         session-key: xxl-job-admin-sid
         sm-initial-script:
           language: zh-CN
