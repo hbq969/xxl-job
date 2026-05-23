@@ -149,7 +149,11 @@ const fetchJobGroup = () => {
         </template>
       </el-table-column>
       <el-table-column prop="username" :label="langData.username" :show-overflow-tooltip="true" header-align="center" align="center" min-width="140"/>
-      <el-table-column prop="roleName" :label="langData.roleName" :show-overflow-tooltip="true" header-align="center" align="center" min-width="130"/>
+      <el-table-column :label="langData.roleName" :show-overflow-tooltip="true" header-align="center" align="center" min-width="130">
+        <template #default="{row}">
+          <span>{{ row.roleNames?.join(', ') }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="fmtAccStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center" align="center" width="130">
         <template #default="{row}">
           <el-tag size="small" effect="plain" :type="row.accStatus==1?'success':'info'">{{ row.fmtAccStatus }}</el-tag>

@@ -34,6 +34,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -222,7 +223,7 @@ public class JobUserController {
     @SMRequiresPermissions(menu = "xxl_user_list", apiDesc = "获取权限范围内的执行器", apiKey = "findPermissionGroups")
     public ReturnMessage<List<XxlJobGroup>> findPermissionGroups() {
         UserInfo ui = UserContext.get();
-        List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(ui.getUserName(), ui.getRoleName());
+        List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(ui.getUserName(), new ArrayList<>(ui.getRoleNames()));
         return ReturnMessage.success(groupList);
     }
 
@@ -231,7 +232,7 @@ public class JobUserController {
     @ResponseBody
     @SMRequiresPermissions(menu = "xxl_user_list", apiDesc = "获取指定用户的权限范围内的执行器", apiKey = "findUserPermissionGroups")
     public ReturnMessage<List<Integer>> findUserPermissionGroups(@PathVariable(name = "userName") String userName) {
-        List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(userName, "USER");
+        List<XxlJobGroup> groupList = xxlJobUserMapper.queryUserGroupList(userName, List.of("USER"));
         List<Integer> groupIds = groupList.stream().map(g -> g.getId()).collect(Collectors.toList());
         return ReturnMessage.success(groupIds);
     }
@@ -255,7 +256,7 @@ public class JobUserController {
         PageInfo<UserEntity> pg = loginService.queryUserList(pageNum, pageSize, new UserEntity());
         pg.setList(pg.getList().stream().filter(u -> {
             u.setPassword("**");
-            return !StrUtil.equals("ADMIN", u.getRoleName());
+            return u.getRoleNames() == null || !u.getRoleNames().contains("ADMIN");
         }).collect(Collectors.toList()));
         return ReturnMessage.success(pg);
     }

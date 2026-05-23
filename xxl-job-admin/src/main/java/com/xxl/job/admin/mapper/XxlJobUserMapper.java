@@ -39,7 +39,7 @@ public interface XxlJobUserMapper {
 
     void createXxlJobUserPermission();
 
-    List<XxlJobGroup> queryUserGroupList(@Param("userName") String userName, @Param("roleName") String roleName);
+    List<XxlJobGroup> queryUserGroupList(@Param("userName") String userName, @Param("roleNames") List<String> roleNames);
 
     void deleteUserPermission(@Param("userName") String userName);
 
