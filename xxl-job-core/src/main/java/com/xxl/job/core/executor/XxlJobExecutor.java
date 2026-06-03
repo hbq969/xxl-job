@@ -38,6 +38,7 @@ public class XxlJobExecutor  {
     private int port;
     private String logPath;
     private int logRetentionDays;
+    private boolean callbackRetryEnabled = true;
 
     public void setAdminAddresses(String adminAddresses) {
         this.adminAddresses = adminAddresses;
@@ -66,6 +67,9 @@ public class XxlJobExecutor  {
     public void setLogRetentionDays(int logRetentionDays) {
         this.logRetentionDays = logRetentionDays;
     }
+    public void setCallbackRetryEnabled(boolean callbackRetryEnabled) {
+        this.callbackRetryEnabled = callbackRetryEnabled;
+    }
 
 
     // ---------------------- start + stop ----------------------
@@ -82,6 +86,7 @@ public class XxlJobExecutor  {
         JobLogFileCleanThread.getInstance().start(logRetentionDays);
 
         // init TriggerCallbackThread
+        TriggerCallbackThread.setRetryEnabled(callbackRetryEnabled);
         TriggerCallbackThread.getInstance().start();
 
         // init executor-server

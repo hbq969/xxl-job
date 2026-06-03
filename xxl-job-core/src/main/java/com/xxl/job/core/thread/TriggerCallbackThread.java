@@ -45,6 +45,11 @@ public class TriggerCallbackThread {
      */
     private Thread triggerCallbackThread;
     private Thread triggerRetryCallbackThread;
+	private static boolean retryEnabled = true;
+	public static void setRetryEnabled(boolean retryEnabled) {
+		TriggerCallbackThread.retryEnabled = retryEnabled;
+	}
+
     private volatile boolean toStop = false;
     public void start() {
 
@@ -104,7 +109,7 @@ public class TriggerCallbackThread {
         triggerCallbackThread.start();
 
 
-        // retry
+		if (retryEnabled) {
         triggerRetryCallbackThread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -130,6 +135,8 @@ public class TriggerCallbackThread {
         });
         triggerRetryCallbackThread.setDaemon(true);
         triggerRetryCallbackThread.start();
+		}
+
 
     }
     public void toStop(){

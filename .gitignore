@@ -26,3 +26,8 @@
 **/.claude
 .github
 graphify-out
+**/.codegraph
+**/.cursor
+**/.settings
+**/.classpath
+**/.factorypath
