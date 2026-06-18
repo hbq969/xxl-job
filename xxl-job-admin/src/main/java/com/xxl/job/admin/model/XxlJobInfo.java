@@ -53,7 +53,7 @@ public class XxlJobInfo implements DictModel, DictAware {
     private String childJobId;        // 子任务ID，多个逗号分隔
 
     @Td(fmtFieldName = "fmtTriggerStatus", dictName = "xxl-job-admin,triggerStatus")
-    private int triggerStatus;        // 调度状态：0-停止，1-运行
+    private Integer triggerStatus;        // 调度状态：0-停止，1-运行
     @Setter
     @Getter
     private String fmtTriggerStatus;
@@ -253,11 +253,11 @@ public class XxlJobInfo implements DictModel, DictAware {
         this.childJobId = childJobId;
     }
 
-    public int getTriggerStatus() {
+    public Integer getTriggerStatus() {
         return triggerStatus;
     }
 
-    public void setTriggerStatus(int triggerStatus) {
+    public void setTriggerStatus(Integer triggerStatus) {
         this.triggerStatus = triggerStatus;
     }
 
