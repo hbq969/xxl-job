@@ -174,6 +174,7 @@ public class XxlJobServiceImpl implements XxlJobService {
         jobInfo.setAddTime(new Date());
         jobInfo.setUpdateTime(new Date());
         jobInfo.setGlueUpdatetime(new Date());
+        jobInfo.setTriggerStatus(0);
         // remove the whitespace
         jobInfo.setExecutorHandler(jobInfo.getExecutorHandler().trim());
         xxlJobInfoMapper.save(jobInfo);
