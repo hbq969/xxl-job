@@ -38,15 +38,15 @@ public class InitialServiceImpl extends AbstractScriptInitialAware {
 
     @Override
     protected void tableCreate0() {
-        ThrowUtils.call("创建h_xxl_job_user_p表成功", "h_xxl_job_user_p表已存在", () -> xxlJobUserMapper.createXxlJobUserPermission());
-        ThrowUtils.call("创建xxl_job_group表成功", "xxl_job_group表已存在", () -> initMapper.createJobGroup());
-        ThrowUtils.call("创建xxl_job_registry表成功", "xxl_job_registry表已存在", () -> initMapper.createJobRegistry());
-        ThrowUtils.call("创建xxl_job_info表成功", "xxl_job_info表已存在", () -> initMapper.createJobInfo());
-        ThrowUtils.call("创建xxl_job_logglue表成功", "xxl_job_logglue表已存在", () -> initMapper.createJobLogglue());
-        ThrowUtils.call("创建xxl_job_log表成功", "xxl_job_log表已存在", () -> initMapper.createJobLog());
-        ThrowUtils.call("创建xxl_job_log_report表成功", "xxl_job_log_report表已存在", () -> initMapper.createJobLogReport());
-        ThrowUtils.call("创建xxl_job_lock表成功", "xxl_job_lock表已存在", () -> initMapper.createJobLock());
-        ThrowUtils.call("创建xxl_job_user表成功", "xxl_job_user表已存在", () -> initMapper.createJobUser());
+        ThrowUtils.runWithCreateTab(() -> xxlJobUserMapper.createXxlJobUserPermission(), "h_xxl_job_user_p");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobGroup(), "xxl_job_group");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobRegistry(), "xxl_job_registry");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobInfo(), "xxl_job_info");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobLogglue(), "xxl_job_logglue");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobLog(), "xxl_job_log");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobLogReport(), "xxl_job_log_report");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobLock(), "xxl_job_lock");
+        ThrowUtils.runWithCreateTab(() -> initMapper.createJobUser(), "xxl_job_user");
     }
 
     @Override
