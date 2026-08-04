@@ -31,3 +31,5 @@ graphify-out
 **/.settings
 **/.classpath
 **/.factorypath
+**/.env.production
+**/.env.test

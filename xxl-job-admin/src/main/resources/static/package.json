@@ -8,6 +8,8 @@
     "build": "run-p type-check \"build-only {@}\" --",
     "preview": "vite preview",
     "build-only": "vite build",
+    "build:test": "run-p type-check \"build-only -- -m test\" --",
+    "build:prod": "run-p type-check \"build-only {@}\" --",
     "prod": "vite build --mode=development",
     "type-check": "vue-tsc --build",
     "format": "prettier --write src/"

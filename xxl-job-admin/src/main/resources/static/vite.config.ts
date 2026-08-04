@@ -2,7 +2,7 @@
 
 import {fileURLToPath, URL} from 'node:url'
 
-import {defineConfig} from 'vite'
+import {defineConfig, loadEnv} from 'vite'
 import vue from '@vitejs/plugin-vue'
 import vueDevTools from 'vite-plugin-vue-devtools'
 import autoprefixer from 'autoprefixer'
@@ -12,7 +12,21 @@ import Components from 'unplugin-vue-components/vite';
 import {ElementPlusResolver} from 'unplugin-vue-components/resolvers';
 
 // https://vite.dev/config/
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '')
+
+  const rumPlugin = {
+    name: 'inject-rum',
+    transformIndexHtml(html: string) {
+      if (env.VITE_RUM_ENABLED !== 'true') return html
+      const rumScript = `!(function(w,d,s,r){w['rum_queue']=w['rum_queue']||[];w[r]||(w[r]={});w[r].config={appId:${env.VITE_RUM_APP_ID},agentId:'${env.VITE_RUM_AGENT_ID}',userMark:'${env.VITE_RUM_USER_MARK}',reportUrl:'${env.VITE_RUM_REPORT_URL}',disableHook:false,disableResource:false,disableFmp:false,clickScope:'part',disableConsole:true,globalDisabled:false,rate:1,enableFullLink:false,enableApiCors:false,enableCatonFps:false,catonFpsThreshold:20};var dom=d.createElement("script");dom.setAttribute("crossorigin","anonymous");dom.setAttribute("src",s);var nd=d.getElementsByTagName("script")[0];nd.parentNode.insertBefore(dom,nd);})(window,document,'${env.VITE_RUM_JS_URL}',"__rum");`
+      return [
+        { tag: 'script', children: rumScript, injectTo: 'head-prepend' as const }
+      ]
+    }
+  }
+
+  return {
   base: './',
   plugins: [
     // 预加载组件
@@ -21,7 +35,8 @@ export default defineConfig({
     }),
     vue(),
     vueDevTools(),
-    vuetify({autoImport: true})
+    vuetify({autoImport: true}),
+    rumPlugin,
   ],
   resolve: {
     alias: {
@@ -74,5 +89,6 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/dev/, '')
       }
     }
+  }
   }
 })
