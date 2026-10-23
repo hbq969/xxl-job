@@ -1240,7 +1240,7 @@ const downloadTemplate = () => {
 
 .sc-body :deep(.el-form-item__label) {
   width: 110px !important;
-  font-size: 12.5px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   color: var(--el-text-color-secondary);
   white-space: nowrap;
