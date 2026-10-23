@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import {
-  Edit, ArrowLeft
-} from '@element-plus/icons-vue'
+import {IcEdit, IcArrowLeft} from '@/utils/icons'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
@@ -83,14 +81,14 @@ const _ = (window as any).ResizeObserver;
 
 <template>
   <div class="container">
-    <el-page-header :icon="ArrowLeft" @back="router.push({path:'/'})"
+    <el-page-header :icon="IcArrowLeft" @back="router.push({path:'/'})"
                     v-if="!router.currentRoute.value.query.hiddeHeader">
       <template #content>
         <span> demo </span>
       </template>
     </el-page-header>
     <el-divider content-position="left" v-if="!router.currentRoute.value.query.hiddeHeader"></el-divider>
-    <el-form :model="form" size="small" label-position="right" inline-message inline>
+    <el-form :model="form" label-position="right" inline-message inline>
       <el-form-item label="Search Cond1" prop="cond1">
         <el-input v-model="form.cond1" placeholder="请输入..." type="text" clearable/>
       </el-form-item>
@@ -98,20 +96,19 @@ const _ = (window as any).ResizeObserver;
         <el-input v-model="form.cond2" placeholder="请输入..." type="text" clearable/>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" size="small" @click="query()">Search</el-button>
+        <el-button type="primary" @click="query()">Search</el-button>
       </el-form-item>
     </el-form>
-    <el-table :data="data" style="width: 100%" :border="true" table-layout="fixed" :stripe="true"
-              size="small" :highlight-current-row="true">
+    <el-table :data="data" style="width: 100%" :border="true" table-layout="fixed" :stripe="true" :highlight-current-row="true">
       <el-table-column fixed="left" label="Operation" width="180" header-align="center" align="center">
         <template #default="scope">
-          <el-button link type="primary" size="small" @click="showEditDialog(scope.row)">edit
+          <el-button link type="primary" @click="showEditDialog(scope.row)">edit
           </el-button>
           <el-popconfirm title="你确定要删除本条记录吗?" @confirm="deleteUser(scope.row)"
                          icon-color="red"
                          confirm-button-type="danger">
             <template #reference>
-              <el-button link type="danger" size="small">delete
+              <el-button link type="danger">delete
               </el-button>
             </template>
           </el-popconfirm>
@@ -129,8 +126,7 @@ const _ = (window as any).ResizeObserver;
     <el-pagination class="page" v-model:page-size="form.pageSize" v-model:current-page="form.pageNum"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="form.total"
                    @size-change="query()"
-                   @current-change="query()" @prev-click="query()" @next-click="query()"
-                   size="small" :background="true"
+                   @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
                    :page-sizes="[5, 10, 20, 50, 100]"/>
   </div>
 </template>

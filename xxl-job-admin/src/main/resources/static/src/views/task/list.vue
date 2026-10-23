@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import {
-  Edit, ArrowLeft, Plus, Delete, VideoPause, VideoPlay, DocumentCopy, Setting, UploadFilled, Printer, Document
-} from '@element-plus/icons-vue'
+import {IcEdit, IcArrowLeft, IcPlus, IcDelete, IcVideoPlay, IcDocumentCopy, IcSetting, IcUploadFilled, IcDocument} from '@/utils/icons'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, notify, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
@@ -557,15 +555,15 @@ const downloadTemplate = () => {
         <span class="card-title">任务搜索</span>
         <span class="card-badge">{{ total }} 个任务</span>
       </div>
-      <el-form :model="form" size="small" label-position="right" inline-message :inline="true" class="search-form">
+      <el-form :model="form" label-position="right" inline-message :inline="true" class="search-form">
         <el-form-item :label="langData.executor" prop="jobGroup">
-          <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+          <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable
                      filterable remote automatic-dropdown :remote-method="fetchJobGroup">
             <el-option :key="item.id" :label="item.title+' ('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="langData.taskStatus" prop="triggerStatus">
-          <el-select v-model="form.triggerStatus" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+          <el-select v-model="form.triggerStatus" :placeholder="langData.formSelectPlaceholder" clearable
                      filterable automatic-dropdown>
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in triggerStatusList"/>
           </el-select>
@@ -580,8 +578,8 @@ const downloadTemplate = () => {
           <el-input v-model="form.author" type="text" clearable/>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="small" @click="query()">{{ langData.btnSearch }}</el-button>
-          <el-button type="success" :icon="Plus" circle @click="showAddTaskDialog" :title="langData.btnAdd"/>
+          <el-button type="primary" @click="query()">{{ langData.btnSearch }}</el-button>
+          <el-button type="success" :icon="IcPlus" circle @click="showAddTaskDialog" :title="langData.btnAdd"/>
         </el-form-item>
       </el-form>
     </div>
@@ -593,20 +591,20 @@ const downloadTemplate = () => {
           <template v-if="selectedCount">
             <el-popconfirm :title="langData.confirmOpera" @confirm="batchStartTasks" confirm-button-type="warning">
               <template #reference>
-                <span class="tool-btn start"><el-icon :size="16"><VideoPlay/></el-icon> 启动</span>
+                <span class="tool-btn start"><el-icon :size="16"><IcVideoPlay/></el-icon> 启动</span>
               </template>
             </el-popconfirm>
             <el-popconfirm :title="langData.confirmOpera" @confirm="batchStopTasks" confirm-button-type="warning">
               <template #reference>
-                <span class="tool-btn pause"><el-icon :size="16"><VideoPause/></el-icon> 暂停</span>
+                <span class="tool-btn pause"><el-icon :size="16"><IcVideoPause/></el-icon> 暂停</span>
               </template>
             </el-popconfirm>
             <el-popconfirm :title="langData.confirmDelete" @confirm="batchDeleteTasks" confirm-button-type="danger">
               <template #reference>
-                <span class="tool-btn delete"><el-icon :size="16"><Delete/></el-icon> 删除</span>
+                <span class="tool-btn delete"><el-icon :size="16"><IcDelete/></el-icon> 删除</span>
               </template>
             </el-popconfirm>
-            <span class="tool-btn setting" :title="langData.batchModifyExecutor" @click="showBatchModifyExecutorDialog"><el-icon :size="16"><Setting/></el-icon> 修改执行器</span>
+            <span class="tool-btn setting" :title="langData.batchModifyExecutor" @click="showBatchModifyExecutorDialog"><el-icon :size="16"><IcSetting/></el-icon> 修改执行器</span>
           </template>
           <template v-else>
             <span class="selected-hint">选中项进行操作</span>
@@ -615,42 +613,41 @@ const downloadTemplate = () => {
       </div>
       <div class="toolbar-right">
         <el-tooltip :content="langData.importTask" effect="dark" placement="top">
-          <span class="tool-btn ghost" @click="showImportDialog"><el-icon :size="14"><UploadFilled/></el-icon> 导入</span>
+          <span class="tool-btn ghost" @click="showImportDialog"><el-icon :size="14"><IcUploadFilled/></el-icon> 导入</span>
         </el-tooltip>
         <el-tooltip :content="langData.exportTask" effect="dark" placement="top">
-          <span class="tool-btn ghost" @click="exportData"><el-icon :size="14"><Printer/></el-icon> 导出</span>
+          <span class="tool-btn ghost" @click="exportData"><el-icon :size="14"><IcPrinter/></el-icon> 导出</span>
         </el-tooltip>
         <el-tooltip :content="langData.downloadTemplate" effect="dark" placement="top">
-          <span class="tool-btn ghost" @click="downloadTemplate"><el-icon :size="14"><Document/></el-icon> 模板</span>
+          <span class="tool-btn ghost" @click="downloadTemplate"><el-icon :size="14"><IcDocument/></el-icon> 模板</span>
         </el-tooltip>
       </div>
     </div>
 
     <!-- 表格 -->
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false"
-              size="small" :highlight-current-row="true" ref="multipleTableRef"
+    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false" :highlight-current-row="true" ref="multipleTableRef"
               @selection-change="handleSelectionChange" class="data-table">
       <el-table-column type="selection" header-align="center" align="center" width="40"/>
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="90" header-align="center" align="center">
         <template #default="scope">
           <div class="row-actions">
-            <el-icon @click="showEditTaskDialog(scope.row)" :color="'var(--el-color-primary)'" :size="14" :title="langData.btnEdit"><Edit/></el-icon>
+            <el-icon @click="showEditTaskDialog(scope.row)" :color="'var(--el-color-primary)'" :size="14" :title="langData.btnEdit"><IcEdit/></el-icon>
             <el-popconfirm :title="langData.confirmDelete" @confirm="deleteTask(scope.row)" icon-color="red" confirm-button-type="danger">
               <template #reference>
-                <el-icon color="red" :size="14"><Delete/></el-icon>
+                <el-icon color="red" :size="14"><IcDelete/></el-icon>
               </template>
             </el-popconfirm>
             <el-popconfirm :title="langData.confirmOpera" @confirm="startTask(scope.row)" confirm-button-type="danger" v-if="scope.row.triggerStatus==0">
               <template #reference>
-                <el-icon :color="'var(--el-color-success)'" :size="14" :title="langData.startTask"><VideoPlay/></el-icon>
+                <el-icon :color="'var(--el-color-success)'" :size="14" :title="langData.startTask"><IcVideoPlay/></el-icon>
               </template>
             </el-popconfirm>
             <el-popconfirm :title="langData.confirmOpera" @confirm="stopTask(scope.row)" confirm-button-type="danger" v-if="scope.row.triggerStatus==1">
               <template #reference>
-                <el-icon :color="'var(--el-color-warning)'" :size="14" :title="langData.stopTask"><VideoPause/></el-icon>
+                <el-icon :color="'var(--el-color-warning)'" :size="14" :title="langData.stopTask"><IcVideoPause/></el-icon>
               </template>
             </el-popconfirm>
-            <el-icon :color="'var(--el-color-info)'" :size="14" :title="langData.copyTask" @click="copyTask(scope.row)"><DocumentCopy/></el-icon>
+            <el-icon :color="'var(--el-color-info)'" :size="14" :title="langData.copyTask" @click="copyTask(scope.row)"><IcDocumentCopy/></el-icon>
             <el-icon :color="'var(--el-color-primary)'" :size="14" :title="langData.runImmediate" @click="showImmediateTaskDialog(scope.row)">
               <svg t="1761619792188" class="icon-svg" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="4669" width="14" height="14">
                 <path d="M317.9 80.6l531.7 354.5c25.7 17.2 41.2 46 41.2 76.9 0 30.9-15.4 59.8-41.2 76.9L317.9 943.4c-28.4 18.9-64.9 20.7-95 4.6-30.1-16.1-48.9-47.5-48.8-81.7V157.6c0-34.1 18.7-65.5 48.8-81.6 30.1-16.2 66.6-14.4 95 4.6z m-38.5 57.7c-7.1-4.7-16.2-5.2-23.7-1.1s-12.2 11.9-12.2 20.4v708.8c0 8.5 4.7 16.4 12.2 20.4 7.5 4 16.7 3.6 23.7-1.2l531.7-354.4c6.4-4.3 10.3-11.5 10.3-19.3 0-7.7-3.9-15-10.3-19.2L279.4 138.3zM440 454.2h-87.7c-4.7 0-8.9-2.8-10.7-7.1-1.8-4.3-0.8-9.3 2.5-12.6l95.9-95.9h57.8v346.9H440V454.2z m0 0" fill="currentColor" p-id="4670"></path>
@@ -685,7 +682,7 @@ const downloadTemplate = () => {
       </el-table-column>
       <el-table-column prop="fmtTriggerStatus" :label="langData.triggerStatus" header-align="center" align="center" width="90">
         <template #default="scope">
-          <el-tag :type="scope.row.triggerStatus==0?'info':'success'" effect="plain" size="small">
+          <el-tag :type="scope.row.triggerStatus==0?'info':'success'" effect="plain">
             {{ scope.row.fmtTriggerStatus }}
           </el-tag>
         </template>
@@ -697,14 +694,13 @@ const downloadTemplate = () => {
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
-                   size="small" :background="true"
+                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
                    :page-sizes="[5, 10, 20, 50, 100]"/>
   </div>
 
   <!-- 立即执行弹窗 -->
   <el-dialog v-model="dialogFormVisible" :title="langData.executeTask" draggable width="420px" class="exec-dialog">
-    <el-form :model="immediateTaskForm" label-position="right" size="small" :inline="false" ref="formRef1"
+    <el-form :model="immediateTaskForm" label-position="right" :inline="false" ref="formRef1"
              :rules="rules1" label-width="100px">
       <el-form-item :label="langData.taskId" prop="id">
         <el-input v-model="immediateTaskForm.id" type="text" disabled/>
@@ -718,10 +714,10 @@ const downloadTemplate = () => {
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
         <el-popconfirm :title="langData.confirmOpera" confirm-button-type="warning" @confirm="startTaskImmediate(formRef1)">
           <template #reference>
-            <el-button type="primary" size="small">执行</el-button>
+            <el-button type="primary">执行</el-button>
           </template>
         </el-popconfirm>
       </div>
@@ -737,7 +733,7 @@ const downloadTemplate = () => {
       class="task-dialog"
   >
     <div class="form-container">
-      <el-form :model="taskForm" size="small" label-position="right" inline-message :inline="false" ref="formRef"
+      <el-form :model="taskForm" label-position="right" inline-message :inline="false" ref="formRef"
                :rules="rules" label-width="110px">
         <!-- 核心配置区 — 三列 -->
         <div class="core-sections">
@@ -753,7 +749,7 @@ const downloadTemplate = () => {
             </div>
             <div class="sc-body">
               <el-form-item :label="langData.executor" prop="jobGroup">
-                <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+                <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable
                            filterable :remote-method="fetchJobGroup">
                   <el-option :key="item.id" :label="item.title+'('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
                 </el-select>
@@ -780,7 +776,7 @@ const downloadTemplate = () => {
             </div>
             <div class="sc-body">
               <el-form-item :label="langData.scheduleType" prop="scheduleType">
-                <el-select v-model="taskForm.scheduleType" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+                <el-select v-model="taskForm.scheduleType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
                   <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
                 </el-select>
               </el-form-item>
@@ -809,7 +805,7 @@ const downloadTemplate = () => {
             </div>
             <div class="sc-body">
               <el-form-item :label="langData.glueType" prop="glueType">
-                <el-select v-model="taskForm.glueType" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+                <el-select v-model="taskForm.glueType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
                   <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
                 </el-select>
               </el-form-item>
@@ -836,17 +832,17 @@ const downloadTemplate = () => {
           <div class="sc-body">
             <div class="sc-grid cols-3">
               <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
-                <el-select v-model="taskForm.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+                <el-select v-model="taskForm.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
                   <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
                 </el-select>
               </el-form-item>
               <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
-                <el-select v-model="taskForm.misfireStrategy" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+                <el-select v-model="taskForm.misfireStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
                   <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
                 </el-select>
               </el-form-item>
               <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
-                <el-select v-model="taskForm.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+                <el-select v-model="taskForm.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
                   <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
                 </el-select>
               </el-form-item>
@@ -869,25 +865,24 @@ const downloadTemplate = () => {
     </div>
     <template #footer>
       <div class="dialog-footer">
-        <el-button size="small" @click="drawer = false">{{langData.btnCancel}}</el-button>
-        <el-button type="primary" size="small" @click="updateTask(formRef)" :loading="submitting">{{langData.btnSave}}</el-button>
+        <el-button @click="drawer = false">{{langData.btnCancel}}</el-button>
+        <el-button type="primary" @click="updateTask(formRef)" :loading="submitting">{{langData.btnSave}}</el-button>
       </div>
     </template>
   </el-dialog>
 
   <!-- 批量修改执行器 -->
   <el-dialog v-model="batchExecutorDialogVisible" :title="langData.batchModifyExecutor" draggable width="380px">
-    <el-form :model="batchExecutorForm" label-position="right" size="small" label-width="100px">
+    <el-form :model="batchExecutorForm" label-position="right" label-width="100px">
       <el-form-item :label="langData.executor" prop="jobGroup">
-        <el-select v-model="batchExecutorForm.jobGroup" :placeholder="langData.formSelectPlaceholder"
-                   size="small" clearable filterable remote automatic-dropdown :remote-method="fetchJobGroup">
+        <el-select v-model="batchExecutorForm.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable filterable remote automatic-dropdown :remote-method="fetchJobGroup">
           <el-option :key="item.id" :label="item.title+' ('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
-      <el-button size="small" @click="batchExecutorDialogVisible = false">{{ langData.btnCancel }}</el-button>
-      <el-button type="primary" size="small" @click="batchUpdateJobGroup">{{ langData.btnSave }}</el-button>
+      <el-button @click="batchExecutorDialogVisible = false">{{ langData.btnCancel }}</el-button>
+      <el-button type="primary" @click="batchUpdateJobGroup">{{ langData.btnSave }}</el-button>
     </template>
   </el-dialog>
 
@@ -898,7 +893,7 @@ const downloadTemplate = () => {
         <el-upload action="#" name="file" ref="uploadRef" class="upload-demo" drag
             :multiple="false" :auto-upload="false" :limit="1"
             @change="fileChange" @remove="fileRemove" accept=".csv" style="height:230px">
-          <el-icon class="el-icon--upload"><UploadFilled/></el-icon>
+          <el-icon class="el-icon--upload"><IcUploadFilled/></el-icon>
           <div class="el-upload__text">Drop file here or <em> click to upload </em></div>
           <template #tip>
             <div class="el-upload__tip">{{ langData.importFileTip }}</div>
@@ -952,14 +947,14 @@ const downloadTemplate = () => {
 }
 
 .card-title {
-  font-size: 13px;
+  font-size: var(--el-font-size-small);
   font-weight: 600;
   color: var(--el-text-color-primary);
   letter-spacing: -0.01em;
 }
 
 .card-badge {
-  font-size: 11px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   color: var(--el-text-color-secondary);
   font-family: var(--font-mono);
@@ -999,7 +994,7 @@ const downloadTemplate = () => {
 }
 
 .selected-hint {
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   color: var(--el-text-color-placeholder);
   padding: 4px 8px;
 }
@@ -1010,7 +1005,7 @@ const downloadTemplate = () => {
   gap: 4px;
   padding: 5px 10px;
   border-radius: var(--radius-sm);
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   cursor: pointer;
   transition: all var(--transition-fast);
@@ -1068,7 +1063,7 @@ const downloadTemplate = () => {
 
 .cell-mono {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 50;
   background: var(--surface-inset);
   padding: 2px 2px;
@@ -1078,7 +1073,7 @@ const downloadTemplate = () => {
 
 .cell-sub {
   display: block;
-  font-size: 11px;
+  font-size: var(--el-font-size-extra-small);
   color: var(--el-text-color-placeholder);
   margin-top: 1px;
 }
@@ -1198,7 +1193,7 @@ const downloadTemplate = () => {
 /* 大号编号 */
 .sc-num {
   font-family: var(--font-mono);
-  font-size: 26px;
+  font-size: var(--el-font-size-extra-large);
   font-weight: 600;
   line-height: 1;
   flex-shrink: 0;
@@ -1219,14 +1214,14 @@ const downloadTemplate = () => {
 }
 
 .sc-label {
-  font-size: 13px;
+  font-size: var(--el-font-size-small);
   font-weight: 600;
   color: var(--el-text-color-primary);
   letter-spacing: 0.02em;
 }
 
 .sc-desc {
-  font-size: 11px;
+  font-size: var(--el-font-size-extra-small);
   color: var(--el-text-color-placeholder);
   font-weight: 400;
   letter-spacing: 0.01em;
@@ -1276,7 +1271,7 @@ const downloadTemplate = () => {
 /* 输入框内联前缀 */
 .input-prefix {
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;

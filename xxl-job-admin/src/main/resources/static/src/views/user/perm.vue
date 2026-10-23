@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import {
-  Edit, ArrowLeft, UserFilled
-} from '@element-plus/icons-vue'
+import {IcEdit, IcArrowLeft, IcUserFilled} from '@/utils/icons'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, notify, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
@@ -137,13 +135,12 @@ const fetchJobGroup = () => {
 <template>
   <div class="perm-page view-enter">
     <!-- 用户表格 -->
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false"
-              size="small" :highlight-current-row="true" class="data-table">
+    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false" :highlight-current-row="true" class="data-table">
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
           <div class="row-actions">
             <el-tooltip :content="langData.permConfig" effect="dark" placement="top">
-              <el-icon @click="showUserPermDialog(scope.row)" :color="'var(--el-color-primary)'" :size="15"><UserFilled/></el-icon>
+              <el-icon @click="showUserPermDialog(scope.row)" :color="'var(--el-color-primary)'" :size="15"><IcUserFilled/></el-icon>
             </el-tooltip>
           </div>
         </template>
@@ -156,23 +153,22 @@ const fetchJobGroup = () => {
       </el-table-column>
       <el-table-column prop="fmtAccStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center" align="center" width="130">
         <template #default="{row}">
-          <el-tag size="small" effect="plain" :type="row.accStatus==1?'success':'info'">{{ row.fmtAccStatus }}</el-tag>
+          <el-tag effect="plain" :type="row.accStatus==1?'success':'info'">{{ row.fmtAccStatus }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="fmtCreatedAt" :label="langData.tableHeaderCreateTime" :show-overflow-tooltip="true" header-align="center" align="center" width="150"/>
     </el-table>
     <el-pagination class="page" v-model:page-size="pg.pageSize" v-model:current-page="pg.pageNum"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
-                   size="small" :background="true"
+                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
                    :page-sizes="[5, 10, 20, 50, 100]"/>
   </div>
 
   <!-- 权限配置弹窗 -->
   <el-dialog v-model="dialogFormVisible" :title="langData.permConfig" draggable width="420px">
-    <el-form :model="permForm" label-position="right" size="small" :inline="false" ref="formRef" :rules="rules" label-width="80px">
+    <el-form :model="permForm" label-position="right" :inline="false" ref="formRef" :rules="rules" label-width="80px">
       <el-form-item :label="langData.executor" prop="jobGroup">
-        <el-select v-model="permForm.groupIds" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+        <el-select v-model="permForm.groupIds" :placeholder="langData.formSelectPlaceholder" clearable
                    filterable multiple>
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in jobGroupList"/>
         </el-select>
@@ -180,8 +176,8 @@ const fetchJobGroup = () => {
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
-        <el-button type="primary" size="small" @click="updateUserPerm(formRef)">{{ langData.btnSave }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
+        <el-button type="primary" @click="updateUserPerm(formRef)">{{ langData.btnSave }}</el-button>
       </div>
     </template>
   </el-dialog>

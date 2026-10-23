@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import {
-  Edit, ArrowLeft, Document, Operation
-} from '@element-plus/icons-vue'
+import {IcEdit, IcArrowLeft, IcDocument} from '@/utils/icons'
 import {ref, reactive, onMounted, computed} from 'vue'
 import type {FormInstance, FormRules} from 'element-plus'
 import axios from '@/network'
@@ -287,7 +285,7 @@ const showJobInfoDrawer = (row: any) => {
   <div class="log-page view-enter">
     <!-- 返回导航 -->
     <div class="back-nav" v-if="fromTaskListFlag">
-      <el-page-header :icon="ArrowLeft" @back="router.back()">
+      <el-page-header :icon="IcArrowLeft" @back="router.back()">
         <template #content>
           <span class="text-large font-600 mr-3">{{ langData.taskLog }}</span>
         </template>
@@ -300,7 +298,7 @@ const showJobInfoDrawer = (row: any) => {
         <span class="card-title">日志检索</span>
         <span class="card-badge">{{ total }} 条记录</span>
       </div>
-      <el-form :model="form" size="small" label-position="right" inline-message :inline="true" class="search-form">
+      <el-form :model="form" label-position="right" inline-message :inline="true" class="search-form">
         <el-form-item :label="langData.time" prop="time">
           <el-date-picker
               v-model="form.time"
@@ -309,31 +307,30 @@ const showJobInfoDrawer = (row: any) => {
               :end-placeholder="langData.endTime"
               format="YYYY-MM-DD HH:mm:ss"
               value-format="YYYY-MM-DD HH:mm:ss"
-              size="small"
               style="width: 340px"
           />
         </el-form-item>
         <el-form-item :label="langData.executor" prop="jobGroup">
-          <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+          <el-select v-model="form.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable
                      filterable remote automatic-dropdown :remote-method="fetchJobGroup"
                      @change="()=>{ if (!form.jobGroup || form.jobGroup==null || form.jobGroup=='') { form.jobId=null; taskList=[] as any[];}}">
             <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="langData.task" prop="jobId">
-          <el-select v-model="form.jobId" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+          <el-select v-model="form.jobId" :placeholder="langData.formSelectPlaceholder" clearable
                      filterable remote automatic-dropdown :remote-method="fetchTaskList">
             <el-option :key="item.id" :label="item.jobDesc" :value="item.id" v-for="item in taskList"/>
           </el-select>
         </el-form-item>
         <el-form-item :label="langData.logStatus" prop="logStatus">
-          <el-select v-model="form.logStatus" :placeholder="langData.formSelectPlaceholder" size="small" clearable
+          <el-select v-model="form.logStatus" :placeholder="langData.formSelectPlaceholder" clearable
                      filterable automatic-dropdown>
             <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in logStatusList"/>
           </el-select>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="small" @click="query()">{{ langData.btnSearch }}</el-button>
+          <el-button type="primary" @click="query()">{{ langData.btnSearch }}</el-button>
           <el-tooltip :content="langData.logClean" effect="dark" placement="bottom">
             <span class="tool-btn danger" @click="showLogClearDialog">
               <svg t="1761636296459" class="icon-svg" viewBox="0 0 1024 1024" version="1.1"
@@ -347,8 +344,7 @@ const showJobInfoDrawer = (row: any) => {
     </div>
 
     <!-- 日志表格 -->
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false"
-              size="small" :highlight-current-row="true" class="data-table">
+    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false" :highlight-current-row="true" class="data-table">
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
           <div class="row-actions">
@@ -380,7 +376,7 @@ const showJobInfoDrawer = (row: any) => {
         <template #default="scope">
           <el-tag v-if="scope.row.triggerCode==200 || scope.row.triggerCode==500"
                   :type="scope.row.triggerCode==200?'success':'danger'"
-                  effect="plain" size="small" round>
+                  effect="plain" round>
             {{ scope.row.fmtTriggerCode }}
           </el-tag>
           <span v-else class="cell-muted">--</span>
@@ -391,7 +387,7 @@ const showJobInfoDrawer = (row: any) => {
         <template #default="scope">
           <el-tag v-if="scope.row.handleCode==200 || scope.row.handleCode==500"
                   :type="scope.row.handleCode==200?'success':'danger'"
-                  effect="plain" size="small" round>
+                  effect="plain" round>
             {{ scope.row.fmtHandleCode }}
           </el-tag>
           <span v-else class="cell-muted">--</span>
@@ -401,8 +397,7 @@ const showJobInfoDrawer = (row: any) => {
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
-                   size="small" :background="true"
+                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
                    :page-sizes="[5, 10, 20, 50, 100]"/>
   </div>
 
@@ -413,10 +408,10 @@ const showJobInfoDrawer = (row: any) => {
 
   <!-- 任务详情抽屉 -->
   <el-drawer v-model="drawer1" :title="drawerTitle1" direction="ltr" size="480px">
-    <el-form size="small" label-position="right" inline-message :inline="false" label-width="120px" class="detail-form">
+    <el-form label-position="right" inline-message :inline="false" label-width="120px" class="detail-form">
       <el-divider content-position="left">{{ langData.baseConfig }}</el-divider>
       <el-form-item :label="langData.executor" prop="jobGroup">
-        <el-select v-model="jobInfo.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable :remote-method="fetchJobGroup">
+        <el-select v-model="jobInfo.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable filterable :remote-method="fetchJobGroup">
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
@@ -428,7 +423,7 @@ const showJobInfoDrawer = (row: any) => {
       </el-form-item>
       <el-divider content-position="left">{{ langData.scheduleConfig }}</el-divider>
       <el-form-item :label="langData.scheduleType" prop="scheduleType">
-        <el-select v-model="jobInfo.scheduleType" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+        <el-select v-model="jobInfo.scheduleType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
         </el-select>
       </el-form-item>
@@ -440,7 +435,7 @@ const showJobInfoDrawer = (row: any) => {
       </el-form-item>
       <el-divider content-position="left">{{ langData.taskConfig }}</el-divider>
       <el-form-item :label="langData.glueType" prop="glueType">
-        <el-select v-model="jobInfo.glueType" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+        <el-select v-model="jobInfo.glueType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
         </el-select>
       </el-form-item>
@@ -452,7 +447,7 @@ const showJobInfoDrawer = (row: any) => {
       </el-form-item>
       <el-divider content-position="left">{{ langData.advancedConfig }}</el-divider>
       <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
-        <el-select v-model="jobInfo.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+        <el-select v-model="jobInfo.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
         </el-select>
       </el-form-item>
@@ -460,12 +455,12 @@ const showJobInfoDrawer = (row: any) => {
         <el-input v-model="jobInfo.childJobId" type="text" clearable/>
       </el-form-item>
       <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
-        <el-select v-model="jobInfo.misfireStrategy" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+        <el-select v-model="jobInfo.misfireStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
         </el-select>
       </el-form-item>
       <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
-        <el-select v-model="jobInfo.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable>
+        <el-select v-model="jobInfo.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
         </el-select>
       </el-form-item>
@@ -483,27 +478,27 @@ const showJobInfoDrawer = (row: any) => {
 
   <!-- 日志清理弹窗 -->
   <el-dialog v-model="dialogFormVisible" :title="langData.logClean" draggable width="400px">
-    <el-form :model="logClearForm" label-position="right" size="small" :inline="false" ref="formRef" :rules="rules" label-width="100px">
+    <el-form :model="logClearForm" label-position="right" :inline="false" ref="formRef" :rules="rules" label-width="100px">
       <el-form-item :label="langData.executor" prop="vendor">
-        <el-select v-model="logClearForm.jobGroup" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable remote automatic-dropdown :remote-method="fetchJobGroup">
+        <el-select v-model="logClearForm.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable filterable remote automatic-dropdown :remote-method="fetchJobGroup">
           <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in JobGroupList"/>
         </el-select>
       </el-form-item>
       <el-form-item :label="langData.task" prop="jobId">
-        <el-select v-model="logClearForm.jobId" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable remote automatic-dropdown :remote-method="fetchTaskList2">
+        <el-select v-model="logClearForm.jobId" :placeholder="langData.formSelectPlaceholder" clearable filterable remote automatic-dropdown :remote-method="fetchTaskList2">
           <el-option :key="item.id" :label="item.jobDesc" :value="item.id" v-for="item in taskList"/>
         </el-select>
       </el-form-item>
       <el-form-item :label="langData.cleanWay" prop="type">
-        <el-select v-model="logClearForm.type" :placeholder="langData.formSelectPlaceholder" size="small" clearable filterable automatic-dropdown>
+        <el-select v-model="logClearForm.type" :placeholder="langData.formSelectPlaceholder" clearable filterable automatic-dropdown>
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in logClearTypeList"/>
         </el-select>
       </el-form-item>
     </el-form>
     <template #footer>
       <div class="dialog-footer">
-        <el-button size="small" @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
-        <el-button type="warning" size="small" @click="updateLogClear(formRef)">{{ langData.btnConfirm }}</el-button>
+        <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
+        <el-button type="warning" @click="updateLogClear(formRef)">{{ langData.btnConfirm }}</el-button>
       </div>
     </template>
   </el-dialog>
@@ -547,13 +542,13 @@ const showJobInfoDrawer = (row: any) => {
 }
 
 .card-title {
-  font-size: 13px;
+  font-size: var(--el-font-size-small);
   font-weight: 600;
   color: var(--el-text-color-primary);
 }
 
 .card-badge {
-  font-size: 11px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   color: var(--el-text-color-secondary);
   font-family: var(--font-mono);
@@ -619,7 +614,7 @@ const showJobInfoDrawer = (row: any) => {
 
 .cell-mono {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   background: var(--surface-inset);
   padding: 2px 8px;
@@ -629,7 +624,7 @@ const showJobInfoDrawer = (row: any) => {
 
 .cell-muted {
   color: var(--el-text-color-placeholder);
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
 }
 
 /* ========================================
@@ -637,7 +632,7 @@ const showJobInfoDrawer = (row: any) => {
    ======================================== */
 .log-content {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   line-height: 1.8;
   color: var(--el-text-color-regular);
   background: var(--surface-inset);

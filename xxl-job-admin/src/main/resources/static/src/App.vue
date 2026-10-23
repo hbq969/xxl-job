@@ -144,7 +144,7 @@ html.tx-expand::view-transition-new(root) { z-index: 9999; animation: theme-clip
   border-radius: var(--radius-md) !important;
   overflow: hidden;
   box-shadow: var(--shadow-sm);
-  font-size: 13px;
+  font-size: var(--el-font-size-small);
 }
 
 .el-table::before { display: none; }
@@ -152,7 +152,7 @@ html.tx-expand::view-transition-new(root) { z-index: 9999; animation: theme-clip
 .el-table th.el-table__cell {
   background: var(--surface-inset) !important;
   font-weight: 600;
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   text-transform: uppercase;
   letter-spacing: 0.05em;
   color: var(--el-text-color-secondary);
@@ -187,7 +187,7 @@ html.tx-expand::view-transition-new(root) { z-index: 9999; animation: theme-clip
 
 /* select 下拉面板暗黑模式 */
 .el-select-dropdown__item {
-  font-size: 13px;
+  font-size: var(--el-font-size-small);
   padding: 6px 16px;
 }
 

@@ -15,23 +15,26 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.147",
+    "@iconify/vue": "^5.0.4",
     "@mdi/font": "^7.4.47",
     "axios": "^1.9.0",
     "crypto-js": "^4.2.0",
     "echarts": "^5.6.0",
     "element-plus": "^2.9.11",
-    "jsencrypt": "^3.3.2",
-    "vue": "^3.5.13",
-    "vue-router": "^4.5.1",
     "highlight.js": "^11.11.1",
+    "jsencrypt": "^3.3.2",
     "markdown-it": "^14.1.0",
     "markdown-it-katex": "^2.0.3",
     "marked": "^15.0.7",
     "monaco-editor": "^0.52.2",
-    "pinia": "^3.0.3"
+    "pinia": "^3.0.3",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.1"
   },
   "devDependencies": {
     "@tsconfig/node22": "^22.0.1",
+    "@types/markdown-it": "^14.1.2",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "@vue/tsconfig": "^0.7.0",
@@ -48,7 +51,6 @@
     "vite-plugin-vue-devtools": "^7.7.2",
     "vite-plugin-vuetify": "^2.1.1",
     "vue-tsc": "^2.2.8",
-    "vuetify": "^3.8.7",
-    "@types/markdown-it": "^14.1.2"
+    "vuetify": "^3.8.7"
   }
 }

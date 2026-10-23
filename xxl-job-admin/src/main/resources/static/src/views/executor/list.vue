@@ -1,7 +1,5 @@
 <script lang="ts" setup>
-import {
-  Edit, ArrowLeft, Delete, Plus
-} from '@element-plus/icons-vue'
+import {IcEdit, IcArrowLeft, IcDelete, IcPlus} from '@/utils/icons'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, notify, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
@@ -175,7 +173,7 @@ const deleteExecutor = (row: any) => {
         <span class="card-title">执行器管理</span>
         <span class="card-badge">{{ total }} 个执行器</span>
       </div>
-      <el-form :model="form" size="small" label-position="right" inline-message inline>
+      <el-form :model="form" label-position="right" inline-message inline>
         <el-form-item :label="langData.appname" prop="appname">
           <el-input v-model="form.appname" type="text" clearable/>
         </el-form-item>
@@ -183,22 +181,21 @@ const deleteExecutor = (row: any) => {
           <el-input v-model="form.title" type="text" clearable/>
         </el-form-item>
         <el-form-item>
-          <el-button type="primary" size="small" @click="query()">{{ langData.btnSearch }}</el-button>
-          <el-button type="success" :icon="Plus" circle @click="showAddExecutor" :title="langData.btnAdd"/>
+          <el-button type="primary" @click="query()">{{ langData.btnSearch }}</el-button>
+          <el-button type="success" :icon="IcPlus" circle @click="showAddExecutor" :title="langData.btnAdd"/>
         </el-form-item>
       </el-form>
     </div>
 
     <!-- 表格 -->
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false"
-              size="small" :highlight-current-row="true" class="data-table">
+    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false" :highlight-current-row="true" class="data-table">
       <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
         <template #default="scope">
           <div class="row-actions">
-            <el-icon @click="showEditExecutor(scope.row)" :color="'var(--el-color-primary)'" :size="15" :title="langData.btnEdit"><Edit/></el-icon>
+            <el-icon @click="showEditExecutor(scope.row)" :color="'var(--el-color-primary)'" :size="15" :title="langData.btnEdit"><IcEdit/></el-icon>
             <el-popconfirm :title="langData.confirmDelete" @confirm="deleteExecutor(scope.row)" icon-color="red" confirm-button-type="danger">
               <template #reference>
-                <el-icon color="red" :size="15"><Delete/></el-icon>
+                <el-icon color="red" :size="15"><IcDelete/></el-icon>
               </template>
             </el-popconfirm>
           </div>
@@ -213,7 +210,7 @@ const deleteExecutor = (row: any) => {
       <el-table-column prop="title" :label="langData.executorDesc" header-align="center" align="center" min-width="160"/>
       <el-table-column prop="fmtAddressType" :label="langData.registerType" header-align="center" align="center" width="110">
         <template #default="{row}">
-          <el-tag size="small" effect="plain" type="info">{{ row.fmtAddressType }}</el-tag>
+          <el-tag effect="plain" type="info">{{ row.fmtAddressType }}</el-tag>
         </template>
       </el-table-column>
       <el-table-column prop="addressList" :label="langData.registerAddress" header-align="center" align="center" min-width="160"/>
@@ -221,14 +218,13 @@ const deleteExecutor = (row: any) => {
     </el-table>
     <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
                    layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
-                   size="small" :background="true"
+                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
                    :page-sizes="[5, 10, 20, 50, 100]"/>
   </div>
 
   <!-- 新增/编辑执行器 -->
   <el-drawer v-model="drawer" :title="drawerTitle" direction="ltr" size="440px">
-    <el-form :model="executorForm" size="small" label-position="right" inline-message :inline="false" label-width="110px"
+    <el-form :model="executorForm" label-position="right" inline-message :inline="false" label-width="110px"
              ref="formRef" :rules="rules" class="executor-form">
       <el-form-item label="ID" prop="id" v-if="drawerTitle==langData.editExecutor">
         <el-input v-model="executorForm.id" type="text" clearable disabled/>
@@ -240,7 +236,7 @@ const deleteExecutor = (row: any) => {
         <el-input v-model="executorForm.title" type="text" clearable/>
       </el-form-item>
       <el-form-item :label="langData.registerType" prop="addressType">
-        <el-select v-model="executorForm.addressType" :placeholder="langData.formSelectPlaceholder" size="small"
+        <el-select v-model="executorForm.addressType" :placeholder="langData.formSelectPlaceholder"
                    clearable filterable
                    @change="executorForm.addressType==0?executorForm.addressList='':executorForm.addressList='http://localhost:8080'">
           <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in addressTypeList"/>
@@ -250,7 +246,7 @@ const deleteExecutor = (row: any) => {
         <el-input v-model="executorForm.addressList" type="textarea" :rows="3"/>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" size="small" @click="updateExecutor(formRef)">{{ langData.btnSave }}</el-button>
+        <el-button type="primary" @click="updateExecutor(formRef)">{{ langData.btnSave }}</el-button>
       </el-form-item>
     </el-form>
   </el-drawer>
@@ -290,13 +286,13 @@ const deleteExecutor = (row: any) => {
 }
 
 .card-title {
-  font-size: 13px;
+  font-size: var(--el-font-size-small);
   font-weight: 600;
   color: var(--el-text-color-primary);
 }
 
 .card-badge {
-  font-size: 11px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   color: var(--el-text-color-secondary);
   font-family: var(--font-mono);
@@ -341,7 +337,7 @@ const deleteExecutor = (row: any) => {
 
 .cell-mono {
   font-family: var(--font-mono);
-  font-size: 12px;
+  font-size: var(--el-font-size-extra-small);
   font-weight: 500;
   background: var(--surface-inset);
   padding: 2px 8px;
