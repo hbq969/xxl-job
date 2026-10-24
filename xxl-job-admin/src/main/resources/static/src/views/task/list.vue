@@ -1114,24 +1114,6 @@ const downloadTemplate = () => {
 /* ============================================================
    任务编辑器：左侧步骤导航 + 右侧表单
    ============================================================ */
-.task-dialog :deep(.el-dialog) {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  margin: 0;
-  border-radius: 0;
-}
-
-.task-dialog :deep(.el-dialog__header) { display: none; }
-
-/* 弹窗主体撑满剩余高度并禁止自身滚动，滚动只发生在右侧表单区 */
-.task-dialog :deep(.el-dialog__body) {
-  flex: 1;
-  min-height: 0;
-  padding: 0;
-  overflow: hidden;
-}
-
 .te {
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
@@ -1359,4 +1341,29 @@ const downloadTemplate = () => {
   .te-nav { display: none; }
   .te-grid { grid-template-columns: 1fr; }
 }
+</style>
+
+<style>
+/* 任务编辑弹窗：el-dialog 被 teleport 到 body，且 class 落在 .el-dialog 自身上，
+   scoped + :deep(.el-dialog) 匹配不到，必须用非 scoped 且写成 .el-dialog.task-dialog */
+.el-dialog.task-dialog {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+.el-dialog.task-dialog .el-dialog__header { display: none; }
+
+.el-dialog.task-dialog .el-dialog__body {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.el-dialog.task-dialog .el-dialog__footer { display: none; }
 </style>
