@@ -209,6 +209,11 @@ const showAddTaskDialog = () => {
   taskForm.glueSource = ''
 }
 
+const scrollToSection = (id: string) => {
+  const el = document.getElementById(id)
+  if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'})
+}
+
 const showEditTaskDialog = (row: any) => {
   drawer.value = true
   drawerTitle.value = langData.editTask
@@ -834,131 +839,180 @@ const downloadTemplate = () => {
       </template>
     </el-dialog>
 
-    <!-- 新增/编辑任务 -->
-    <el-dialog v-model="drawer" :title="drawerTitle" fullscreen :close-on-click-modal="false" class="task-dialog">
-      <div class="form-container">
-        <el-form :model="taskForm" label-position="top" :inline="false" ref="formRef" :rules="rules">
-          <div class="core-sections">
-            <div class="section-card card-base">
-              <div class="sc-header">
-                <span class="sc-num">01</span>
-                <div class="sc-headline">
-                  <span class="sc-label">{{langData.baseConfig}}</span>
-                  <span class="sc-desc">选择执行器并填写任务基本信息</span>
-                </div>
-              </div>
-              <div class="sc-body">
-                <el-form-item :label="langData.executor" prop="jobGroup">
-                  <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable
-                             filterable :remote-method="fetchJobGroup">
-                    <el-option :key="item.id" :label="item.title+'('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="langData.taskDesc" prop="jobDesc">
-                  <el-input v-model="taskForm.jobDesc" type="text" clearable :placeholder="langData.taskDescPlaceholder"/>
-                </el-form-item>
-                <el-form-item :label="langData.alarmEmail" prop="alarmEmail">
-                  <el-input v-model="taskForm.alarmEmail" type="textarea" clearable
-                            :placeholder="langData.alarmEmailPlaceholder" :rows="3"/>
-                </el-form-item>
-              </div>
-            </div>
+    <!-- 新增/编辑任务：左侧步骤导航 + 右侧表单 -->
+    <el-dialog v-model="drawer" fullscreen :close-on-click-modal="false" :show-close="false" class="task-dialog">
+      <div class="te">
+        <!-- 左：导航 -->
+        <aside class="te-nav">
+          <div class="te-nav__head">
+            <span class="te-nav__title">{{ drawerTitle }}</span>
+            <span class="te-nav__sub">{{ langData.taskPageDesc }}</span>
+          </div>
+          <ul class="te-nav__list">
+            <li class="te-nav__item is-active" @click="scrollToSection('te-sec-1')">
+              <span class="te-nav__num">01</span>
+              <span class="te-nav__label">
+                <span class="te-nav__name">{{ langData.baseConfig }}</span>
+                <span class="te-nav__desc">执行器与任务基本信息</span>
+              </span>
+            </li>
+            <li class="te-nav__item" @click="scrollToSection('te-sec-2')">
+              <span class="te-nav__num">02</span>
+              <span class="te-nav__label">
+                <span class="te-nav__name">{{ langData.scheduleConfig }}</span>
+                <span class="te-nav__desc">触发周期与调度类型</span>
+              </span>
+            </li>
+            <li class="te-nav__item" @click="scrollToSection('te-sec-3')">
+              <span class="te-nav__num">03</span>
+              <span class="te-nav__label">
+                <span class="te-nav__name">{{ langData.taskConfig }}</span>
+                <span class="te-nav__desc">运行模式与处理器</span>
+              </span>
+            </li>
+            <li class="te-nav__item" @click="scrollToSection('te-sec-4')">
+              <span class="te-nav__num">04</span>
+              <span class="te-nav__label">
+                <span class="te-nav__name">{{ langData.advancedConfig }}</span>
+                <span class="te-nav__desc">路由、超时与重试策略</span>
+              </span>
+            </li>
+          </ul>
+          <div class="te-nav__foot">
+            <span class="te-chip" v-if="taskForm.id">ID {{ taskForm.id }}</span>
+            <span class="te-chip te-chip--primary" v-if="taskForm.scheduleType">{{ taskForm.scheduleType }}</span>
+          </div>
+        </aside>
 
-            <div class="section-card card-schedule">
-              <div class="sc-header">
-                <span class="sc-num">02</span>
-                <div class="sc-headline">
-                  <span class="sc-label">{{langData.scheduleConfig}}</span>
-                  <span class="sc-desc">设置任务的触发周期与策略</span>
-                </div>
-              </div>
-              <div class="sc-body">
-                <el-form-item :label="langData.scheduleType" prop="scheduleType">
-                  <el-select v-model="taskForm.scheduleType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
-                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
-                  </el-select>
-                </el-form-item>
-                <el-form-item label="CRON" prop="scheduleConf" v-if="taskForm.scheduleType=='CRON'">
-                  <el-input v-model="taskForm.scheduleConf" type="text" clearable placeholder="* * * * * ?"/>
-                </el-form-item>
-                <el-form-item :label="langData.fixedRate" prop="scheduleConf" v-if="taskForm.scheduleType=='FIX_RATE'">
-                  <el-input v-model="taskForm.scheduleConf" type="number" clearable placeholder="30"/>
-                </el-form-item>
-              </div>
+        <!-- 右：表单 -->
+        <div class="te-main">
+          <header class="te-head">
+            <span class="te-head__title">{{ drawerTitle }}</span>
+            <span class="te-head__hint">{{ langData.taskPageDesc }}</span>
+            <div class="te-head__right">
+              <el-tooltip :show-after="1000" :content="langData.btnCancel" placement="bottom">
+                <el-button link class="te-head__btn" :aria-label="langData.btnCancel" @click="drawer = false">
+                  <Icon icon="lucide:x"/>
+                </el-button>
+              </el-tooltip>
             </div>
+          </header>
 
-            <div class="section-card card-task">
-              <div class="sc-header">
-                <span class="sc-num">03</span>
-                <div class="sc-headline">
-                  <span class="sc-label">{{langData.taskConfig}}</span>
-                  <span class="sc-desc">选择运行模式与处理器</span>
+          <div class="te-body">
+            <el-form :model="taskForm" label-position="top" :inline="false" ref="formRef" :rules="rules">
+              <section class="te-sec" id="te-sec-1">
+                <div class="te-sec__head">
+                  <span class="te-sec__num">01</span>
+                  <span class="te-sec__title">{{ langData.baseConfig }}</span>
+                  <span class="te-sec__desc">选择执行器并填写任务基本信息</span>
                 </div>
-              </div>
-              <div class="sc-body">
-                <el-form-item :label="langData.glueType" prop="glueType">
-                  <el-select v-model="taskForm.glueType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
-                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="langData.taskHandler" prop="executorHandler" v-if="taskForm.glueType=='BEAN'">
-                  <el-input v-model="taskForm.executorHandler" type="text" clearable :placeholder="langData.taskHandlerPlaceholder"/>
-                </el-form-item>
-                <el-form-item :label="langData.executeParam" prop="executorParam">
-                  <el-input v-model="taskForm.executorParam" type="textarea" clearable :rows="3" :placeholder="langData.taskParamsPlaceholder"/>
-                </el-form-item>
-              </div>
-            </div>
+                <div class="te-grid">
+                  <el-form-item :label="langData.executor" prop="jobGroup">
+                    <el-select v-model="taskForm.jobGroup" :placeholder="langData.formSelectPlaceholder" clearable
+                               filterable :remote-method="fetchJobGroup">
+                      <el-option :key="item.id" :label="item.title+'('+item.addressList+')'" :value="item.id" v-for="item in JobGroupList"/>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :label="langData.taskDesc" prop="jobDesc">
+                    <el-input v-model="taskForm.jobDesc" type="text" clearable :placeholder="langData.taskDescPlaceholder"/>
+                  </el-form-item>
+                  <el-form-item :label="langData.alarmEmail" prop="alarmEmail" class="te-span-1">
+                    <el-input v-model="taskForm.alarmEmail" type="textarea" clearable
+                              :placeholder="langData.alarmEmailPlaceholder" :rows="3"/>
+                  </el-form-item>
+                </div>
+              </section>
+
+              <section class="te-sec" id="te-sec-2">
+                <div class="te-sec__head">
+                  <span class="te-sec__num">02</span>
+                  <span class="te-sec__title">{{ langData.scheduleConfig }}</span>
+                  <span class="te-sec__desc">设置任务的触发周期与策略</span>
+                </div>
+                <div class="te-grid">
+                  <el-form-item :label="langData.scheduleType" prop="scheduleType">
+                    <el-select v-model="taskForm.scheduleType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
+                      <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in scheduleTypeList"/>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item label="CRON" prop="scheduleConf" v-if="taskForm.scheduleType=='CRON'">
+                    <el-input v-model="taskForm.scheduleConf" type="text" clearable placeholder="* * * * * ?"/>
+                  </el-form-item>
+                  <el-form-item :label="langData.fixedRate" prop="scheduleConf" v-if="taskForm.scheduleType=='FIX_RATE'">
+                    <el-input v-model="taskForm.scheduleConf" type="number" clearable placeholder="30"/>
+                  </el-form-item>
+                </div>
+              </section>
+
+              <section class="te-sec" id="te-sec-3">
+                <div class="te-sec__head">
+                  <span class="te-sec__num">03</span>
+                  <span class="te-sec__title">{{ langData.taskConfig }}</span>
+                  <span class="te-sec__desc">选择运行模式与处理器</span>
+                </div>
+                <div class="te-grid">
+                  <el-form-item :label="langData.glueType" prop="glueType">
+                    <el-select v-model="taskForm.glueType" :placeholder="langData.formSelectPlaceholder" clearable filterable>
+                      <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in glueTypeList"/>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :label="langData.taskHandler" prop="executorHandler" v-if="taskForm.glueType=='BEAN'">
+                    <el-input v-model="taskForm.executorHandler" type="text" clearable :placeholder="langData.taskHandlerPlaceholder"/>
+                  </el-form-item>
+                  <el-form-item :label="langData.executeParam" prop="executorParam" class="te-span-all">
+                    <el-input v-model="taskForm.executorParam" type="textarea" clearable :rows="3" :placeholder="langData.taskParamsPlaceholder"/>
+                  </el-form-item>
+                </div>
+              </section>
+
+              <section class="te-sec" id="te-sec-4">
+                <div class="te-sec__head">
+                  <span class="te-sec__num">04</span>
+                  <span class="te-sec__title">{{ langData.advancedConfig }}</span>
+                  <span class="te-sec__desc">路由策略、超时控制与失败重试等高级参数</span>
+                </div>
+                <div class="te-grid">
+                  <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
+                    <el-select v-model="taskForm.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
+                      <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
+                    <el-select v-model="taskForm.misfireStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
+                      <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
+                    <el-select v-model="taskForm.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
+                      <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
+                    </el-select>
+                  </el-form-item>
+                  <el-form-item :label="langData.childTaskId" prop="childJobId">
+                    <el-input v-model="taskForm.childJobId" type="text" clearable :placeholder="langData.childTaskIdPlaceholder"/>
+                  </el-form-item>
+                  <el-form-item :label="langData.timeout" prop="executorTimeout">
+                    <el-input v-model="taskForm.executorTimeout" type="number" clearable placeholder="5"/>
+                  </el-form-item>
+                  <el-form-item :label="langData.failRetryCount" prop="executorFailRetryCount">
+                    <el-input v-model="taskForm.executorFailRetryCount" type="number" clearable placeholder="0"/>
+                  </el-form-item>
+                  <el-form-item label="" prop="glueRemark" style="display:none">
+                    <el-input v-model="taskForm.glueRemark" type="hidden" clearable/>
+                  </el-form-item>
+                </div>
+              </section>
+            </el-form>
           </div>
 
-          <div class="section-card card-advanced">
-            <div class="sc-header">
-              <span class="sc-num">04</span>
-              <div class="sc-headline">
-                <span class="sc-label">{{langData.advancedConfig}}</span>
-                <span class="sc-desc">路由策略、超时控制与失败重试等高级参数</span>
-              </div>
+          <footer class="te-foot">
+            <span class="te-foot__hint">带 * 为必填项</span>
+            <div class="te-foot__actions">
+              <el-button @click="drawer = false">{{ langData.btnCancel }}</el-button>
+              <el-button type="primary" :loading="submitting" @click="updateTask(formRef)">{{ langData.btnSave }}</el-button>
             </div>
-            <div class="sc-body">
-              <div class="sc-grid cols-3">
-                <el-form-item :label="langData.routeStrategy" prop="executorRouteStrategy">
-                  <el-select v-model="taskForm.executorRouteStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
-                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorRouteStrategyList"/>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="langData.misfireStrategy" prop="misfireStrategy">
-                  <el-select v-model="taskForm.misfireStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
-                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in misfireStrategyList"/>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="langData.blockStrategy" prop="executorBlockStrategy">
-                  <el-select v-model="taskForm.executorBlockStrategy" :placeholder="langData.formSelectPlaceholder" clearable filterable>
-                    <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in executorBlockStrategyList"/>
-                  </el-select>
-                </el-form-item>
-                <el-form-item :label="langData.childTaskId" prop="childJobId">
-                  <el-input v-model="taskForm.childJobId" type="text" clearable :placeholder="langData.childTaskIdPlaceholder"/>
-                </el-form-item>
-                <el-form-item :label="langData.timeout" prop="executorTimeout">
-                  <el-input v-model="taskForm.executorTimeout" type="number" clearable placeholder="5"/>
-                </el-form-item>
-                <el-form-item :label="langData.failRetryCount" prop="executorFailRetryCount">
-                  <el-input v-model="taskForm.executorFailRetryCount" type="number" clearable placeholder="0"/>
-                </el-form-item>
-              </div>
-              <el-form-item label="" prop="glueRemark" style="display:none">
-                <el-input v-model="taskForm.glueRemark" type="hidden" clearable/>
-              </el-form-item>
-            </div>
-          </div>
-        </el-form>
-      </div>
-      <template #footer>
-        <div class="dialog-footer">
-          <el-button @click="drawer = false">{{langData.btnCancel}}</el-button>
-          <el-button type="primary" @click="updateTask(formRef)" :loading="submitting">{{langData.btnSave}}</el-button>
+          </footer>
         </div>
-      </template>
+      </div>
     </el-dialog>
 
     <!-- 批量修改执行器 -->
@@ -1057,171 +1111,243 @@ const downloadTemplate = () => {
   color: var(--el-text-color-placeholder);
 }
 
+/* ============================================================
+   任务编辑器：左侧步骤导航 + 右侧表单
+   ============================================================ */
+.task-dialog :deep(.el-dialog) { border-radius: 0; }
+
+.task-dialog :deep(.el-dialog__header) { display: none; }
+
 .task-dialog :deep(.el-dialog__body) {
-  padding: 16px 20px;
+  padding: 0;
+  height: 100%;
 }
 
-.form-container {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-}
-
-.form-container .el-form {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  overflow: hidden;
-  gap: 16px;
-}
-
-/* ========================================
-   Core Sections — 三列等宽
-   ======================================== */
-.core-sections {
+.te {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  flex: 1;
+  grid-template-columns: 248px minmax(0, 1fr);
+  height: 100%;
   min-height: 0;
+  background: var(--el-bg-color);
 }
 
-/* ========================================
-   Section Card — 蓝图卡片
-   ======================================== */
-.section-card {
-  position: relative;
-  border-radius: var(--radius-md);
-  background: var(--surface-elevated);
-  border: 1px solid var(--el-border-color-lighter);
+/* 左侧导航 */
+.te-nav {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  transition: all var(--transition-smooth);
-  box-shadow: var(--shadow-sm);
-}
-
-.section-card:hover {
-  box-shadow: var(--shadow-md);
-}
-
-/* 左侧彩色强调线 */
-.sc-accent {
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 3px;
-  border-radius: 3px 0 0 3px;
-  transition: width var(--transition-smooth);
-}
-
-.card-base     .sc-accent { background: var(--el-color-primary); }
-.card-schedule .sc-accent { background: var(--el-color-success); }
-.card-task     .sc-accent { background: var(--el-color-warning); }
-.card-advanced .sc-accent { background: var(--el-color-info); }
-
-.section-card:hover .sc-accent { width: 4px; }
-
-/* 卡片头部 */
-.sc-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  padding: 14px 16px 12px 20px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-  flex-shrink: 0;
-}
-
-/* 大号编号 */
-.sc-num {
-  font-family: var(--font-mono);
-  font-size: var(--el-font-size-extra-large);
-  font-weight: 600;
-  line-height: 1;
-  flex-shrink: 0;
-  opacity: 0.18;
-  margin-top: -2px;
-}
-
-.card-base     .sc-num { color: var(--el-color-primary); }
-.card-schedule .sc-num { color: var(--el-color-success); }
-.card-task     .sc-num { color: var(--el-color-warning); }
-.card-advanced .sc-num { color: var(--el-color-info); }
-
-/* 标题文本组 */
-.sc-headline {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-
-.sc-label {
-  font-size: var(--el-font-size-small);
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-  letter-spacing: 0.02em;
-}
-
-.sc-desc {
-  font-size: var(--el-font-size-extra-small);
-  color: var(--el-text-color-placeholder);
-  font-weight: 400;
-  letter-spacing: 0.01em;
-}
-
-/* 卡片内容区 */
-.sc-body {
-  padding: 14px 16px 10px 20px;
-  flex: 1;
+  gap: 4px;
+  padding: 18px 14px;
+  border-right: 1px solid var(--el-border-color-lighter);
+  background: var(--el-fill-color-light);
   overflow: auto;
 }
 
-.sc-body :deep(.el-form-item) {
-  margin-bottom: 14px;
+.te-nav__head {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 0 6px 12px;
 }
 
-.sc-body :deep(.el-form-item__label) {
-  width: 110px !important;
+.te-nav__title {
+  font-size: var(--el-font-size-medium);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.te-nav__sub {
   font-size: var(--el-font-size-extra-small);
-  font-weight: 500;
+  line-height: 1.5;
   color: var(--el-text-color-secondary);
-  white-space: nowrap;
 }
 
-.sc-body :deep(.el-select) {
-  width: 100%;
+.te-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
-/* 高级配置网格 */
-.sc-grid {
-  display: grid;
-  gap: 0 20px;
+.te-nav__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 9px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
-.sc-grid.cols-3 {
-  grid-template-columns: repeat(3, 1fr);
+.te-nav__item:hover { background: var(--el-fill-color); }
+
+.te-nav__item.is-active {
+  background: var(--el-color-primary-light-9);
 }
 
-.sc-grid :deep(.el-form-item) {
-  margin-bottom: 14px;
-}
+.te-nav__item.is-active .te-nav__num,
+.te-nav__item.is-active .te-nav__name { color: var(--el-color-primary); }
 
-.sc-grid :deep(.el-select) {
-  width: 100%;
-}
-
-/* 输入框内联前缀 */
-.input-prefix {
+.te-nav__num {
+  flex: none;
   font-family: var(--font-mono);
   font-size: var(--el-font-size-extra-small);
   font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  line-height: 1.6;
   color: var(--el-text-color-placeholder);
-  background: var(--surface-inset);
-  padding: 1px 6px;
-  border-radius: 3px;
+}
+
+.te-nav__label { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+
+.te-nav__name {
+  font-size: var(--el-font-size-small);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.te-nav__desc {
+  font-size: var(--el-font-size-extra-small);
+  line-height: 1.4;
+  color: var(--el-text-color-secondary);
+}
+
+.te-nav__foot {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: auto;
+  padding: 12px 6px 0;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.te-chip {
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 8px;
+  font-family: var(--font-mono);
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-secondary);
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color-lighter);
+  border-radius: 999px;
+}
+
+.te-chip--primary {
+  color: var(--el-color-primary);
+  border-color: var(--el-color-primary-light-7);
+  background: var(--el-color-primary-light-9);
+}
+
+/* 右侧主区 */
+.te-main {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+}
+
+.te-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex: none;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.te-head__title {
+  font-size: var(--el-font-size-medium);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.te-head__hint {
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-secondary);
+}
+
+.te-head__right { margin-left: auto; }
+
+.te-head__btn { font-size: var(--el-font-size-base); }
+
+.te-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 6px 20px 20px;
+}
+
+.te-sec { padding: 16px 0 4px; }
+
+.te-sec + .te-sec { border-top: 1px solid var(--el-border-color-lighter); }
+
+.te-sec__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.te-sec__num {
+  font-family: var(--font-mono);
+  font-size: var(--el-font-size-extra-small);
+  font-weight: 700;
+  color: var(--el-color-primary);
+}
+
+.te-sec__title {
+  font-size: var(--el-font-size-base);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.te-sec__desc {
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-secondary);
+}
+
+.te-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 4px 16px;
+}
+
+.te-grid :deep(.el-form-item) { margin-bottom: 14px; }
+
+.te-grid :deep(.el-select),
+.te-grid :deep(.el-input),
+.te-grid :deep(.el-textarea) { width: 100%; }
+
+.te-span-all { grid-column: 1 / -1; }
+
+.te-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: none;
+  padding: 10px 20px;
+  border-top: 1px solid var(--el-border-color);
+  background: var(--el-bg-color);
+}
+
+.te-foot__hint {
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-placeholder);
+}
+
+.te-foot__actions { margin-left: auto; display: flex; gap: 10px; }
+
+@media (max-width: 1280px) {
+  .te { grid-template-columns: 210px minmax(0, 1fr); }
+  .te-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .te { grid-template-columns: 1fr; }
+  .te-nav { display: none; }
+  .te-grid { grid-template-columns: 1fr; }
 }
 </style>
