@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import {IcEdit, IcArrowLeft, IcDelete, IcPlus} from '@/utils/icons'
+import {Icon} from '@iconify/vue'
+import PageHead from '@/components/admin/PageHead.vue'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, notify, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
@@ -81,6 +82,24 @@ const query = () => {
     msg(err?.response.data.errorMessage, 'error')
   })
 }
+
+const filtersVisible = ref(true)
+const filterCount = () => {
+  let n = 0
+  if (form.appname) n++
+  if (form.title) n++
+  return n
+}
+const resetQuery = () => {
+  form.appname = ''
+  form.title = ''
+  form.start = 1
+  query()
+}
+
+const drawerFull = ref(false)
+const drawerSize = computed(() => (drawerFull.value ? '100%' : '440px'))
+const toggleDrawer = () => { drawerFull.value = !drawerFull.value }
 
 const drawer = ref(false)
 const drawerTitle = ref(langData.addExecutor)
@@ -166,189 +185,187 @@ const deleteExecutor = (row: any) => {
 </script>
 
 <template>
-  <div class="executor-page view-enter">
-    <!-- 搜索卡片 -->
-    <div class="search-card">
-      <div class="card-header">
-        <span class="card-title">执行器管理</span>
-        <span class="card-badge">{{ total }} 个执行器</span>
+  <div class="admin-page">
+    <PageHead :title="langData.executorPageTitle" :desc="langData.executorPageDesc"/>
+
+    <section class="admin-panel">
+      <!-- 查询区 -->
+      <div class="admin-filter" v-show="filtersVisible">
+        <el-form :model="form" inline-message inline label-position="right" @submit.prevent>
+          <el-form-item :label="langData.appname" prop="appname">
+            <el-input v-model="form.appname" type="text" clearable :placeholder="langData.formInputPlaceholder"/>
+          </el-form-item>
+          <el-form-item :label="langData.appDesc" prop="title">
+            <el-input v-model="form.title" type="text" clearable :placeholder="langData.formInputPlaceholder"/>
+          </el-form-item>
+        </el-form>
+        <div class="admin-filter__actions">
+          <el-button @click="resetQuery">
+            <Icon icon="lucide:rotate-ccw" class="ic"/>{{ langData.btnReset }}
+          </el-button>
+          <el-button type="primary" @click="query()">
+            <Icon icon="lucide:search" class="ic"/>{{ langData.btnSearch }}
+          </el-button>
+        </div>
       </div>
-      <el-form :model="form" label-position="right" inline-message inline>
-        <el-form-item :label="langData.appname" prop="appname">
-          <el-input v-model="form.appname" type="text" clearable/>
+
+      <!-- 工具栏 -->
+      <div class="admin-toolbar">
+        <div class="tb-left">
+          <el-tooltip :show-after="1000" :content="langData.btnAdd" placement="bottom">
+            <el-button type="primary" circle :aria-label="langData.btnAdd" @click="showAddExecutor">
+              <Icon icon="lucide:plus"/>
+            </el-button>
+          </el-tooltip>
+          <span class="admin-toolbar__divider"></span>
+          <el-tooltip :show-after="1000" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
+            <el-button class="admin-toolbar__icon" :class="{ 'is-active': filtersVisible }" circle text
+                       :aria-label="langData.filterHide" @click="filtersVisible = !filtersVisible">
+              <Icon icon="lucide:filter"/>
+            </el-button>
+          </el-tooltip>
+        </div>
+        <div class="tb-right">
+          <el-tooltip :show-after="1000" :content="langData.btnRefresh" placement="bottom">
+            <el-button class="admin-toolbar__icon" circle text :aria-label="langData.btnRefresh" @click="query()">
+              <Icon icon="lucide:refresh-ccw"/>
+            </el-button>
+          </el-tooltip>
+        </div>
+      </div>
+
+      <!-- 摘要栏 -->
+      <div class="admin-sumbar" v-if="!filtersVisible && filterCount() > 0">
+        <span class="admin-sumbar__seg">
+          <Icon icon="lucide:filter" class="ic"/>
+          {{ langData.filteredPrefix }} {{ filterCount() }} {{ langData.filteredSuffix }}
+          <span class="admin-sumbar__lnk" @click="filtersVisible = true">{{ langData.filterExpand }}</span>
+        </span>
+      </div>
+
+      <!-- 表格 -->
+      <div class="admin-table">
+        <el-table :data="list" class="data-table" table-layout="fixed" highlight-current-row v-loading="false">
+          <el-table-column fixed="left" :label="langData.tableHeaderOp" width="90" header-align="center" align="center">
+            <template #default="scope">
+              <div class="row-actions">
+                <el-tooltip :show-after="1000" :content="langData.btnEdit" placement="top">
+                  <el-button link type="primary" class="admin-op" @click="showEditExecutor(scope.row)">
+                    <Icon icon="lucide:pencil"/>
+                  </el-button>
+                </el-tooltip>
+                <el-popconfirm :title="langData.confirmDelete" @confirm="deleteExecutor(scope.row)" confirm-button-type="danger">
+                  <template #reference>
+                    <el-tooltip :show-after="1000" :content="langData.btnDelete" placement="top">
+                      <el-button link type="danger" class="admin-op" :aria-label="langData.btnDelete">
+                        <Icon icon="lucide:trash-2"/>
+                      </el-button>
+                    </el-tooltip>
+                  </template>
+                </el-popconfirm>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="id" label="ID" header-align="center" align="center" width="80"/>
+          <el-table-column prop="appname" :label="langData.executorName" header-align="left" align="left" min-width="180">
+            <template #default="{row}">
+              <span class="cell-mono">{{ row.appname }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="title" :label="langData.executorDesc" header-align="left" align="left" min-width="180"/>
+          <el-table-column prop="fmtAddressType" :label="langData.registerType" header-align="center" align="center" width="120">
+            <template #default="{row}">
+              <el-tag effect="light" type="info" round>{{ row.fmtAddressType }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="addressList" :label="langData.registerAddress" header-align="left" align="left" min-width="200" show-overflow-tooltip/>
+          <el-table-column prop="fmtUpdateTime" :label="langData.updateTime" header-align="center" align="center" width="180"/>
+        </el-table>
+      </div>
+
+      <!-- 分页 -->
+      <div class="admin-foot">
+        <el-pagination v-model:page-size="form.length" v-model:current-page="form.start"
+                       layout="total, sizes, prev, pager, next, jumper" v-model:total="total"
+                       @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
+                       :background="true" :page-sizes="[10, 20, 50, 100]"/>
+      </div>
+    </section>
+
+    <!-- 新增/编辑执行器 -->
+    <el-drawer v-model="drawer" :size="drawerSize" direction="ltr">
+      <template #header>
+        <div class="drawer-head">
+          <span class="drawer-head__title">{{ drawerTitle }}</span>
+          <el-tooltip :show-after="1000" :content="drawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
+            <el-button link class="drawer-head__btn" :aria-label="langData.drawerMaximize" @click="toggleDrawer">
+              <Icon :icon="drawerFull ? 'lucide:minimize-2' : 'lucide:maximize-2'"/>
+            </el-button>
+          </el-tooltip>
+        </div>
+      </template>
+      <el-form :model="executorForm" label-position="top" :inline="false" ref="formRef" :rules="rules" class="executor-form">
+        <el-form-item label="ID" prop="id" v-if="drawerTitle == langData.editExecutor">
+          <el-input v-model="executorForm.id" type="text" clearable disabled/>
         </el-form-item>
-        <el-form-item :label="langData.appDesc" prop="title">
-          <el-input v-model="form.title" type="text" clearable/>
+        <el-form-item :label="langData.executorName" prop="appname">
+          <el-input v-model="executorForm.appname" type="text" clearable/>
         </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="query()">{{ langData.btnSearch }}</el-button>
-          <el-button type="success" :icon="IcPlus" circle @click="showAddExecutor" :title="langData.btnAdd"/>
+        <el-form-item :label="langData.executorDesc" prop="title">
+          <el-input v-model="executorForm.title" type="text" clearable/>
         </el-form-item>
+        <el-form-item :label="langData.registerType" prop="addressType">
+          <el-select v-model="executorForm.addressType" :placeholder="langData.formSelectPlaceholder" clearable filterable
+                     @change="executorForm.addressType==0?executorForm.addressList='':executorForm.addressList='http://localhost:8080'">
+            <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in addressTypeList"/>
+          </el-select>
+        </el-form-item>
+        <el-form-item :label="langData.registerAddress" prop="addressList" v-if="executorForm.addressType==1">
+          <el-input v-model="executorForm.addressList" type="textarea" :rows="3"/>
+        </el-form-item>
+        <div class="admin-form-actions">
+          <el-button @click="drawer = false">{{ langData.btnCancel }}</el-button>
+          <el-button type="primary" @click="updateExecutor(formRef)">{{ langData.btnSave }}</el-button>
+        </div>
       </el-form>
-    </div>
-
-    <!-- 表格 -->
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false" :highlight-current-row="true" class="data-table">
-      <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
-        <template #default="scope">
-          <div class="row-actions">
-            <el-icon @click="showEditExecutor(scope.row)" :color="'var(--el-color-primary)'" :size="15" :title="langData.btnEdit"><IcEdit/></el-icon>
-            <el-popconfirm :title="langData.confirmDelete" @confirm="deleteExecutor(scope.row)" icon-color="red" confirm-button-type="danger">
-              <template #reference>
-                <el-icon color="red" :size="15"><IcDelete/></el-icon>
-              </template>
-            </el-popconfirm>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="id" label="ID" header-align="center" align="center" width="80"/>
-      <el-table-column prop="appname" :label="langData.executorName" header-align="center" align="center" min-width="160">
-        <template #default="{row}">
-          <code class="cell-mono">{{ row.appname }}</code>
-        </template>
-      </el-table-column>
-      <el-table-column prop="title" :label="langData.executorDesc" header-align="center" align="center" min-width="160"/>
-      <el-table-column prop="fmtAddressType" :label="langData.registerType" header-align="center" align="center" width="110">
-        <template #default="{row}">
-          <el-tag effect="plain" type="info">{{ row.fmtAddressType }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="addressList" :label="langData.registerAddress" header-align="center" align="center" min-width="160"/>
-      <el-table-column prop="fmtUpdateTime" :label="langData.updateTime" header-align="center" align="center"/>
-    </el-table>
-    <el-pagination class="page" v-model:page-size="form.length" v-model:current-page="form.start"
-                   layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
-                   :page-sizes="[5, 10, 20, 50, 100]"/>
+    </el-drawer>
   </div>
-
-  <!-- 新增/编辑执行器 -->
-  <el-drawer v-model="drawer" :title="drawerTitle" direction="ltr" size="440px">
-    <el-form :model="executorForm" label-position="right" inline-message :inline="false" label-width="110px"
-             ref="formRef" :rules="rules" class="executor-form">
-      <el-form-item label="ID" prop="id" v-if="drawerTitle==langData.editExecutor">
-        <el-input v-model="executorForm.id" type="text" clearable disabled/>
-      </el-form-item>
-      <el-form-item :label="langData.executorName" prop="appname">
-        <el-input v-model="executorForm.appname" type="text" clearable/>
-      </el-form-item>
-      <el-form-item :label="langData.executorDesc" prop="title">
-        <el-input v-model="executorForm.title" type="text" clearable/>
-      </el-form-item>
-      <el-form-item :label="langData.registerType" prop="addressType">
-        <el-select v-model="executorForm.addressType" :placeholder="langData.formSelectPlaceholder"
-                   clearable filterable
-                   @change="executorForm.addressType==0?executorForm.addressList='':executorForm.addressList='http://localhost:8080'">
-          <el-option :key="item.key" :label="item.value" :value="item.key" v-for="item in addressTypeList"/>
-        </el-select>
-      </el-form-item>
-      <el-form-item :label="langData.registerAddress" prop="addressList" v-if="executorForm.addressType==1">
-        <el-input v-model="executorForm.addressList" type="textarea" :rows="3"/>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" @click="updateExecutor(formRef)">{{ langData.btnSave }}</el-button>
-      </el-form-item>
-    </el-form>
-  </el-drawer>
 </template>
 
 <style scoped>
-/* ========================================
-   Executor Page - Layout
-   ======================================== */
-.executor-page {
-  flex-grow: 1;
-  padding: 24px;
-  overflow: auto;
-  width: 100%;
-  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* ========================================
-   Search Card
-   ======================================== */
-.search-card {
-  background: var(--surface-elevated);
-  border: 1px solid var(--el-border-color);
-  border-radius: var(--radius-md);
-  padding: 16px 20px 4px 20px;
-  margin-bottom: 16px;
-  box-shadow: var(--shadow-sm);
-}
-
-.card-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  padding-bottom: 10px;
-  border-bottom: 1px solid var(--el-border-color-lighter);
-}
-
-.card-title {
-  font-size: var(--el-font-size-small);
-  font-weight: 600;
-  color: var(--el-text-color-primary);
-}
-
-.card-badge {
-  font-size: var(--el-font-size-extra-small);
-  font-weight: 500;
-  color: var(--el-text-color-secondary);
-  font-family: var(--font-mono);
-  background: var(--surface-inset);
-  padding: 2px 10px;
-  border-radius: 12px;
-}
-
-.search-card .el-form-item {
-  margin-bottom: 12px;
-}
-
-.search-card .el-input {
-  width: 160px;
-}
-
-/* ========================================
-   Data Table
-   ======================================== */
-.data-table {
-  border-radius: var(--radius-md) !important;
-}
-
-.data-table :deep(.cell) {
-  white-space: pre-line !important;
-}
+.data-table :deep(.cell) { white-space: nowrap; }
 
 .row-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-}
-
-.row-actions .el-icon {
-  transition: all var(--transition-fast);
-}
-
-.row-actions .el-icon:hover {
-  transform: scale(1.15);
+  gap: 2px;
 }
 
 .cell-mono {
   font-family: var(--font-mono);
   font-size: var(--el-font-size-extra-small);
-  font-weight: 500;
-  background: var(--surface-inset);
-  padding: 2px 8px;
-  border-radius: 4px;
   color: var(--el-text-color-regular);
 }
 
-/* ========================================
-   Drawer Form
-   ======================================== */
-.executor-form :deep(.el-select) {
+.executor-form :deep(.el-select),
+.executor-form :deep(.el-input),
+.executor-form :deep(.el-textarea) {
   width: 100%;
 }
+
+.drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.drawer-head__title {
+  font-size: var(--el-font-size-medium);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.drawer-head__btn { font-size: var(--el-font-size-base); }
 </style>

@@ -1,4 +1,5 @@
 import './assets/css/base.css'
+import './assets/css/admin.css'
 import { useDark } from '@/utils/theme'
 
 import router from './router'

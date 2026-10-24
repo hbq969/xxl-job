@@ -1,0 +1,408 @@
+/* ========================================
+ * 系统管理页面公共样式
+ * 只使用 Element Plus 变量（--el-*），不写死颜色
+ * 尺寸类属性一律用变量，跟随门户「界面尺寸」三档
+ * ======================================== */
+
+/* ---------- 页面骨架 ---------- */
+.admin-page {
+  padding-top: var(--sm-page-pad-top, 18px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 100%;
+}
+
+/* ---------- 页头（单行：标题 + 说明 + 右侧操作/统计，§7.6） ---------- */
+.admin-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 0 2px 2px;
+  min-height: 24px;
+}
+
+.admin-head__title {
+  font-size: var(--el-font-size-medium);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--el-text-color-primary);
+  white-space: nowrap;
+}
+
+.admin-head__desc {
+  margin: 0;
+  font-size: var(--el-font-size-extra-small);
+  line-height: 1.4;
+  color: var(--el-text-color-secondary);
+  min-width: 0;
+}
+
+.admin-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* ---------- 内容面板 ---------- */
+.admin-panel {
+  display: flex;
+  flex-direction: column;
+  background: var(--el-bg-color);
+  border: 1px solid var(--el-border-color);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
+  overflow: hidden;
+}
+
+/* ---------- 查询区 ---------- */
+.admin-filter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.admin-filter .el-form-item {
+  margin: 0;
+}
+
+.admin-filter .el-form-item__label {
+  font-size: var(--el-font-size-base);
+  color: var(--el-text-color-regular);
+}
+
+.admin-filter__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+/* 控件宽度：Element Plus 用 .el-input/.el-select 的 var(--el-*-width) 定义宽度，
+   单类选择器会被后加载的组件样式覆盖，这里用父级限定提高优先级 */
+.admin-filter .el-input,
+.admin-filter .el-select {
+  width: 180px;
+}
+
+.admin-filter .admin-filter__input--wide,
+.admin-filter .el-date-editor {
+  width: 260px;
+}
+
+.admin-filter .admin-filter__select {
+  width: 160px;
+}
+
+/* ---------- 工具条 ---------- */
+.admin-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+}
+
+/* 工具栏左右分组：左侧操作图标，右侧刷新等辅助图标 */
+.admin-toolbar .tb-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.admin-toolbar .tb-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+
+.admin-toolbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+}
+
+.admin-toolbar__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--el-border-color);
+}
+
+.admin-selected-tip {
+  font-size: var(--el-font-size-small);
+  color: var(--el-text-color-secondary);
+}
+
+/* ---------- 表格 ---------- */
+.admin-table {
+  padding: 0 14px;
+}
+
+.admin-table .el-table {
+  --el-table-header-bg-color: var(--el-fill-color-light);
+  --el-table-header-text-color: var(--el-text-color-primary);
+  --el-table-row-hover-bg-color: var(--el-color-primary-light-9);
+  font-size: var(--el-font-size-base);
+}
+
+.admin-table .el-table th.el-table__cell {
+  font-weight: 600;
+}
+
+.admin-table .el-table .cell {
+  line-height: 1.5;
+}
+
+.admin-table .el-table__empty-text {
+  font-size: var(--el-font-size-base);
+  color: var(--el-text-color-secondary);
+}
+
+/* ---------- 表格操作列 ---------- */
+/* 表格操作列图标按钮。
+   全局「界面尺寸」主题会给所有 .el-button 强制 height/padding（ID 级选择器），
+   操作列需要的是紧凑的图标按钮，这里用 #app 前缀提升优先级并显式声明尺寸。 */
+#app .admin-panel .el-button.admin-op,
+#app .el-dialog .el-button.admin-op {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px !important;
+  min-width: 24px !important;
+  height: 24px !important;
+  min-height: 24px !important;
+  padding: 0 !important;
+  margin: 0;
+  border-radius: 6px;
+  font-size: var(--el-font-size-medium);
+  line-height: 1;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+#app .admin-panel .el-button.admin-op + .el-button.admin-op,
+#app .el-dialog .el-button.admin-op + .el-button.admin-op {
+  margin-left: 6px;
+}
+
+#app .admin-panel .el-button.admin-op:hover,
+#app .el-dialog .el-button.admin-op:hover {
+  background: var(--el-fill-color-light);
+}
+
+#app .admin-panel .el-button.admin-op:focus-visible,
+#app .el-dialog .el-button.admin-op:focus-visible {
+  outline: 2px solid var(--el-color-primary-light-5);
+  outline-offset: 1px;
+}
+
+.admin-op .ic {
+  margin: 0;
+}
+
+.admin-op--muted {
+  color: var(--el-text-color-placeholder);
+}
+
+/* ---------- 分页 ---------- */
+.admin-foot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding: 10px 14px 12px;
+}
+
+/* ---------- 图标 ---------- */
+.ic {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  flex: none;
+}
+
+.el-button .ic {
+  margin-right: 5px;
+}
+
+.el-button .ic:only-child,
+.el-button.admin-op .ic {
+  margin-right: 0;
+}
+
+/* ---------- 表单区块 ---------- */
+.admin-section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  font-size: var(--el-font-size-base);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.admin-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.admin-input-unit {
+  margin-right: 4px;
+  font-size: var(--el-font-size-small);
+  color: var(--el-text-color-secondary);
+}
+
+/* ---------- 弹窗 / 抽屉 ---------- */
+.styled-dialog.el-dialog {
+  border-radius: 12px;
+}
+
+.styled-dialog .el-dialog__header {
+  margin-right: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.styled-dialog .el-dialog__title {
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.styled-dialog .el-dialog__footer {
+  padding-top: 14px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.styled-drawer .el-drawer__header {
+  margin-bottom: 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+  color: var(--el-text-color-primary);
+  font-weight: 600;
+}
+
+.styled-drawer .el-drawer__footer {
+  padding-top: 14px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+/* ---------- 弹窗内嵌表格 ---------- */
+.inner-table .el-table {
+  --el-table-header-bg-color: var(--el-fill-color-light);
+  font-size: var(--el-font-size-base);
+}
+
+.admin-inner-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-top: 8px;
+}
+
+/* ---------- 其它 ---------- */
+.admin-link {
+  color: var(--el-color-primary);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.admin-link:hover {
+  text-decoration: underline;
+}
+
+.admin-muted {
+  font-size: var(--el-font-size-small);
+  color: var(--el-text-color-placeholder);
+}
+
+.admin-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.admin-preview-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 56px;
+  padding: 14px;
+  border: 1px dashed var(--el-border-color);
+  border-radius: 8px;
+  background: var(--el-fill-color-light);
+  color: var(--el-text-color-primary);
+}
+
+.admin-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--el-font-size-small);
+  letter-spacing: 0.3px;
+}
+
+/* ---------- 工具栏纯图标按钮 ---------- */
+.admin-toolbar__icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+}
+
+.admin-toolbar__icon.is-active {
+  color: var(--el-color-primary) !important;
+  background: var(--el-color-primary-light-9) !important;
+}
+
+.admin-toolbar__divider {
+  width: 1px;
+  height: 16px;
+  background: var(--el-border-color);
+  margin: 0 2px;
+}
+
+/* ---------- 摘要栏（筛选状态 + 选择摘要，一条） ---------- */
+.admin-sumbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 6px 14px;
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-color-primary);
+  background: var(--el-color-primary-light-9);
+  border-bottom: 1px solid var(--el-color-primary-light-8);
+}
+
+.admin-sumbar__seg {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.admin-sumbar__vsep {
+  width: 1px;
+  height: 14px;
+  background: var(--el-color-primary-light-7);
+}
+
+.admin-sumbar__lnk {
+  cursor: pointer;
+}
+
+.admin-sumbar__lnk:hover {
+  text-decoration: underline;
+}

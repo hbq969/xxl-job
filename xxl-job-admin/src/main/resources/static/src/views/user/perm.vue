@@ -1,5 +1,6 @@
 <script lang="ts" setup>
-import {IcEdit, IcArrowLeft, IcUserFilled} from '@/utils/icons'
+import {Icon} from '@iconify/vue'
+import PageHead from '@/components/admin/PageHead.vue'
 import {ref, reactive, onMounted, computed, provide, inject} from 'vue'
 import axios from '@/network'
 import {msg, notify, encryptRSA, encryptAES, generateRandomAESKey} from '@/utils/Utils'
@@ -133,97 +134,91 @@ const fetchJobGroup = () => {
 </script>
 
 <template>
-  <div class="perm-page view-enter">
-    <!-- 用户表格 -->
-    <el-table :data="list" style="width: 100%" table-layout="fixed" :stripe="false" :highlight-current-row="true" class="data-table">
-      <el-table-column fixed="left" :label="langData.tableHeaderOp" width="80" header-align="center" align="center">
-        <template #default="scope">
-          <div class="row-actions">
-            <el-tooltip :content="langData.permConfig" effect="dark" placement="top">
-              <el-icon @click="showUserPermDialog(scope.row)" :color="'var(--el-color-primary)'" :size="15"><IcUserFilled/></el-icon>
-            </el-tooltip>
-          </div>
-        </template>
-      </el-table-column>
-      <el-table-column prop="username" :label="langData.username" :show-overflow-tooltip="true" header-align="center" align="center" min-width="140"/>
-      <el-table-column :label="langData.roleName" :show-overflow-tooltip="true" header-align="center" align="center" min-width="130">
-        <template #default="{row}">
-          <span>{{ row.roleNames?.join(', ') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column prop="fmtAccStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true" header-align="center" align="center" width="130">
-        <template #default="{row}">
-          <el-tag effect="plain" :type="row.accStatus==1?'success':'info'">{{ row.fmtAccStatus }}</el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="fmtCreatedAt" :label="langData.tableHeaderCreateTime" :show-overflow-tooltip="true" header-align="center" align="center" width="150"/>
-    </el-table>
-    <el-pagination class="page" v-model:page-size="pg.pageSize" v-model:current-page="pg.pageNum"
-                   layout="->, total, sizes, prev, pager, next, jumper" v-model:total="total"
-                   @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()" :background="true"
-                   :page-sizes="[5, 10, 20, 50, 100]"/>
-  </div>
+  <div class="admin-page">
+    <PageHead :title="langData.permPageTitle" :desc="langData.permPageDesc"/>
 
-  <!-- 权限配置弹窗 -->
-  <el-dialog v-model="dialogFormVisible" :title="langData.permConfig" draggable width="420px">
-    <el-form :model="permForm" label-position="right" :inline="false" ref="formRef" :rules="rules" label-width="80px">
-      <el-form-item :label="langData.executor" prop="jobGroup">
-        <el-select v-model="permForm.groupIds" :placeholder="langData.formSelectPlaceholder" clearable
-                   filterable multiple>
-          <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in jobGroupList"/>
-        </el-select>
-      </el-form-item>
-    </el-form>
-    <template #footer>
-      <div class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
-        <el-button type="primary" @click="updateUserPerm(formRef)">{{ langData.btnSave }}</el-button>
+    <section class="admin-panel">
+      <div class="admin-toolbar">
+        <div class="tb-left">
+          <el-tooltip :show-after="1000" :content="langData.btnRefresh" placement="bottom">
+            <el-button class="admin-toolbar__icon" circle text :aria-label="langData.btnRefresh" @click="query()">
+              <Icon icon="lucide:refresh-ccw"/>
+            </el-button>
+          </el-tooltip>
+        </div>
       </div>
-    </template>
-  </el-dialog>
+
+      <div class="admin-table">
+        <el-table :data="list" class="data-table" table-layout="fixed" highlight-current-row>
+          <el-table-column fixed="left" :label="langData.tableHeaderOp" width="90" header-align="center" align="center">
+            <template #default="scope">
+              <div class="row-actions">
+                <el-tooltip :show-after="1000" :content="langData.permConfig" placement="top">
+                  <el-button link type="primary" class="admin-op" @click="showUserPermDialog(scope.row)">
+                    <Icon icon="lucide:shield-check"/>
+                  </el-button>
+                </el-tooltip>
+              </div>
+            </template>
+          </el-table-column>
+          <el-table-column prop="username" :label="langData.username" :show-overflow-tooltip="true"
+                           header-align="left" align="left" min-width="160"/>
+          <el-table-column :label="langData.roleName" :show-overflow-tooltip="true" header-align="left" align="left" min-width="160">
+            <template #default="{row}">
+              <span>{{ row.roleNames?.join(', ') }}</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="fmtAccStatus" :label="langData.triggerStatus" :show-overflow-tooltip="true"
+                           header-align="center" align="center" width="140">
+            <template #default="{row}">
+              <el-tag effect="light" round :type="row.accStatus==1?'success':'info'">{{ row.fmtAccStatus }}</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column prop="fmtCreatedAt" :label="langData.tableHeaderCreateTime" :show-overflow-tooltip="true"
+                           header-align="center" align="center" width="180"/>
+        </el-table>
+      </div>
+
+      <div class="admin-foot">
+        <el-pagination v-model:page-size="pg.pageSize" v-model:current-page="pg.pageNum"
+                       layout="total, sizes, prev, pager, next, jumper" v-model:total="total"
+                       @size-change="query()" @current-change="query()" @prev-click="query()" @next-click="query()"
+                       :background="true" :page-sizes="[10, 20, 50, 100]"/>
+      </div>
+    </section>
+
+    <!-- 权限配置弹窗 -->
+    <el-dialog v-model="dialogFormVisible" :title="langData.permConfig" draggable width="460px">
+      <el-form :model="permForm" label-position="top" :inline="false" ref="formRef" :rules="rules">
+        <el-form-item :label="langData.executor" prop="groupIds">
+          <el-select v-model="permForm.groupIds" :placeholder="langData.formSelectPlaceholder" clearable
+                     filterable multiple class="full-width">
+            <el-option :key="item.id" :label="item.title" :value="item.id" v-for="item in jobGroupList"/>
+          </el-select>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <div class="dialog-footer">
+          <el-button @click="dialogFormVisible = false">{{ langData.btnCancel }}</el-button>
+          <el-button type="primary" @click="updateUserPerm(formRef)">{{ langData.btnSave }}</el-button>
+        </div>
+      </template>
+    </el-dialog>
+  </div>
 </template>
 
 <style scoped>
-/* ========================================
-   Permission Page - Layout
-   ======================================== */
-.perm-page {
-  flex-grow: 1;
-  padding: 24px;
-  overflow: auto;
-  width: 100%;
-  animation: fadeInUp 0.35s cubic-bezier(0.4, 0, 0.2, 1) both;
-}
-
-/* ========================================
-   Data Table
-   ======================================== */
-.data-table {
-  border-radius: var(--radius-md) !important;
-}
-
-.data-table :deep(.cell) {
-  white-space: pre-line !important;
-}
+.data-table :deep(.cell) { white-space: nowrap; }
 
 .row-actions {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 2px;
 }
 
-.row-actions .el-icon {
-  transition: all var(--transition-fast);
-}
+.full-width { width: 100%; }
 
-.row-actions .el-icon:hover {
-  transform: scale(1.15);
-}
-
-/* ========================================
-   Dialog
-   ======================================== */
 .dialog-footer {
   display: flex;
   justify-content: flex-end;
