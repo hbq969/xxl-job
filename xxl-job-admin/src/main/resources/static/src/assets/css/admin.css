@@ -69,7 +69,7 @@
 /* 查询项用网格均分，避免控件被挤成一列或换行错位 */
 .admin-filter .el-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   gap: 10px 16px;
   width: 100%;
 }
@@ -78,6 +78,7 @@
   display: flex;
   align-items: center;
   margin: 0;
+  min-width: 0;
 }
 
 .admin-filter .el-form-item__content {
@@ -117,6 +118,13 @@
 .admin-filter .admin-filter__input--wide,
 .admin-filter .el-date-editor {
   width: 100%;
+  min-width: 0;
+}
+
+/* 日期范围控件内部也允许收缩，避免撑宽整列导致后面的查询项被挤到下一行 */
+.admin-filter .el-date-editor :deep(.el-range-input),
+.admin-filter .el-date-editor .el-range-input {
+  min-width: 0;
 }
 
 .admin-filter .admin-filter__select {
