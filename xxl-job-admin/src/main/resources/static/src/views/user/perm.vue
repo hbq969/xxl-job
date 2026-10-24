@@ -140,7 +140,7 @@ const fetchJobGroup = () => {
     <section class="admin-panel">
       <div class="admin-toolbar">
         <div class="tb-left">
-          <el-tooltip :show-after="1000" :content="langData.btnRefresh" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnRefresh" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.btnRefresh" @click="query()">
               <Icon icon="lucide:refresh-ccw"/>
             </el-button>
@@ -153,7 +153,7 @@ const fetchJobGroup = () => {
           <el-table-column fixed="left" :label="langData.tableHeaderOp" width="90" header-align="center" align="center">
             <template #default="scope">
               <div class="row-actions">
-                <el-tooltip :show-after="1000" :content="langData.permConfig" placement="top">
+                <el-tooltip :show-after="500" :content="langData.permConfig" placement="top">
                   <el-button link type="primary" class="admin-op" @click="showUserPermDialog(scope.row)">
                     <Icon icon="lucide:shield-check"/>
                   </el-button>

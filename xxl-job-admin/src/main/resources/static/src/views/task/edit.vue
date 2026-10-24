@@ -209,7 +209,7 @@ onMounted(() => {
   <div class="admin-page task-edit-page">
     <PageHead :title="pageTitle" :desc="langData.taskPageDesc">
       <template #lead>
-        <el-tooltip :show-after="1000" :content="langData.btnBack" placement="bottom">
+        <el-tooltip :show-after="0" :content="langData.btnBack" placement="bottom">
           <el-button class="page-back" circle text :aria-label="langData.btnBack" @click="goBack">
             <Icon icon="lucide:circle-arrow-left"/>
           </el-button>

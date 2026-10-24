@@ -498,54 +498,54 @@ const downloadTemplate = () => {
       <!-- 工具栏 -->
       <div class="admin-toolbar">
         <div class="tb-left">
-          <el-tooltip :show-after="1000" :content="langData.btnAdd" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnAdd" placement="bottom">
             <el-button type="primary" circle :aria-label="langData.btnAdd" @click="goAddTask">
               <Icon icon="lucide:plus"/>
             </el-button>
           </el-tooltip>
           <span class="admin-toolbar__divider"></span>
-          <el-tooltip :show-after="1000" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
+          <el-tooltip :show-after="0" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
             <el-button class="admin-toolbar__icon" :class="{ 'is-active': filtersVisible }" circle text
                        :aria-label="langData.filterHide" @click="filtersVisible = !filtersVisible">
               <Icon icon="lucide:filter"/>
             </el-button>
           </el-tooltip>
           <span class="admin-toolbar__divider"></span>
-          <el-tooltip :show-after="1000" :content="langData.importTask" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.importTask" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.importTask" @click="showImportDialog">
               <Icon icon="lucide:upload"/>
             </el-button>
           </el-tooltip>
-          <el-tooltip :show-after="1000" :content="langData.exportTask" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.exportTask" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.exportTask" @click="exportData">
               <Icon icon="lucide:download"/>
             </el-button>
           </el-tooltip>
-          <el-tooltip :show-after="1000" :content="langData.downloadTemplate" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.downloadTemplate" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.downloadTemplate" @click="downloadTemplate">
               <Icon icon="lucide:file-down"/>
             </el-button>
           </el-tooltip>
           <span class="admin-toolbar__divider"></span>
-          <el-tooltip :show-after="1000" :content="langData.startTask" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.startTask" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :disabled="!selectedCount" :aria-label="langData.startTask"
                        @click="confirmBatch(batchStartTasks, langData.confirmOpera)">
               <Icon icon="lucide:play"/>
             </el-button>
           </el-tooltip>
-          <el-tooltip :show-after="1000" :content="langData.stopTask" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.stopTask" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :disabled="!selectedCount" :aria-label="langData.stopTask"
                        @click="confirmBatch(batchStopTasks, langData.confirmOpera)">
               <Icon icon="lucide:pause"/>
             </el-button>
           </el-tooltip>
-          <el-tooltip :show-after="1000" :content="langData.batchModifyExecutor" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.batchModifyExecutor" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :disabled="!selectedCount" :aria-label="langData.batchModifyExecutor"
                        @click="showBatchModifyExecutorDialog">
               <Icon icon="lucide:cpu"/>
             </el-button>
           </el-tooltip>
-          <el-tooltip :show-after="1000" :content="langData.btnDelete" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnDelete" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text type="danger" :disabled="!selectedCount" :aria-label="langData.btnDelete"
                        @click="confirmBatch(batchDeleteTasks, langData.confirmDelete)">
               <Icon icon="lucide:trash-2"/>
@@ -553,7 +553,7 @@ const downloadTemplate = () => {
           </el-tooltip>
         </div>
         <div class="tb-right">
-          <el-tooltip :show-after="1000" :content="langData.btnRefresh" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnRefresh" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.btnRefresh" @click="query()">
               <Icon icon="lucide:refresh-ccw"/>
             </el-button>
@@ -584,12 +584,12 @@ const downloadTemplate = () => {
           <el-table-column fixed="left" :label="langData.tableHeaderOp" width="220" header-align="center" align="center">
             <template #default="scope">
               <div class="row-actions">
-                <el-tooltip :show-after="1000" :content="langData.btnEdit" placement="top">
+                <el-tooltip :show-after="500" :content="langData.btnEdit" placement="top">
                   <el-button link type="primary" class="admin-op" @click="goEditTask(scope.row)">
                     <Icon icon="lucide:pencil"/>
                   </el-button>
                 </el-tooltip>
-                <el-tooltip :show-after="1000" :content="langData.runImmediate" placement="top">
+                <el-tooltip :show-after="500" :content="langData.runImmediate" placement="top">
                   <el-button link type="primary" class="admin-op" @click="showImmediateTaskDialog(scope.row)">
                     <Icon icon="lucide:zap"/>
                   </el-button>
@@ -597,7 +597,7 @@ const downloadTemplate = () => {
                 <el-popconfirm :title="langData.confirmOpera" confirm-button-type="warning" v-if="scope.row.triggerStatus==0"
                                @confirm="startTask(scope.row)">
                   <template #reference>
-                    <el-tooltip :show-after="1000" :content="langData.startTask" placement="top">
+                    <el-tooltip :show-after="500" :content="langData.startTask" placement="top">
                       <el-button link type="success" class="admin-op" :aria-label="langData.startTask">
                         <Icon icon="lucide:play"/>
                       </el-button>
@@ -607,26 +607,26 @@ const downloadTemplate = () => {
                 <el-popconfirm :title="langData.confirmOpera" confirm-button-type="warning" v-if="scope.row.triggerStatus==1"
                                @confirm="stopTask(scope.row)">
                   <template #reference>
-                    <el-tooltip :show-after="1000" :content="langData.stopTask" placement="top">
+                    <el-tooltip :show-after="500" :content="langData.stopTask" placement="top">
                       <el-button link type="warning" class="admin-op" :aria-label="langData.stopTask">
                         <Icon icon="lucide:pause"/>
                       </el-button>
                     </el-tooltip>
                   </template>
                 </el-popconfirm>
-                <el-tooltip :show-after="1000" :content="langData.copyTask" placement="top">
+                <el-tooltip :show-after="500" :content="langData.copyTask" placement="top">
                   <el-button link class="admin-op admin-op--muted" @click="goCopyTask(scope.row)">
                     <Icon icon="lucide:copy"/>
                   </el-button>
                 </el-tooltip>
-                <el-tooltip :show-after="1000" :content="langData.detailTaskLog" placement="top">
+                <el-tooltip :show-after="500" :content="langData.detailTaskLog" placement="top">
                   <el-button link class="admin-op admin-op--muted" @click="toTaskLogList(scope.row)">
                     <Icon icon="lucide:scroll-text"/>
                   </el-button>
                 </el-tooltip>
                 <el-popconfirm :title="langData.confirmDelete" @confirm="deleteTask(scope.row)" confirm-button-type="danger">
                   <template #reference>
-                    <el-tooltip :show-after="1000" :content="langData.btnDelete" placement="top">
+                    <el-tooltip :show-after="500" :content="langData.btnDelete" placement="top">
                       <el-button link type="danger" class="admin-op" :aria-label="langData.btnDelete">
                         <Icon icon="lucide:trash-2"/>
                       </el-button>
@@ -720,7 +720,7 @@ const downloadTemplate = () => {
       <template #header>
         <div class="drawer-head">
           <span class="drawer-head__title">{{ langData.importTaskTitle }}</span>
-          <el-tooltip :show-after="1000" :content="importDrawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
+          <el-tooltip :show-after="0" :content="importDrawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
             <el-button link class="drawer-head__btn" :aria-label="langData.drawerMaximize" @click="importDrawerFull = !importDrawerFull">
               <Icon :icon="importDrawerFull ? 'lucide:minimize-2' : 'lucide:maximize-2'"/>
             </el-button>

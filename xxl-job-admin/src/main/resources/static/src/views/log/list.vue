@@ -310,7 +310,7 @@ const showJobInfoDrawer = (row: any) => {
     <PageHead :title="langData.logPageTitle" :desc="langData.logPageDesc">
       <template #lead>
         <template v-if="fromTaskListFlag">
-          <el-tooltip :show-after="1000" :content="langData.btnBack" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnBack" placement="bottom">
             <el-button class="page-back" circle text :aria-label="langData.btnBack" @click="router.back()">
               <Icon icon="lucide:circle-arrow-left"/>
             </el-button>
@@ -366,13 +366,13 @@ const showJobInfoDrawer = (row: any) => {
       <!-- 工具栏 -->
       <div class="admin-toolbar">
         <div class="tb-left">
-          <el-tooltip :show-after="1000" :content="langData.logClean" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.logClean" placement="bottom">
             <el-button type="danger" plain circle :aria-label="langData.logClean" @click="showLogClearDialog">
               <Icon icon="lucide:trash-2"/>
             </el-button>
           </el-tooltip>
           <span class="admin-toolbar__divider"></span>
-          <el-tooltip :show-after="1000" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
+          <el-tooltip :show-after="0" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
             <el-button class="admin-toolbar__icon" :class="{ 'is-active': filtersVisible }" circle text
                        :aria-label="langData.filterHide" @click="filtersVisible = !filtersVisible">
               <Icon icon="lucide:filter"/>
@@ -380,7 +380,7 @@ const showJobInfoDrawer = (row: any) => {
           </el-tooltip>
         </div>
         <div class="tb-right">
-          <el-tooltip :show-after="1000" :content="langData.btnRefresh" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnRefresh" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.btnRefresh" @click="query()">
               <Icon icon="lucide:refresh-ccw"/>
             </el-button>
@@ -403,12 +403,12 @@ const showJobInfoDrawer = (row: any) => {
           <el-table-column fixed="left" :label="langData.tableHeaderOp" width="100" header-align="center" align="center">
             <template #default="scope">
               <div class="row-actions">
-                <el-tooltip :show-after="1000" :content="langData.detailLog" placement="top">
+                <el-tooltip :show-after="500" :content="langData.detailLog" placement="top">
                   <el-button link type="primary" class="admin-op" @click="showLogDrawer(scope.row)">
                     <Icon icon="lucide:file-text"/>
                   </el-button>
                 </el-tooltip>
-                <el-tooltip :show-after="1000" :content="langData.taskDetail" placement="top">
+                <el-tooltip :show-after="500" :content="langData.taskDetail" placement="top">
                   <el-button link class="admin-op admin-op--muted" @click="showJobInfoDrawer(scope.row)">
                     <Icon icon="lucide:list-tree"/>
                   </el-button>
@@ -460,7 +460,7 @@ const showJobInfoDrawer = (row: any) => {
       <template #header>
         <div class="drawer-head">
           <span class="drawer-head__title">{{ drawerTitle }}</span>
-          <el-tooltip :show-after="1000" :content="logDrawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
+          <el-tooltip :show-after="0" :content="logDrawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
             <el-button link class="drawer-head__btn" :aria-label="langData.drawerMaximize" @click="logDrawerFull = !logDrawerFull">
               <Icon :icon="logDrawerFull ? 'lucide:minimize-2' : 'lucide:maximize-2'"/>
             </el-button>
@@ -475,7 +475,7 @@ const showJobInfoDrawer = (row: any) => {
       <template #header>
         <div class="drawer-head">
           <span class="drawer-head__title">{{ drawerTitle1 }}</span>
-          <el-tooltip :show-after="1000" :content="jobDrawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
+          <el-tooltip :show-after="0" :content="jobDrawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
             <el-button link class="drawer-head__btn" :aria-label="langData.drawerMaximize" @click="jobDrawerFull = !jobDrawerFull">
               <Icon :icon="jobDrawerFull ? 'lucide:minimize-2' : 'lucide:maximize-2'"/>
             </el-button>

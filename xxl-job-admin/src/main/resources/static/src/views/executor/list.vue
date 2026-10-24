@@ -212,13 +212,13 @@ const deleteExecutor = (row: any) => {
       <!-- 工具栏 -->
       <div class="admin-toolbar">
         <div class="tb-left">
-          <el-tooltip :show-after="1000" :content="langData.btnAdd" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnAdd" placement="bottom">
             <el-button type="primary" circle :aria-label="langData.btnAdd" @click="showAddExecutor">
               <Icon icon="lucide:plus"/>
             </el-button>
           </el-tooltip>
           <span class="admin-toolbar__divider"></span>
-          <el-tooltip :show-after="1000" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
+          <el-tooltip :show-after="0" :content="filtersVisible ? langData.filterHide : langData.filterShow" placement="bottom">
             <el-button class="admin-toolbar__icon" :class="{ 'is-active': filtersVisible }" circle text
                        :aria-label="langData.filterHide" @click="filtersVisible = !filtersVisible">
               <Icon icon="lucide:filter"/>
@@ -226,7 +226,7 @@ const deleteExecutor = (row: any) => {
           </el-tooltip>
         </div>
         <div class="tb-right">
-          <el-tooltip :show-after="1000" :content="langData.btnRefresh" placement="bottom">
+          <el-tooltip :show-after="0" :content="langData.btnRefresh" placement="bottom">
             <el-button class="admin-toolbar__icon" circle text :aria-label="langData.btnRefresh" @click="query()">
               <Icon icon="lucide:refresh-ccw"/>
             </el-button>
@@ -249,14 +249,14 @@ const deleteExecutor = (row: any) => {
           <el-table-column fixed="left" :label="langData.tableHeaderOp" width="90" header-align="center" align="center">
             <template #default="scope">
               <div class="row-actions">
-                <el-tooltip :show-after="1000" :content="langData.btnEdit" placement="top">
+                <el-tooltip :show-after="500" :content="langData.btnEdit" placement="top">
                   <el-button link type="primary" class="admin-op" @click="showEditExecutor(scope.row)">
                     <Icon icon="lucide:pencil"/>
                   </el-button>
                 </el-tooltip>
                 <el-popconfirm :title="langData.confirmDelete" @confirm="deleteExecutor(scope.row)" confirm-button-type="danger">
                   <template #reference>
-                    <el-tooltip :show-after="1000" :content="langData.btnDelete" placement="top">
+                    <el-tooltip :show-after="500" :content="langData.btnDelete" placement="top">
                       <el-button link type="danger" class="admin-op" :aria-label="langData.btnDelete">
                         <Icon icon="lucide:trash-2"/>
                       </el-button>
@@ -297,7 +297,7 @@ const deleteExecutor = (row: any) => {
       <template #header>
         <div class="drawer-head">
           <span class="drawer-head__title">{{ drawerTitle }}</span>
-          <el-tooltip :show-after="1000" :content="drawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
+          <el-tooltip :show-after="0" :content="drawerFull ? langData.drawerRestore : langData.drawerMaximize" placement="bottom">
             <el-button link class="drawer-head__btn" :aria-label="langData.drawerMaximize" @click="toggleDrawer">
               <Icon :icon="drawerFull ? 'lucide:minimize-2' : 'lucide:maximize-2'"/>
             </el-button>

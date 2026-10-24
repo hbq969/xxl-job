@@ -389,6 +389,20 @@
   border-radius: 50%;
 }
 
+/* EP 的 .el-button.is-circle 定义了 32px，优先级高于单类选择器；这里用复合选择器拉回规范的 28×28 */
+button.el-button.admin-toolbar__icon {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  padding: 0;
+  border-radius: 50%;
+}
+
+button.el-button.admin-toolbar__icon svg {
+  width: 1em;
+  height: 1em;
+}
+
 .admin-toolbar__icon.is-active {
   color: var(--el-color-primary) !important;
   background: var(--el-color-primary-light-9) !important;
