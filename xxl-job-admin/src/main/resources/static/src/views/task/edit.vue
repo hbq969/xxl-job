@@ -178,7 +178,23 @@ const scrollToSection = (id: string) => {
   if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'})
 }
 
+/** 页面高度按「最外层可见窗口」计算：门户里 iframe 被内容撑高，用 100vh 会超出屏幕导致左侧导航被滚走 */
+const applyPageHeight = () => {
+  let vh = window.innerHeight
+  try {
+    const host: any = (window.parent && window.parent !== window) ? window.parent : window
+    vh = host.innerHeight || vh
+  } catch (e) {
+    vh = window.innerHeight
+  }
+  // 门户顶部标题栏 + 标签栏约 114px，由 h-sm 统一预留
+  const h = Math.max(420, vh - 114)
+  document.documentElement.style.setProperty('--te-page-h', h + 'px')
+}
+
 onMounted(() => {
+  applyPageHeight()
+  window.addEventListener('resize', applyPageHeight)
   queryDict()
   fetchJobGroup()
   resetForm()
@@ -239,10 +255,6 @@ onMounted(() => {
               </span>
             </li>
           </ul>
-          <div class="te-nav__foot">
-            <span class="te-chip" v-if="taskForm.scheduleType">{{ taskForm.scheduleType }}</span>
-            <span class="te-chip" v-if="isCopy">{{ langData.copyMode }}</span>
-          </div>
         </aside>
 
         <!-- 右侧表单 -->
@@ -363,9 +375,23 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.task-edit-page { gap: 10px; padding-bottom: 10px; }
+.task-edit-page {
+  height: var(--te-page-h, calc(100vh - 114px));
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 10px;
+  overflow: hidden;
+}
 
-.te-shell { padding: 0; overflow: hidden; }
+.te-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+}
 
 .page-back {
   font-size: var(--el-font-size-medium);
@@ -378,24 +404,24 @@ onMounted(() => {
 .page-divider { width: 1px; height: 14px; background: var(--el-border-color); flex-shrink: 0; }
 
 .te {
+  flex: 1;
+  min-height: 0;
   display: grid;
   grid-template-columns: 248px minmax(0, 1fr);
-  min-height: 0;
 }
 
 /* 左侧导航：粘在页面顶部，不随右侧表单滚动 */
+/* 左侧导航：占满列高、独立滚动，右侧内容滚动时它不动 */
 .te-nav {
-  position: sticky;
-  top: 0;
-  align-self: start;
   display: flex;
   flex-direction: column;
   gap: 4px;
   padding: 16px 14px;
   border-right: 1px solid var(--el-border-color-lighter);
   background: var(--el-fill-color-light);
-  max-height: calc(100vh - 140px);
+  min-height: 0;
   overflow: auto;
+  overscroll-behavior: contain;
 }
 
 .te-nav__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
@@ -454,9 +480,21 @@ onMounted(() => {
   border-radius: 999px;
 }
 
-.te-main { display: flex; flex-direction: column; min-width: 0; }
+.te-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
 
-.te-body { padding: 6px 20px 12px; }
+/* 右侧表单区是唯一滚动区域 */
+.te-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding: 6px 20px 12px;
+}
 
 .te-sec { padding: 16px 0 4px; }
 
@@ -486,8 +524,7 @@ onMounted(() => {
 
 /* 底部操作条：粘在视口底部，始终可点 */
 .te-foot {
-  position: sticky;
-  bottom: 0;
+  flex: none;
   display: flex;
   align-items: center;
   gap: 10px;
