@@ -69,9 +69,17 @@
 /* 查询项用网格均分，避免控件被挤成一列或换行错位 */
 .admin-filter .el-form {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px 16px;
   width: 100%;
+}
+
+@media (max-width: 1200px) {
+  .admin-filter .el-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 720px) {
+  .admin-filter .el-form { grid-template-columns: minmax(0, 1fr); }
 }
 
 .admin-filter .el-form-item {
