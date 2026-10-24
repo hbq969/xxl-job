@@ -1114,13 +1114,22 @@ const downloadTemplate = () => {
 /* ============================================================
    任务编辑器：左侧步骤导航 + 右侧表单
    ============================================================ */
-.task-dialog :deep(.el-dialog) { border-radius: 0; }
+.task-dialog :deep(.el-dialog) {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  margin: 0;
+  border-radius: 0;
+}
 
 .task-dialog :deep(.el-dialog__header) { display: none; }
 
+/* 弹窗主体撑满剩余高度并禁止自身滚动，滚动只发生在右侧表单区 */
 .task-dialog :deep(.el-dialog__body) {
+  flex: 1;
+  min-height: 0;
   padding: 0;
-  height: 100%;
+  overflow: hidden;
 }
 
 .te {
@@ -1139,7 +1148,7 @@ const downloadTemplate = () => {
   padding: 18px 14px;
   border-right: 1px solid var(--el-border-color-lighter);
   background: var(--el-fill-color-light);
-  overflow: auto;
+  overflow: hidden;
 }
 
 .te-nav__head {
