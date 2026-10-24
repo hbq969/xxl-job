@@ -182,6 +182,7 @@ const drawerTitle = ref(langData.addTask)
 const submitting = ref(false)
 
 const showAddTaskDialog = () => {
+  applyDialogHeight()
   drawer.value = true
   drawerTitle.value = langData.addTask
   formRef.value?.clearValidate()
@@ -209,12 +210,26 @@ const showAddTaskDialog = () => {
   taskForm.glueSource = ''
 }
 
+/** 弹窗高度取「最外层可见窗口」高度：门户里页面在 iframe 中，iframe 会被撑高，100vh 会超出屏幕 */
+const applyDialogHeight = () => {
+  let vh = window.innerHeight
+  try {
+    const host: any = (window.parent && window.parent !== window) ? window.parent : window
+    vh = host.innerHeight || vh
+  } catch (e) {
+    vh = window.innerHeight
+  }
+  const h = Math.max(320, vh - 24)
+  document.documentElement.style.setProperty('--te-dialog-h', h + 'px')
+}
+
 const scrollToSection = (id: string) => {
   const el = document.getElementById(id)
   if (el) el.scrollIntoView({behavior: 'smooth', block: 'start'})
 }
 
 const showEditTaskDialog = (row: any) => {
+  applyDialogHeight()
   drawer.value = true
   drawerTitle.value = langData.editTask
   formRef.value?.clearValidate()
@@ -840,7 +855,8 @@ const downloadTemplate = () => {
     </el-dialog>
 
     <!-- 新增/编辑任务：左侧步骤导航 + 右侧表单 -->
-    <el-dialog v-model="drawer" fullscreen :close-on-click-modal="false" :show-close="false" class="task-dialog">
+    <el-dialog v-model="drawer" width="100%" :close-on-click-modal="false" :show-close="false"
+               class="task-dialog" modal-class="task-dialog-overlay" @opened="applyDialogHeight">
       <div class="te">
         <!-- 左：导航 -->
         <aside class="te-nav">
@@ -1346,13 +1362,22 @@ const downloadTemplate = () => {
 <style>
 /* 任务编辑弹窗：el-dialog 被 teleport 到 body，且 class 落在 .el-dialog 自身上，
    scoped + :deep(.el-dialog) 匹配不到，必须用非 scoped 且写成 .el-dialog.task-dialog */
+.task-dialog-overlay { overflow: hidden; }
+
+.task-dialog-overlay .el-overlay-dialog {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
 .el-dialog.task-dialog {
+  --el-dialog-width: 100%;
   display: flex;
   flex-direction: column;
-  height: 100vh;
-  margin: 0;
+  height: var(--te-dialog-h, 100vh);
+  margin: 12px 0;
   padding: 0;
-  border-radius: 0;
+  border-radius: 10px;
   overflow: hidden;
 }
 
