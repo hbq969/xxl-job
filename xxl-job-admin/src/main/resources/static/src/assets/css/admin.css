@@ -50,36 +50,27 @@
   display: flex;
   flex-direction: column;
   background: var(--el-bg-color);
-  border: 1px solid var(--el-border-color);
+  border: 1px solid var(--el-border-color-light);
   border-radius: 10px;
-  box-shadow: 0 1px 2px rgb(0 0 0 / 4%);
   overflow: hidden;
 }
 
 /* ---------- 查询区 ---------- */
+/* 布局规则（规范 §7.7-2）：条件项固定宽 flex 换行；「重置/查询」跟在最后一行条件右侧，
+   该行放不下时自动换到下一行并右对齐；禁止把按钮单独做成整行（浪费可视区） */
 .admin-filter {
   display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 16px;
   padding: 12px 14px;
   border-bottom: 1px solid var(--el-border-color-lighter);
 }
 
-/* 查询项用网格均分，避免控件被挤成一列或换行错位 */
+/* form 自身不参与布局，把查询项“摊平”成 .admin-filter 的直接 flex 子项，
+   这样按钮才能跟条件项处在同一个换行流里 */
 .admin-filter .el-form {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px 16px;
-  width: 100%;
-}
-
-@media (max-width: 1200px) {
-  .admin-filter .el-form { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-}
-
-@media (max-width: 720px) {
-  .admin-filter .el-form { grid-template-columns: minmax(0, 1fr); }
+  display: contents;
 }
 
 .admin-filter .el-form-item {
@@ -87,6 +78,14 @@
   align-items: center;
   margin: 0;
   min-width: 0;
+  flex: 0 0 auto;
+  width: 260px;
+}
+
+.admin-filter .el-form-item__label {
+  font-size: var(--el-font-size-base);
+  color: var(--el-text-color-regular);
+  white-space: nowrap;
 }
 
 .admin-filter .el-form-item__content {
@@ -94,49 +93,35 @@
   min-width: 0;
 }
 
-.admin-filter .el-input,
-.admin-filter .el-select,
-.admin-filter .el-date-editor {
-  width: 100%;
-}
-
-.admin-filter .el-form-item {
-  margin: 0;
-}
-
-.admin-filter .el-form-item__label {
-  font-size: var(--el-font-size-base);
-  color: var(--el-text-color-regular);
-}
-
+/* 操作按钮：紧贴最后一行条件右侧；空间不足时随 flex 换行到下一行右对齐 */
 .admin-filter__actions {
   display: flex;
   align-items: center;
   gap: 8px;
   margin-left: auto;
+  flex: 0 0 auto;
 }
 
-/* 控件宽度：Element Plus 用 .el-input/.el-select 的 var(--el-*-width) 定义宽度，
-   单类选择器会被后加载的组件样式覆盖，这里用父级限定提高优先级 */
+/* 控件撑满自身单元格；日期区间控件内部可收缩，避免撑宽整项 */
 .admin-filter .el-input,
-.admin-filter .el-select {
-  width: 100%;
-}
-
+.admin-filter .el-select,
 .admin-filter .admin-filter__input--wide,
 .admin-filter .el-date-editor {
   width: 100%;
   min-width: 0;
 }
 
-/* 日期范围控件内部也允许收缩，避免撑宽整列导致后面的查询项被挤到下一行 */
-.admin-filter .el-date-editor :deep(.el-range-input),
 .admin-filter .el-date-editor .el-range-input {
   min-width: 0;
 }
 
-.admin-filter .admin-filter__select {
-  width: 100%;
+/* 日期之类的宽条件项占两倍宽度（仍然与条件项同等高度） */
+.admin-filter .el-form-item--wide { width: 544px; }
+
+@media (max-width: 900px) {
+  .admin-filter .el-form-item { width: 100%; }
+  .admin-filter .el-form-item--wide { width: 100%; }
+  .admin-filter__actions { margin-left: 0; width: 100%; justify-content: flex-end; }
 }
 
 /* ---------- 工具条 ---------- */
