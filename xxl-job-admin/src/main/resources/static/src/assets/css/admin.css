@@ -83,10 +83,19 @@
   width: 260px;
 }
 
+/* 标签定宽：所有条件的控件从同一列（左侧对齐）；整行条件（如批量 IP 文本域）占满剩余宽度 */
 .admin-filter .el-form-item__label {
+  width: var(--sm-filter-label-w, 76px);
+  justify-content: flex-end;
+  padding-right: 8px;
   font-size: var(--el-font-size-base);
   color: var(--el-text-color-regular);
   white-space: nowrap;
+}
+
+.admin-filter .form-item--full {
+  flex: 1 0 100%;
+  width: 100%;
 }
 
 .admin-filter .el-form-item__content {
@@ -114,6 +123,15 @@
 
 .admin-filter .el-date-editor .el-range-input {
   min-width: 0;
+}
+
+/* 单选组条件项：宽度按内容自适应，避免按钮被挤成两行 */
+.admin-filter .el-form-item--radio {
+  width: auto;
+}
+
+.admin-filter .el-form-item--radio .el-radio-group {
+  flex-wrap: nowrap;
 }
 
 /* 日期之类的宽条件项占两倍宽度（仍然与条件项同等高度） */
@@ -456,4 +474,290 @@ button.el-button.admin-toolbar__icon svg {
 
 .admin-sumbar__lnk:hover {
   text-decoration: underline;
+}
+
+/* ===== 宿主尺寸套件（host-kit）：组件尺寸统一由门户下发的 --el-component-size 决定 =====
+   门户字号/控件档位切换时，同步下来的变量一变，下面的按钮、下拉、输入框、开关一起缩放。 */
+#app .el-button:not(.admin-toolbar__icon):not(.admin-op) {
+  --el-button-size: var(--el-component-size);
+  height: var(--el-component-size);
+  min-height: var(--el-component-size);
+  font-size: var(--el-font-size-base);
+}
+
+#app .el-select__wrapper {
+  box-sizing: border-box;
+  height: var(--el-component-size);
+  min-height: var(--el-component-size);
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: var(--el-font-size-base);
+}
+
+#app .el-input__wrapper {
+  box-sizing: border-box;
+  height: var(--el-component-size);
+  min-height: var(--el-component-size);
+  font-size: var(--el-font-size-base);
+}
+
+#app .el-textarea__inner {
+  font-size: var(--el-font-size-base);
+}
+
+#app .el-form-item__label {
+  font-size: var(--el-form-label-font-size, var(--el-font-size-base));
+}
+
+#app .el-radio-button__inner,
+#app .el-checkbox__label {
+  font-size: var(--el-font-size-base);
+}
+
+/* ===== 宿主尺寸套件（弹层）：下拉/日期等 teleport 到 body 的浮层同样跟随门户档位 =====
+   注意：这些浮层不在 #app 内，不能用 #app 前缀，否则选择器不命中。 */
+.el-select-dropdown__item {
+  height: var(--el-component-size) !important;
+  line-height: var(--el-component-size) !important;
+  min-height: var(--el-component-size) !important;
+  font-size: var(--el-font-size-base) !important;
+}
+
+.el-select-dropdown__header {
+  font-size: var(--el-font-size-small);
+}
+
+.el-select-dropdown__empty {
+  padding: 10px 0;
+  font-size: var(--el-font-size-base);
+}
+
+.el-popper.is-light,
+.el-popper.is-dark {
+  font-size: var(--el-font-size-small);
+}
+
+/* ---------- 返回按钮（§7.6：纯图标、圆形、无边框，图标 1.25em） ---------- */
+.admin-head__lead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+button.el-button.page-back {
+  font-size: var(--el-font-size-medium);
+  color: var(--el-text-color-regular);
+  flex-shrink: 0;
+}
+
+button.el-button.page-back:hover {
+  color: var(--el-color-primary);
+  background: var(--el-fill-color-light);
+}
+
+button.el-button.page-back .el-icon,
+button.el-button.page-back svg {
+  font-size: 1.25em;
+  width: 1.25em;
+  height: 1.25em;
+}
+
+.page-divider {
+  width: 1px;
+  height: 14px;
+  background: var(--el-border-color);
+  flex-shrink: 0;
+}
+
+/* ---------- 大表单页骨架（form-layout.md §7.10） ---------- */
+.form-page {
+  height: var(--page-h, calc(100vh - 114px));
+  max-height: var(--page-h, calc(100vh - 114px));
+  padding-top: var(--sm-page-pad-top, 18px);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  box-sizing: border-box;
+}
+
+.form-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.form-body {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: 248px minmax(0, 1fr);
+}
+
+.form-nav {
+  min-height: 0;
+  padding: 14px 12px;
+  border-right: 1px solid var(--el-border-color-lighter);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.form-nav__item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 2px;
+  border-radius: 8px;
+  cursor: pointer;
+  color: var(--el-text-color-regular);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.form-nav__item:hover {
+  background: var(--el-fill-color-light);
+}
+
+.form-nav__item.is-active {
+  background: var(--el-color-primary-light-9);
+  color: var(--el-color-primary);
+}
+
+.form-nav__no {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-placeholder);
+  line-height: 1.6;
+}
+
+.form-nav__item.is-active .form-nav__no {
+  color: var(--el-color-primary);
+}
+
+.form-nav__title {
+  font-size: var(--el-font-size-base);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.form-nav__desc {
+  display: block;
+  font-size: var(--el-font-size-extra-small);
+  font-weight: 400;
+  color: var(--el-text-color-secondary);
+  line-height: 1.4;
+}
+
+.form-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.form-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 14px 16px;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.form-foot {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--el-border-color-lighter);
+}
+
+.form-foot__hint {
+  margin-right: auto;
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-secondary);
+}
+
+.form-section {
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--el-border-color-lighter);
+}
+
+.form-section:last-child {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.form-section__head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.form-section__no {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: var(--el-font-size-small);
+  color: var(--el-color-primary);
+  font-weight: 600;
+}
+
+.form-section__title {
+  font-size: var(--el-font-size-base);
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.form-section__desc {
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-secondary);
+}
+
+.form-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.form-grid-3 > .el-form-item {
+  min-width: 0;
+}
+
+.form-grid-3 > .form-item--full {
+  grid-column: 1 / -1;
+}
+
+@media (max-width: 1280px) {
+  .form-body { grid-template-columns: 200px minmax(0, 1fr); }
+  .form-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 900px) {
+  .form-body { grid-template-columns: minmax(0, 1fr); }
+  .form-nav { display: none; }
+  .form-grid-3 { grid-template-columns: 1fr; }
+}
+
+/* 页面正文基准：跟随门户字号调节（A-/A+ 改的就是 --el-font-size-*），不再用浏览器默认 16px */
+.admin-page,
+.form-page {
+  font-size: var(--el-font-size-base);
+  color: var(--el-text-color-regular);
+}
+
+/* 面板内直接嵌页签时：标签区左右留白、页签头回到顶部
+   （Element Plus 2.9 的 DOM 顺序是「内容, 页签头」，纵向 flex 下需要 order 拉回） */
+.admin-panel > .el-tabs > .el-tabs__header {
+  order: -1;
+  padding: 6px 14px 0;
+  margin-bottom: 0;
+}
+
+.admin-panel > .el-tabs > .el-tabs__header .el-tabs__nav-wrap::after {
+  height: 1px;
 }
