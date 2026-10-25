@@ -244,6 +244,16 @@
   padding: 10px 14px 12px;
 }
 
+/* 分页行左侧的辅助提示（如「不选时间默认查最近 N 天」）：推到最左，分页仍固定右侧 */
+.admin-foot__hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-right: auto;
+  font-size: var(--el-font-size-extra-small);
+  color: var(--el-text-color-secondary);
+}
+
 /* ---------- 图标 ---------- */
 .ic {
   display: inline-block;
