@@ -38,7 +38,7 @@ const taskForm = reactive({
   childJobId: '',
   misfireStrategy: '',
   executorBlockStrategy: '',
-  executorTimeout: 5,
+  executorTimeout: 0,
   executorFailRetryCount: 0,
   glueRemark: 'GLUE代码初始化',
   glueSource: '',
@@ -104,11 +104,13 @@ const resetForm = () => {
   taskForm.childJobId = ''
   taskForm.misfireStrategy = 'FIRE_ONCE_NOW'
   taskForm.executorBlockStrategy = 'SERIAL_EXECUTION'
-  taskForm.executorTimeout = 5
+  taskForm.executorTimeout = 0
   taskForm.executorFailRetryCount = 0
 }
 
 const fillForm = (row: any) => {
+  // 编辑保存需要带上任务 ID，否则后端 update 会报「任务ID不存在」
+  taskForm.id = row.id
   taskForm.jobGroup = row.jobGroup
   taskForm.jobDesc = row.jobDesc
   taskForm.author = row.author
@@ -350,7 +352,7 @@ onMounted(() => {
                     <el-input v-model="taskForm.childJobId" type="text" clearable :placeholder="langData.childTaskIdPlaceholder"/>
                   </el-form-item>
                   <el-form-item :label="langData.timeout" prop="executorTimeout">
-                    <el-input v-model="taskForm.executorTimeout" type="number" clearable placeholder="5"/>
+                    <el-input v-model="taskForm.executorTimeout" type="number" clearable placeholder="0"/>
                   </el-form-item>
                   <el-form-item :label="langData.failRetryCount" prop="executorFailRetryCount">
                     <el-input v-model="taskForm.executorFailRetryCount" type="number" clearable placeholder="0"/>
