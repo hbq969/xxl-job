@@ -70,13 +70,19 @@ const resetQuery = () => {
 const importDrawerFull = ref(false)
 const importDrawerSize = computed(() => (importDrawerFull.value ? '100%' : '480px'))
 
-const confirmBatch = (action: () => void, message: string) => {
-  if (!selectedCount.value) return
+// 行内按钮直接 @click 绑确认逻辑：el-popconfirm 的 #reference 里若再包 el-tooltip，
+// popconfirm 的点击监听挂不到按钮上，表现为图标点了完全没反应
+const confirmAction = (action: () => void, message: string) => {
   ElMessageBox.confirm(message, langData.notifyTitle || '', {
     confirmButtonText: langData.btnConfirm,
     cancelButtonText: langData.btnCancel,
     type: 'warning'
   }).then(() => action()).catch(() => {})
+}
+
+const confirmBatch = (action: () => void, message: string) => {
+  if (!selectedCount.value) return
+  confirmAction(action, message)
 }
 
 const selectedCount = ref(0)
@@ -594,26 +600,18 @@ const downloadTemplate = () => {
                     <Icon icon="lucide:zap"/>
                   </el-button>
                 </el-tooltip>
-                <el-popconfirm :title="langData.confirmOpera" confirm-button-type="warning" v-if="scope.row.triggerStatus==0"
-                               @confirm="startTask(scope.row)">
-                  <template #reference>
-                    <el-tooltip :show-after="500" :content="langData.startTask" placement="top">
-                      <el-button link type="success" class="admin-op" :aria-label="langData.startTask">
-                        <Icon icon="lucide:play"/>
-                      </el-button>
-                    </el-tooltip>
-                  </template>
-                </el-popconfirm>
-                <el-popconfirm :title="langData.confirmOpera" confirm-button-type="warning" v-if="scope.row.triggerStatus==1"
-                               @confirm="stopTask(scope.row)">
-                  <template #reference>
-                    <el-tooltip :show-after="500" :content="langData.stopTask" placement="top">
-                      <el-button link type="warning" class="admin-op" :aria-label="langData.stopTask">
-                        <Icon icon="lucide:pause"/>
-                      </el-button>
-                    </el-tooltip>
-                  </template>
-                </el-popconfirm>
+                <el-tooltip v-if="scope.row.triggerStatus==0" :show-after="500" :content="langData.startTask" placement="top">
+                  <el-button link type="success" class="admin-op" :aria-label="langData.startTask"
+                             @click="confirmAction(() => startTask(scope.row), langData.confirmOpera)">
+                    <Icon icon="lucide:play"/>
+                  </el-button>
+                </el-tooltip>
+                <el-tooltip v-if="scope.row.triggerStatus==1" :show-after="500" :content="langData.stopTask" placement="top">
+                  <el-button link type="warning" class="admin-op" :aria-label="langData.stopTask"
+                             @click="confirmAction(() => stopTask(scope.row), langData.confirmOpera)">
+                    <Icon icon="lucide:pause"/>
+                  </el-button>
+                </el-tooltip>
                 <el-tooltip :show-after="500" :content="langData.copyTask" placement="top">
                   <el-button link class="admin-op admin-op--muted" @click="goCopyTask(scope.row)">
                     <Icon icon="lucide:copy"/>
@@ -624,15 +622,12 @@ const downloadTemplate = () => {
                     <Icon icon="lucide:scroll-text"/>
                   </el-button>
                 </el-tooltip>
-                <el-popconfirm :title="langData.confirmDelete" @confirm="deleteTask(scope.row)" confirm-button-type="danger">
-                  <template #reference>
-                    <el-tooltip :show-after="500" :content="langData.btnDelete" placement="top">
-                      <el-button link type="danger" class="admin-op" :aria-label="langData.btnDelete">
-                        <Icon icon="lucide:trash-2"/>
-                      </el-button>
-                    </el-tooltip>
-                  </template>
-                </el-popconfirm>
+                <el-tooltip :show-after="500" :content="langData.btnDelete" placement="top">
+                  <el-button link type="danger" class="admin-op" :aria-label="langData.btnDelete"
+                             @click="confirmAction(() => deleteTask(scope.row), langData.confirmDelete)">
+                    <Icon icon="lucide:trash-2"/>
+                  </el-button>
+                </el-tooltip>
               </div>
             </template>
           </el-table-column>
